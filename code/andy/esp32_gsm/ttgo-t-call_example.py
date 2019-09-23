@@ -20,6 +20,10 @@ import socket
 import urequests as requests
 import json
 from time import sleep
+from machine import RTC
+rtc = RTC()
+
+machine.freq(40000000)
 
 LED = machine.Pin(13, machine.Pin.OUT)
 LED.value(1)
@@ -33,35 +37,42 @@ GSM_PASS = 'vodafone' # Your Pass
 GSM_PWR = machine.Pin(4, machine.Pin.OUT)
 GSM_RST = machine.Pin(5, machine.Pin.OUT)
 GSM_MODEM_PWR = machine.Pin(23, machine.Pin.OUT)
-
-GSM_PWR.value(0)
-GSM_RST.value(1)
-GSM_MODEM_PWR.value(1)
-
+#GSM_PWR.value(0)
+#GSM_RST.value(0)
+#GSM_MODEM_PWR.value(0)
 
 
-# Init PPPoS
-#gsm.debug(True)  # Uncomment this to see more logs, investigate issues, etc.
-gsm.start(tx=27, rx=26, apn=GSM_APN, user=GSM_USER, password=GSM_PASS)
-
-sys.stdout.write('Waiting for AT command response...')
-for retry in range(20):
-    if gsm.atcmd('AT'):
-        break
+def connect_gsm():
+    global gsm
+    if gsm.status()[0] is 98 or 0: # not started/ disconnected
+        GSM_PWR.value(1)
+        sleep(0.1)
+        GSM_PWR.value(0)
+        GSM_RST.value(1)
+        GSM_MODEM_PWR.value(1)
+        sleep(1.5)
+        GSM_PWR.value(1)
+        # Init PPPoS
+        #gsm.debug(True)  # Uncomment this to see more logs, investigate issues, etc.
+        gsm.start(tx=27, rx=26, apn=GSM_APN, user=GSM_USER, password=GSM_PASS)
+    sys.stdout.write('Waiting for AT command response...')
+    for retry in range(25):
+        if gsm.atcmd('AT'):
+            break
+        else:
+            sys.stdout.write('.')
+            time.sleep_ms(1000)
     else:
-        sys.stdout.write('.')
-        time.sleep_ms(5000)
-else:
-    raise Exception("Modem not responding!")
-print()
-
-print("Connecting to GSM...")
-gsm.connect()
-
-while gsm.status()[0] != 1:
-    pass
-
-print('IP:', gsm.ifconfig()[0])
+        raise Exception("Modem not responding!")
+    print()
+    print("Connecting to GSM...")
+    gsm.connect()
+    while gsm.status()[0] != 1:
+        pass
+    print('IP:', gsm.ifconfig()[0])
+    if rtc.now()[0] == 1970:
+        rtc.ntp_sync("pool.ntp.org")
+    
 
 
 
@@ -84,7 +95,7 @@ while True:
 
 address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9"
 node_url = "https://nodes.thetangle.org/"
-command = {'threshold': 100, 'command': 'getBalances', 'addresses': ['SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9']}
+#command = {'threshold': 100, 'command': 'getBalances', 'addresses': ['SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9']}
 
 def http_get(url, port=80):
     _, _, host, path = url.split('/', 3)
@@ -102,16 +113,16 @@ def http_get(url, port=80):
 
 
 def send_request(url):
+    global gsm
     try:
         req_status = None
         print("sending request...")
-        if gsm.status()[0] == 1:
-            json_data = [{"sensorID": 2}, {"data": 456}]
-            #req = requests.get(url)
-            req = requests.post(url, json=json_data)
-            req_status = [req.status_code, req.reason]
-        else:
-            print("Sensor Data Error, not sensing request.") 
+        if not gsm.status()[0] == 1:
+            connect_gsm()        
+        json_data = [{"sensorID": 2}, {"data": 456}]
+        #req = requests.get(url)
+        req = requests.post(url, json=json_data)
+        req_status = [req.status_code, req.reason]
         if req_status is not None:
             pass
         else:
@@ -130,28 +141,30 @@ def get_balance(url=node_url, address=address, threshold=100):
       ],
       "threshold": threshold
     }
-    stringified = json.dumps(command) #.encode('utf-8')
+    #stringified = json.dumps(command) #.encode('utf-8')
     headers = {
         'content-type': 'application/json',
         'X-IOTA-API-Version': '1'
     }
-    response = requests.get(url, json=stringified, headers=headers)
+    response = requests.get(url, json=command, headers=headers)
     return response
 
+"""
+connect_gsm()
 LED.value(0)
-sleep(0.5)
+sleep(0.2)
 LED.value(1)
-sleep(0.5)
+sleep(0.2)
 LED.value(0)
-sleep(0.5)
+sleep(0.2)
 LED.value(1)
-sleep(0.5)
+sleep(0.2)
 LED.value(0)
-sleep(0.5)
+sleep(0.2)
 LED.value(1)
 
 http_get("https://req.dev.iota.pw/")
 print("\n*** DEEPSLEEP ***")
 LED.value(0)
-machine.deepsleep()
-
+#machine.deepsleep()
+"""
