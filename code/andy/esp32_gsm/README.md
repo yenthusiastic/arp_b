@@ -14,3 +14,23 @@
 
 ## MircoPython and Example Code
 [Github - Xinyuan-LilyGO](https://github.com/Xinyuan-LilyGO/TTGO-T-Call/tree/master/examples/MicroPython_LoBo)
+
+
+
+## Power
+|State|Freq (MHz)|mA|
+|---     |---       |---       |
+|Idle|240|27|
+|Idle|40|5|
+|Idle & Modem Online|240|40|
+|Idle & Modem Online|40|-|
+
+
+## Timing
+|Function|Freq (MHz)|Time (sec)|
+|---     |---       |---       |
+|Connect GSM|240|22|
+|Connect GSM|40|60|
+|Get Balance|240|5|
+|Get Balance|240|8|
+
