@@ -5,6 +5,8 @@
  - **Name:**   LILYGO TTGO T-Call V1.3 ESP32 Wireless Module GPRS Antenna SIM Card SIM800L Board
  - **Link:**   [Product Page](https://www.banggood.com/LILYGO-TTGO-T-Call-V1_3-ESP32-Wireless-Module-GPRS-Antenna-SIM-Card-SIM800L-Board-p-1527048.html)
  - **Price:**   13 €   
+ 
+![Pinout](/media/TTGO-T-call-Pinout.jpg)
 
 
 ### SIM Card
@@ -18,7 +20,7 @@
 
 [RTC Sync with NTP](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/rtc)
 
-
+[GSM Library](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm)
 
 
 ## Power
