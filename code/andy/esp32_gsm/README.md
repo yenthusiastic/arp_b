@@ -16,6 +16,10 @@
 [Github - Xinyuan-LilyGO](https://github.com/Xinyuan-LilyGO/TTGO-T-Call/tree/master/examples/MicroPython_LoBo)
 
 
+[RTC Sync with NTP](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/rtc)
+
+
+
 
 ## Power
 |State|Freq (MHz)|mA|
