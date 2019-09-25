@@ -13,6 +13,10 @@
 - Port: 6000
 - URL: https://db.dev.iota.pw
 
+#### PgAdmin server
+- Port: 7000
+- URL: https://pg.dev.iota.pw
+
 #### Tests
 ##### Test 1
 - Port: 
