@@ -44,12 +44,13 @@ The following recommendations can be made:
 
 #### Stats
 ##### Power
-|State|Freq (MHz)|mA|
-|---     |---       |---       |
-|Idle|240|27|
-|Idle|40|5|
-|Idle & Modem Online|240|40|
-|Idle & Modem Online|40|-|
+|State|Freq (MHz)|mA USB| mA Bat|V Bat|Wh Bat|
+|---  |---       |---   |---    |---  |---   |
+|Idle|240|27|32|3.57|0,1142|
+|Idle|40|5|7|3.57|0,025|
+|Idle & Modem Online|240|47|45|3.57|0,1607|
+|Idle & Modem Online|40|-|19|3.57|0,0678|
+|Deepsleep|all|-|0.130|3.57|0,0005|
 
 
 ##### Timing
