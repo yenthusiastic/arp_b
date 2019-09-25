@@ -1,4 +1,4 @@
-###Python REST API endpoint for handling HTTP requests 
+### Python REST API endpoint for handling HTTP requests 
 - API endpoint address: https://req.dev.iota.pw
 - PUT request JSON body to update session address of hardware: 
 ```

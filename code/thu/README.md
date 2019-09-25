@@ -1,12 +1,15 @@
-#### Plans
-- Python Backend   
-    - API endpoint for handling POST requests at https://req.dev.iota.pw. Check [Python API documentation for details](../../documentation/API_python.md).
-    - Web Application
-        - Default view: 
-            - Visualize **parked** bikes available for rent on a map
-            - Click on bike to get location
-        - Advanced view: 
-            - Input form for entering IOTA address
-            - Show a map of collected data in the session corresponding to the entered IOTA address
+#### Plans/ TODOs
+- API Endpoints  
+    - [x] Simple API endpoint for handling GET/PUT/POST requests at https://req.dev.iota.pw. Check [Python API documentation for details](../../documentation/API_python.md).
+    - [x] Define JSON data structure for API request body
+    - [ ] Advanced API with multiple endpoints using additional frameworks
+- Web Application
+    - Default view: 
+        - Visualize **parked** bikes available for rent on a map
+        - Click on bike to get location
+    - Advanced view: 
+        - Input form for entering IOTA address
+        - Show a map of collected data in the session corresponding to the entered IOTA address
 - Postgres database
-    - Define database structure
+    - [x] Define database schemas and structure
+    - [x] Run Postgres and PgAdmin servers from Docker images
