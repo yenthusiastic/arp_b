@@ -5,7 +5,7 @@
 - Port: 5100
 - URL: https://be.dev.iota.pw | http://be.dev.iota.pw
 
-#### Request server
+#### Request (Python API) server
 - Port: 5000
 - URL: https://req.dev.iota.pw
 
@@ -14,7 +14,7 @@
 - URL: https://db.dev.iota.pw
 
 #### PgAdmin server
-- Port: 7000
+- Port: 5555
 - URL: https://pg.dev.iota.pw
 
 #### Tests

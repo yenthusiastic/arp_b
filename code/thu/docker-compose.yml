@@ -1,0 +1,28 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    hostname: postgres
+    ports:
+      - "6000:5432"
+    environment:
+      POSTGRES_USER: arp_b
+      POSTGRES_PASSWORD: iota999
+      POSTGRES_DB: arp_b
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - "5555:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: arpb@iota.dev
+      PGADMIN_DEFAULT_PASSWORD: iota999
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

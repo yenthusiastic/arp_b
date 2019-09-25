@@ -1,20 +1,6 @@
 #### Plans
 - Python Backend   
-    - API for handling POST requests
-        - POST/PUT request JSON body to API sub-path */hardware/*: 
-        ```
-        {
-            hardware_id: 1; 
-            address: "ABC…999" 
-        }
-        ```
-        - POST request JSON body to API sub-path */sensor/*:
-        ```
-        {
-            hardware_id: 1; 
-            data: [52.5157, 5.8992, 23.57, 40.5] 
-        }
-        ```
+    - API endpoint for handling POST requests at https://req.dev.iota.pw. Check [Python API documentation for details](../../documentation/API_python.md).
     - Web Application
         - Default view: 
             - Visualize **parked** bikes available for rent on a map
