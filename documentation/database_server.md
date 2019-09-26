@@ -56,14 +56,14 @@ The PostgreSQL server can be managed by PgAdmin or by a CLI tool called **psql**
 ```bash
 sudo docker ps
 ```
-Go inside the container and run psql:
+Go inside the container and run psql to connect to the database server using matching database name and username:
 ```bash
 sudo docker exec -it <container-ID-here> bash 
 psql -U arp_b -d arp_b
 ```
 Using PgAdmin or psql to adjust the timezone and create 2 tables "HARDWARE" and "SENSOR_DATA" using following queries:
 ```sql
-ALTER DATABASE postgres SET timezone TO 'Europe/Berlin';
+ALTER DATABASE arp_b SET timezone TO 'Europe/Berlin';
 
 CREATE TABLE public."HARDWARE"
 (
