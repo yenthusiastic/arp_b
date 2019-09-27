@@ -1,5 +1,12 @@
 # Server
 
+## Quick guide
+### Install Pyota
+```bash
+sudo adduser hubuser
+source hubenv/bin/activate
+pip3 install pyota[ccurl]
+```
 
 
 ## Complete documentation starting from openresty-snapshot
