@@ -2,6 +2,7 @@
 - API Endpoints  
     - [x] Simple API endpoint for handling GET/PUT/POST requests at https://req.dev.iota.pw. Check [Python API documentation for details](../../documentation/API_python.md).
     - [x] Define JSON data structure for API request body
+    - [x] Send transaction with sensor data to Tangle through connection with IOTA node
     - [ ] Advanced API with multiple endpoints using additional frameworks
 - Web Application
     - Default view: 
@@ -12,4 +13,4 @@
         - Show a map of collected data in the session corresponding to the entered IOTA address
 - Postgres database
     - [x] Define database schemas and structure
-    - [x] Run Postgres and PgAdmin servers from Docker images
+    - [x] Run Postgres and PgAdmin servers from Docker images. Check [Database Server documentation for details](../../documentation/database_server.md).
