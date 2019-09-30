@@ -11,8 +11,8 @@ The API should have the following endpoints:
 - The JSON data in the **POST** request body should have the following format:
 ```json
 {
-    "hardwareID": 1; 
-    "address": "ABC…999";
+    "hardwareID": 1,
+    "address": "ABC…999",
     "data": [52.5157, 5.8992, 23.57, 40.5]
 }
 ```
@@ -24,8 +24,8 @@ Note:
 - The JSON data in the **PUT** request body should have the following format:
 ```json
 {
-    "hardwareID": 1; 
-    "status": "parked"
+    "hardwareID": 1, 
+    "status": "parked",
     "location": [52.5157, 5.8992]
 }
 ```
@@ -55,12 +55,11 @@ Status Code | Message | Information
 {
     "HttpStatusCode": 200, 
     "HttpMessage": "OK", 
-    "MoreInformation": "Success."
-    "Data": 
-        {"SessionAddress": "ABC...999"}
+    "MoreInformation": "Success.",
+    "SessionAddress": "ABC...999"
 }
 ```
-where the `Data` field is **only** required when a **GET** request to endpoint `api/address` is made.
+where the `SessionAddress` field is **only** required when a **GET** request to endpoint `api/address` is made.
 
 ### 2. Database
 
