@@ -20,13 +20,17 @@ import socket
 import urequests as requests
 import json
 from time import sleep
+#import esp32
 from machine import RTC
 rtc = RTC()
 
-machine.freq(40000000)
+#machine.freq(40000000)
 
 LED = machine.Pin(13, machine.Pin.OUT)
 LED.value(1)
+
+wake1 = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
+#esp32.wake_on_ext0(pin = wake1, level = esp32.WAKEUP_ALL_LOW)
 
 # APN credentials (replace with yours)
 GSM_APN  = 'web.vodafone.de' # Your APN
@@ -42,9 +46,11 @@ GSM_MODEM_PWR = machine.Pin(23, machine.Pin.OUT)
 #GSM_MODEM_PWR.value(0)
 
 
-def connect_gsm():
+def gsm_connect():
     global gsm
-    if gsm.status()[0] is 98 or 0: # not started/ disconnected
+    if gsm.status()[0] is 98 : # not started; 0-disconnected 89-IDle
+        print("Power up GSM modem...")
+        #machine.freq(240000000)
         GSM_PWR.value(1)
         sleep(0.1)
         GSM_PWR.value(0)
@@ -54,27 +60,42 @@ def connect_gsm():
         GSM_PWR.value(1)
         # Init PPPoS
         #gsm.debug(True)  # Uncomment this to see more logs, investigate issues, etc.
+    if gsm.status()[0] is 98 or 0:
         gsm.start(tx=27, rx=26, apn=GSM_APN, user=GSM_USER, password=GSM_PASS)
-    sys.stdout.write('Waiting for AT command response...')
-    for retry in range(25):
-        if gsm.atcmd('AT'):
-            break
+        sys.stdout.write('Waiting for AT command response...')
+        for retry in range(8):
+            if gsm.atcmd('AT'):
+                break
+            else:
+                sys.stdout.write('.')
+                time.sleep_ms(3000)
         else:
-            sys.stdout.write('.')
-            time.sleep_ms(1000)
-    else:
-        raise Exception("Modem not responding!")
-    print()
-    print("Connecting to GSM...")
-    gsm.connect()
-    while gsm.status()[0] != 1:
-        pass
-    print('IP:', gsm.ifconfig()[0])
-    if rtc.now()[0] == 1970:
-        rtc.ntp_sync("pool.ntp.org")
-    
+            raise Exception("Modem not responding!")
+        print()
+        print("Connecting to GSM...")
+        gsm.connect()
+        while gsm.status()[0] != 1:
+            pass
+        print('IP:', gsm.ifconfig()[0])
+        if rtc.now()[0] == 1970:
+            print("Update RTC from NTP server...")
+            rtc.ntp_sync(server="hr.pool.ntp.org", tz="CET-1CEST")
+            print("RTC updated.")
+        #machine.freq(40000000)
 
 
+def gsm_online_check():
+    if not gsm.status()[0] == 1:
+        gsm_connect()
+
+
+def gsm_shutdown():
+    if gsm.stop():
+        GSM_PWR.value(1)
+        sleep(0.1)
+        GSM_PWR.value(0)
+        sleep(1.2)
+        GSM_PWR.value(1)
 
 # GSM connection is complete.
 # You can now use modules like urequests, uPing, etc.
@@ -97,7 +118,12 @@ address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANV
 node_url = "https://nodes.thetangle.org/"
 #command = {'threshold': 100, 'command': 'getBalances', 'addresses': ['SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9']}
 
+
+
+
 def http_get(url, port=80):
+    gsm_online_check()
+    print("Sending get request...")
     _, _, host, path = url.split('/', 3)
     addr = socket.getaddrinfo(host, port)[0][-1]
     s = socket.socket()
@@ -112,14 +138,12 @@ def http_get(url, port=80):
     s.close()
 
 
-def send_request(url):
-    global gsm
+def send_request(url="https://req.dev.iota.pw/"):
     try:
+        gsm_online_check()
         req_status = None
         print("sending request...")
-        if not gsm.status()[0] == 1:
-            connect_gsm()        
-        json_data = [{"sensorID": 2}, {"data": 456}]
+        json_data = [{"hardwareID": 1}, {"vbat": 3850}]
         #req = requests.get(url)
         req = requests.post(url, json=json_data)
         req_status = [req.status_code, req.reason]
@@ -130,10 +154,11 @@ def send_request(url):
         print(req_status)
     except Exception as e:
         print("Exception at request: ", e)
-        print(req_status)
 
 
 def get_balance(url=node_url, address=address, threshold=100):
+    gsm_online_check()
+    print("Requesting balance...")
     command = {
       "command": "getBalances",
       "addresses": [
@@ -150,7 +175,7 @@ def get_balance(url=node_url, address=address, threshold=100):
     return response
 
 """
-connect_gsm()
+gsm_connect()
 LED.value(0)
 sleep(0.2)
 LED.value(1)
