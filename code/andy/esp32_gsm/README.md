@@ -39,7 +39,7 @@ The following recommendations can be made:
  - For GSM connection a core frequency of 240 MHz is used
  - While the modem is online but no request is send, the frequency can be reduced to 40 MHz
  - Before any request is send, the frequency has to be set to 240 MHz
- - While the model is powered of, the frequency can be freely choosen
+ - While the model is powered off, the frequency can be choosen freely.
 
 
 #### Stats
