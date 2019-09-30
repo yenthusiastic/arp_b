@@ -1,7 +1,16 @@
+// Dummy Server
 
+// Documentation used for http functions
+// https://nodejs.org/api/http.html
 const http = require('http')
+
+// Documentation used for fs functions
+// https://nodejs.org/api/fs.html
 const fs = require('fs')
 
+// The following function recives two arguments in the "options" array.
+// http.createServer([options][, requestlistener])
+// One is the IncomingMessage: in charge of working the request from the browser; and the other one is the ServerResponse: in charge of response the web content to the browser.
 const server = http.createServer((req,res)=>{
     console.log('Request from: ' + req.url)
     console.log('Server address: ' + res.socket.remoteAddress + '\n' + 'Server port: ' + res.socket.remotePort)
