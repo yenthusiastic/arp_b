@@ -65,28 +65,31 @@ Using PgAdmin or psql to adjust the timezone and create 2 tables "HARDWARE" and 
 ```sql
 ALTER DATABASE arp_b SET timezone TO 'Europe/Berlin';
 
-CREATE TABLE public."HARDWARE"
+CREATE TABLE public."HARDWARE_STATUS"
 (
     "hardwareID" integer NOT NULL,
+    "address_index" integer NOT NULL,
     "session_address" text NOT NULL,
+    "latitude" real NOT NULL,
+    "longitude" real NOT NULL,
     PRIMARY KEY ("hardwareID")
 );
 
 CREATE TABLE public."SENSOR_DATA"
 (
-    "index" bigserial NOT NULL,
+    "hardwareID" integer NOT NULL,
+    "address" text,
     "latitude" real NOT NULL,
     "longitude" real NOT NULL,
     "temperature" real NOT NULL,
     "humidity" real NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL,
-    PRIMARY KEY ("index")
+    "timestamp" timestamp with time zone NOT NULL
 );
 ```
 
 The graphical view of the Tables (Schemas) is as follows:
 
-<img src = "../media/db.png" width="720px">
+<img src = "../media/db_new.png" width="720px">
 
 #### 4. Install psycopg2 
 **Psycopg2** package is required for the communication between any Python application, e.g. the [Python API server](API_python.md) and the PostgreSQL database server. Try `pip install psycopg2`. If not successful, try following steps:

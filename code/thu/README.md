@@ -3,7 +3,7 @@
     - [x] Simple API endpoint for handling GET/PUT/POST requests at https://req.dev.iota.pw. Check [Python API documentation for details](../../documentation/API_python.md).
     - [x] Define JSON data structure for API request body
     - [x] Send transaction with sensor data to Tangle through connection with IOTA node
-    - [ ] Advanced API with multiple endpoints using additional frameworks
+    - [ ] Advanced API with multiple endpoints using additional frameworks and authentication
 - Web Application
     - Default view: 
         - Visualize **parked** bikes available for rent on a map

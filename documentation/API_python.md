@@ -1,5 +1,6 @@
 ### Python REST API endpoint for handling HTTP requests 
-- API endpoint address: https://req.dev.iota.pw
+#### Current status
+- API server: https://req.dev.iota.pw
 - PUT request JSON body to update session address of hardware: 
 ```
 {
@@ -10,7 +11,7 @@
 - POST request JSON body to insert sensor data of hardware to database:
 ```
 {
-    "hardwareID": 1; #Bike ID
+    "hardwareID": 1; 
     "data": [52.5157, 5.8992, 23.57, 40.5]
 }
 ```
