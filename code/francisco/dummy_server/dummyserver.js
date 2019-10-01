@@ -1,20 +1,24 @@
 // Dummy Server
 
-// Documentation used for http functions
+// Documentation used for http methods
 // https://nodejs.org/api/http.html
 const http = require('http')
 
-// Documentation used for fs functions
+// Documentation used for fs methods
 // https://nodejs.org/api/fs.html
 const fs = require('fs')
 
-// The following function recives two arguments in the "options" array.
+// The following method recives two arguments in the "options" array.
 // http.createServer([options][, requestlistener])
-// One is the IncomingMessage: in charge of working the request from the browser; and the other one is the ServerResponse: in charge of response the web content to the browser.
+// One is the IncomingMessage or "req": in charge of working the request from the browser; and the other one is the ServerResponse or "res": in charge of response the web content to the browser.
 const server = http.createServer((req,res)=>{
     console.log('Request from: ' + req.url)
     console.log('Server address: ' + res.socket.remoteAddress + '\n' + 'Server port: ' + res.socket.remotePort)
     if(req.url === "/home" || req.url === "/"){
+        // The following method sends a response header to the request.
+        // response.writeHead(statusCode[, statusMessage][, headers]) 
+        // The status code is a 3-digit HTTP status code, like 404 (erro message). The statusMessage
+        // is a optional human-readble message. The last argument is the response header.
         res.writeHead(200,{'Content-Type':'text/html'})
         fs.createReadStream(__dirname + '/index.html').pipe(res)
     }else if(req.url === '/contacts'){
@@ -29,5 +33,7 @@ const server = http.createServer((req,res)=>{
         fs.createReadStream(__dirname + '/404.html').pipe(res)
     }
 })
+// The following method start the HTTP server to listen for connections.
+// server.listen()
 server.listen(5100)
 console.log("Listening port 5100\n")
