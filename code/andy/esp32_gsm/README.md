@@ -70,6 +70,17 @@ esptool.py --port /dev/ttyUSB4 erase_flash
 esptool --chip esp32 --port /dev/ttyUSB4 --before default_reset --after no_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader/bootloader.bin 0xf000 phy_init_data.bin 0x10000 MicroPython.bin 0x8000 partitions_mpy.bin
 ```
 
+## GSM Module Support
+Currently (Q3 2019) MicroPython stable release (MPSR) supports PPP (GSM) in its network stack, but it is not implemented yet. Using the MPSR, the GSM module can only be used with *AT-commands* over the UART connection
+. Because of that, the requests library can not be used to issue HTTP requests.
+
+The GSM module (SIM800L) supports two ways of issuing requests. One is trough a direct TCP connection, but this mode doesn't support SSL encryption. Hence it can not be used to issue an IOTA-API call to an IOTA-Node.
+The second way is trought usage of the builtin HTTP stack. The stack supports GET and PUT requests, but doesn't allow the HEADER and BODY of an request to be customized. Therefore it can not be used to to issue an IOTA-API call to an IOTA-Node.
+
+In conclusion, the MPSR can not be used to interact with an IOTA-Node. Therefore the custom build MicroPython firmware by [loboris](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm) will be used for development of this project. Last commits to the repository were made in summer 2018. Because of this, it doesn't contain relevant functionalities with are implemented in the stable releases. These functionalities are:
+ - deepsleep with wake-up source 
+ - DHT22 library
+Therefore the to be developed prototype might not be able to suport any low-power modes to enhace battery operation time. Additionaly a custom solution to interact with the DHT22 module has to be developed. 
 
 ## GSM Code
 [Python Example SIM800](http://www.python-exemplary.com/index_en.php?inhalt_links=navigation_en.inc.php&inhalt_mitte=raspi/en/gsm.inc.php)
