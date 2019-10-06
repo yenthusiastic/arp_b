@@ -86,11 +86,12 @@ Password: 'iota999'
 ### 3. Server functions
 - Check validity of all **REST** requests, especially the format of the sent JSON data as defined in Section 1.2
 - Everytime a valid **PUT** request is received, update the `status`, `latitude` and `longitude` fields of given `hardwareID` in the `HARDWARE_STATUS` table with received data
+    - example query to update data in PostgreSQL: `UPDATE "HARDWARE_STATUS" SET "status" = 'parked', latitude = 55.990, longitude = 6.001 WHERE "hardwareID" = 1`
 - Everytime a valid **GET** request is received (as the bike status changes from "rented" to "parked"), for the given `hardwareID`, 
     - query the value of current `address_index` in the `HARDWARE_STATUS` table, increment it by 1 and update its value in the table
     - generate a new `session_address` based on the new `address_index` using the IOTA library and update its value in the `HARDWARE_STATUS` table
     - return the new `session_address` in the API response body
 - Everytime a valid **POST** request is received
     - insert all received data together with an auto generated timestamp in the `SENSOR_DATA` table
-        - example query to insert data with automatic timestamp in PostgreSQL: `INSERT into "SENSOR_DATA" values (1, 'ABC...999', 52.5157, 5.8992, 23.57, 40.5, current_timestamp)`
+        - example query to insert data with automatic timestamp in PostgreSQL: `INSERT into "SENSOR_DATA" values (default, 1, 'ABC...999', 52.5157, 5.8992, 23.57, 40.5, current_timestamp)`
     - update the `latitude` and `longitude` fields of given `hardwareID` in the `HARDWARE_STATUS` table with received data
