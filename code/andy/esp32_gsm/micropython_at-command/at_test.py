@@ -1,7 +1,19 @@
 from machine import UART, Pin
 from time import sleep, sleep_ms
-import sim800l
+#import sim800l
+import gsm_module
 
+req_server = "https://req.dev.iota.pw"
+node_url = "https://nodes.thetangle.org/"
+command = {'threshold': 100,
+           'command': 'getBalances',
+           'addresses': ['SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9'
+                         ]
+            }
+headers = {
+        'content-type': 'application/json',
+        'X-IOTA-API-Version': '1'
+    }
 
 GSM_APN  = 'web.vodafone.de' # Your APN
 GSM_USER = 'vodafone' # Your User
@@ -14,7 +26,7 @@ GSM_MODEM_PWR = Pin(23, Pin.OUT)
 
 #tx=27, rx=26
 uart = UART(1, baudrate=9600, tx=27, rx=26)
-p = sim800l.SIM800L(uart, GSM_APN, debug=True)
+p = gsm_module.SIM800L(uart, GSM_APN, req_server, debug=True)
 
 def gsm_on():
     print("Power up GSM modem...")

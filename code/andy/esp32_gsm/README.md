@@ -69,3 +69,7 @@ cd esp32_gsm/micropython_binaries/esp32_psram_all-custom
 esptool.py --port /dev/ttyUSB4 erase_flash
 esptool --chip esp32 --port /dev/ttyUSB4 --before default_reset --after no_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader/bootloader.bin 0xf000 phy_init_data.bin 0x10000 MicroPython.bin 0x8000 partitions_mpy.bin
 ```
+
+
+## GSM Code
+[Python Example SIM800](http://www.python-exemplary.com/index_en.php?inhalt_links=navigation_en.inc.php&inhalt_mitte=raspi/en/gsm.inc.php)
