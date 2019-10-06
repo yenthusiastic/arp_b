@@ -1,18 +1,29 @@
 '''
-  Using your phone:
-    - Disable PIN code on the SIM card
-    - Check your balance
-    - Check that APN, User, Pass are correct and you have internet
-  Ensure the SIM card is correctly inserted into the board
-  Ensure that GSM antenna is firmly attached
-
-  NOTE: While GSM is connected to the Internet, WiFi can be used only in AP mode
-
-  More docs on GSM module here:
+  Based on:
   https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm
-
-  Author: Volodymyr Shymanskyy
 '''
+
+
+# APN Credentials
+GSM_APN  = 'web.vodafone.de'
+GSM_USER = 'vodafone'
+GSM_PASS = 'vodafone'
+
+
+# Module Settings
+HARDWARE_ID = 1
+API_KEY = "2ed617ed018c0b13f209fc0bbe75ab8ab1a1d303"
+PHONE_NUMBER = '+491745851814'
+SERVER_URL = "https://req.dev.iota.pw/"
+NODE_URL = "https://nodes.thetangle.org/"
+
+# dev-strings
+json_data = [{"hardwareID": 1}, {"vbat": 3850}]
+
+m_address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9"
+m_status = None
+m_states = {"offline": 0, "parked":1, "rented":2, "broken":3, "stolen":4}
+
 
 import machine, time, sys
 import gsm
@@ -20,24 +31,11 @@ import socket
 import urequests as requests
 import json
 from time import sleep
-#import esp32
 from machine import RTC
 rtc = RTC()
 
-#machine.freq(40000000)
 
-LED = machine.Pin(13, machine.Pin.OUT)
-LED.value(1)
-
-wake1 = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
-#esp32.wake_on_ext0(pin = wake1, level = esp32.WAKEUP_ALL_LOW)
-
-# APN credentials (replace with yours)
-GSM_APN  = 'web.vodafone.de' # Your APN
-GSM_USER = 'vodafone' # Your User
-GSM_PASS = 'vodafone' # Your Pass
-
-# Power on the GSM module
+# Setup GSM Module Pins
 GSM_PWR = machine.Pin(4, machine.Pin.OUT)
 GSM_RST = machine.Pin(5, machine.Pin.OUT)
 GSM_MODEM_PWR = machine.Pin(23, machine.Pin.OUT)
@@ -45,10 +43,15 @@ GSM_MODEM_PWR = machine.Pin(23, machine.Pin.OUT)
 #GSM_RST.value(0)
 #GSM_MODEM_PWR.value(0)
 
+# Setup User IO Pins
+LED = machine.Pin(13, machine.Pin.OUT)
+LED.value(1)
+BTN1 = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
+
 
 def gsm_connect():
     global gsm
-    if gsm.status()[0] is 98 : # not started; 0-disconnected 89-IDle
+    if gsm.status()[0] is 98 : # 98-not started; 89-idle; 0-disconnected
         print("Power up GSM modem...")
         #machine.freq(240000000)
         GSM_PWR.value(1)
@@ -58,9 +61,8 @@ def gsm_connect():
         GSM_MODEM_PWR.value(1)
         sleep(1.5)
         GSM_PWR.value(1)
-        # Init PPPoS
-        #gsm.debug(True)  # Uncomment this to see more logs, investigate issues, etc.
-    if gsm.status()[0] is 98 or 0:
+        #gsm.debug(True)
+    if gsm.status()[0] is 98 or 89 or 0:
         gsm.start(tx=27, rx=26, apn=GSM_APN, user=GSM_USER, password=GSM_PASS)
         sys.stdout.write('Waiting for AT command response...')
         for retry in range(8):
@@ -81,12 +83,16 @@ def gsm_connect():
             print("Update RTC from NTP server...")
             rtc.ntp_sync(server="hr.pool.ntp.org", tz="CET-1CEST")
             print("RTC updated.")
-        #machine.freq(40000000)
 
 
-def gsm_online_check():
-    if not gsm.status()[0] == 1:
-        gsm_connect()
+def gsm_online_check(connect=False):
+    if gsm.status()[0] == 1:
+        return True
+    else:
+        if connect:
+            gsm_connect()
+        else:
+            return False
 
 
 def gsm_shutdown():
@@ -97,73 +103,37 @@ def gsm_shutdown():
         sleep(1.2)
         GSM_PWR.value(1)
 
-# GSM connection is complete.
-# You can now use modules like urequests, uPing, etc.
-# Let's try socket API:
-"""
-import socket
-addr_info = socket.getaddrinfo("iota.pw", 80)
-addr = addr_info[0][-1]
-s = socket.socket()
-s.connect(addr)
+def call(number = PHONE_NUMBER):
+    if gsm_online_check():
+        gsm.disconnect()
+    return gsm.atcmd('ATD{};'.format(number))
+    
 
-while True:
-    data = s.recv(500)
-    print(str(data, 'utf8'), end='')
-"""
-# You should see terminal version of StarWars episode
-# Just like this: https://asciinema.org/a/1457
+def hangup():
+    return gsm.atcmd('ATH')
+    
 
-address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9"
-node_url = "https://nodes.thetangle.org/"
-#command = {'threshold': 100, 'command': 'getBalances', 'addresses': ['SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9']}
-
-
-
-
-def http_get(url, port=80):
-    gsm_online_check()
-    print("Sending get request...")
-    _, _, host, path = url.split('/', 3)
-    addr = socket.getaddrinfo(host, port)[0][-1]
-    s = socket.socket()
-    s.connect(addr)
-    s.send(bytes('GET /%s HTTP/1.0\r\nHost: %s\r\n\r\n' % (path, host), 'utf8'))
-    while True:
-        data = s.recv(100)
-        if data:
-            print(str(data, 'utf8'), end='')
-        else:
-            break
-    s.close()
-
-
-def send_request(url="https://req.dev.iota.pw/"):
+def http_request(method="GET", url=SERVER_URL, headers={}, data=None, json=None):
     try:
-        gsm_online_check()
+        gsm_online_check(True)
         req_status = None
-        print("sending request...")
-        json_data = [{"hardwareID": 1}, {"vbat": 3850}]
-        #req = requests.get(url)
-        req = requests.post(url, json=json_data)
+        print("Sending http_get request...")
+        req = requests.request(method=method, url=url, headers=headers, data=data, json=json)
         req_status = [req.status_code, req.reason]
         if req_status is not None:
-            pass
+            print(req_status)
+            return req
         else:
             return False
-        print(req_status)
     except Exception as e:
-        print("Exception at request: ", e)
+        print("Exception at http_request: ", e)
 
 
-def get_balance(url=node_url, address=address, threshold=100):
-    gsm_online_check()
+def get_balance(url=NODE_URL, address=m_address, threshold=100):
     print("Requesting balance...")
     command = {
       "command": "getBalances",
-      "addresses": [
-        address
-      ],
+      "addresses": [address],
       "threshold": threshold
     }
     #stringified = json.dumps(command) #.encode('utf-8')
@@ -171,27 +141,17 @@ def get_balance(url=node_url, address=address, threshold=100):
         'content-type': 'application/json',
         'X-IOTA-API-Version': '1'
     }
-    response = requests.get(url, json=command, headers=headers)
-    balance = int(response.json()['balances'][0])
-    return balance
+    try:
+        response = http_request("GET", url, json=command, headers=headers)
+        balance = int(response.json()['balances'][0])
+        return balance
+    except Exception as e:
+        print("Exception at get_balance: ", e)
+        return False
 
 """
-gsm_connect()
-LED.value(0)
-sleep(0.2)
-LED.value(1)
-sleep(0.2)
-LED.value(0)
-sleep(0.2)
-LED.value(1)
-sleep(0.2)
-LED.value(0)
-sleep(0.2)
-LED.value(1)
-
-http_get("https://req.dev.iota.pw/")
-print("\n*** DEEPSLEEP ***")
-LED.value(0)
-#machine.deepsleep()
+while True:
+    if BTN1.value() == 0:
+        break
+    gsm_online_check()
 """
-
