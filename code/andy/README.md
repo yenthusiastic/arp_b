@@ -18,4 +18,5 @@ Price: 3.5 €
 
 ### GPS Sensor - [Beitian Dual BN-220 GPS](https://www.banggood.com/Beitian-Dual-BN-220-GPS-GLONASS-Antenna-Module-TTL-Level-RC-Drone-Airplane-p-1208588.html?rmmds=search&cur_warehouse=CN)
 Price: 10€
-GPS,GLONASS,Galileo,BeiDou
+Supported GNSS: GPS,GLONASS,Galileo,BeiDou
+Provided data: data & time, latitude, longitude, altitude, number of received satelites, quality, speed_kmh, course(heading), [dop](https://gisgeography.com/gps-accuracy-hdop-pdop-gdop-multipath/))
