@@ -1,0 +1,21 @@
+## Sensors
+
+### Particulate Matter (PM)/ Fine Dust Sensor - [Nova SDS011](https://www.banggood.com/Geekcreit-Nova-PM-Sensor-SDS011-High-Precision-Laser-PM2_5-Air-Quality-Detection-Sensor-Module-Tester-p-1144246.html?rmmds=search&cur_warehouse=CN)
+The SDS011 is using the principle of laser scattering to measure the concentration of particles of a size between 0.3 to 10 µm.
+Resolution of 0.3µg/m³.
+
+Running 70 mA
+sleep 3mA
+
+Price: 20€
+
+
+
+### Humidity and Temperature Sensor - [ASAIR AM2302 (DHT22)](https://www.banggood.com/AM2302-DHT22-Temperature-And-Humidity-Sensor-Module-For-Arduino-SCM-p-937403.html?rmmds=detail-top-buytogether-auto&cur_warehouse=CN)
+Price: 3.5 €
+
+
+
+### GPS Sensor - [Beitian Dual BN-220 GPS](https://www.banggood.com/Beitian-Dual-BN-220-GPS-GLONASS-Antenna-Module-TTL-Level-RC-Drone-Airplane-p-1208588.html?rmmds=search&cur_warehouse=CN)
+Price: 10€
+GPS,GLONASS,Galileo,BeiDou
