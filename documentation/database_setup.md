@@ -76,14 +76,15 @@ CREATE TABLE public."HARDWARE_STATUS"
 );
 
 CREATE TABLE public."SENSOR_DATA"
-(
+(	"index" bigserial NOT NULL,
     "hardwareID" integer NOT NULL,
     "address" text,
     "latitude" real NOT NULL,
     "longitude" real NOT NULL,
     "temperature" real NOT NULL,
     "humidity" real NOT NULL,
-    "timestamp" timestamp with time zone NOT NULL
+    "timestamp" timestamp with time zone NOT NULL,
+ 	 PRIMARY KEY ("index")
 );
 ```
 

@@ -105,6 +105,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None, timeout=
     resp = Response(s)
     resp.status_code = status
     resp.reason = reason
+    s.close()
     return resp
 
 

@@ -103,6 +103,8 @@ Create kernel from your venv just for your user, also add your user name to it (
 
 `python -m ipykernel install --user --name mykernel_USER  --display-name "mykernel_USER"`
 
+NOTE: This has to be executed **inside** the virtual environment. If *ipykernel* is not available inside the venv, install it using `pip install ipykernel`
+
 Stop all your notebook servers for the changes to take effect.
 You can now select the kernel inside a notebook.
 If you install more packages afterwards, the above command has to be excecuted again, to override the old kernel version.

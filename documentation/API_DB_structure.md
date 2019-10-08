@@ -68,7 +68,7 @@ The graphical view of the Tables (Schemas) in the database is as follows:
 
 <img src = "../media/db_new.png" width="720px">
 
-Upon created, the `HARDWARE_STATUS` table is manually inserted with the initital `session_address` (`address_index` = 0) for each `hardwareID`. Similarly, manual insertion is required for new hardware modules.
+Upon created, the `HARDWARE_STATUS` table is manually inserted with the initital `session_address` (`address_index` = 0) for each `hardwareID`. Similarly, manual insertion is required for new hardware modules. This is intended to be done through the administration dashboard at later phase of the project. For now, this is done through PgAdmin.
 #### 2.2. Access
 - The database is currently implemented using a Postgres server and can be accessed through the PgAdmin web interface at https://pg.dev.iota.hub with following credentials:
     - Email address: arpb@iota.dev
@@ -78,19 +78,21 @@ Upon created, the `HARDWARE_STATUS` table is manually inserted with the initital
 ```shell
 DB Host: 'db.dev.iota.pw'
 DB Port: 6000
-Database name: 'arp_b'
+Database name: 'arpb'
 User: 'arp_b'
 Password: 'iota999'
 ```
+With SQLAlchemy library, set `SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://arp_b:iota999@db.dev.iota.pw:6000/arpb"`
 
 ### 3. Server functions
 - Check validity of all **REST** requests, especially the format of the sent JSON data as defined in Section 1.2
 - Everytime a valid **PUT** request is received, update the `status`, `latitude` and `longitude` fields of given `hardwareID` in the `HARDWARE_STATUS` table with received data
+    - example query to update data in PostgreSQL: `UPDATE "HARDWARE_STATUS" SET "status" = 'parked', latitude = 55.990, longitude = 6.001 WHERE "hardwareID" = 1`
 - Everytime a valid **GET** request is received (as the bike status changes from "rented" to "parked"), for the given `hardwareID`, 
     - query the value of current `address_index` in the `HARDWARE_STATUS` table, increment it by 1 and update its value in the table
     - generate a new `session_address` based on the new `address_index` using the IOTA library and update its value in the `HARDWARE_STATUS` table
     - return the new `session_address` in the API response body
 - Everytime a valid **POST** request is received
     - insert all received data together with an auto generated timestamp in the `SENSOR_DATA` table
-        - example query to insert data with automatic timestamp in PostgreSQL: `INSERT into "SENSOR_DATA" values (1, 'ABC...999', 52.5157, 5.8992, 23.57, 40.5, current_timestamp)`
+        - example query to insert data with automatic timestamp in PostgreSQL: `INSERT into "SENSOR_DATA" values (default, 1, 'ABC...999', 52.5157, 5.8992, 23.57, 40.5, current_timestamp)`
     - update the `latitude` and `longitude` fields of given `hardwareID` in the `HARDWARE_STATUS` table with received data
