@@ -26,27 +26,58 @@ m_states = {"offline": 0, "parked":1, "rented":2, "broken":3, "stolen":4}
 
 
 import machine, time, sys
+from machine import Pin, UART, GPS
 import gsm
+import sds011
 import socket
 import urequests as requests
 import json
 from time import sleep
+from time import sleep_ms
 from machine import RTC
 rtc = RTC()
 
+"""
+Pins used
+LED: 13 (build in)
+PM: 12, 14
+BTN: 15
+GSM: 4, 5, 23, 26, 27
+
+
+"""
 
 # Setup GSM Module Pins
-GSM_PWR = machine.Pin(4, machine.Pin.OUT)
-GSM_RST = machine.Pin(5, machine.Pin.OUT)
-GSM_MODEM_PWR = machine.Pin(23, machine.Pin.OUT)
+GSM_PWR = machine.Pin(4, Pin.OUT)
+GSM_RST = machine.Pin(5, Pin.OUT)
+GSM_MODEM_PWR = machine.Pin(23, Pin.OUT)
 #GSM_PWR.value(0)
 #GSM_RST.value(0)
 #GSM_MODEM_PWR.value(0)
 
 # Setup User IO Pins
-LED = machine.Pin(13, machine.Pin.OUT)
+LED = machine.Pin(13, Pin.OUT)
 LED.value(1)
-BTN1 = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
+BTN1 = machine.Pin(15, machine.Pin.IN, Pin.PULL_UP)
+
+uart_gps = machine.UART(1, rx=2, tx=0, baudrate=9600, bits=8, parity=None, stop=1, timeout=1500, buffer_size=1024, lineend='\r\n')
+gps = machine.GPS(uart_gps)
+#gps.startservice()
+#gps.service()
+sds_uart= UART(2, baudrate=9600, tx=12, rx=14)
+pm = sds011.SDS011(sds_uart)
+
+
+def gps_location():
+    data = gps.getdata()
+    return (data[1], data[2])
+
+def pm_read():
+  if pm.read():
+      print('PM10: ', pm.pm10)
+      print('PM25: ', pm.pm25)
+  else:
+      return False
 
 
 def gsm_connect():
@@ -150,8 +181,12 @@ def get_balance(url=NODE_URL, address=m_address, threshold=100):
         return False
 
 """
+
 while True:
     if BTN1.value() == 0:
         break
-    gsm_online_check()
+    gsm_online_check(True)
+    while True:
+        LED.value(not BTN1.value())
+        sleep_ms(30)
 """
