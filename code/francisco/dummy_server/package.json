@@ -1,0 +1,19 @@
+{
+  "name": "dummy_server",
+  "version": "1.0.0",
+  "description": "Basic server on NodeJS",
+  "main": "dummyserver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yenthusiastic/arp_b.git"
+  },
+  "author": "Francisco Susana Canela",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yenthusiastic/arp_b/issues"
+  },
+  "homepage": "https://github.com/yenthusiastic/arp_b#readme"
+}
