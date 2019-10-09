@@ -1,16 +1,24 @@
 #### Plans/ TODOs
-- API Endpoints  
+- API Endpoints for bike hardware communication  
     - [x] Simple API endpoint for handling GET/PUT/POST requests at https://req.dev.iota.pw. Check [Python API documentation for details](../../documentation/API_python.md).
     - [x] Define JSON data structure for API request body
     - [x] Send transaction with sensor data to Tangle through connection with IOTA node
     - [ ] Advanced API with multiple endpoints using additional frameworks and authentication
 - Web Application
-    - Default view: 
+    - User interface: 
         - Visualize **parked** bikes available for rent on a map
         - Click on bike to get location
-    - Advanced view: 
         - Input form for entering IOTA address
-        - Show a map of collected data in the session corresponding to the entered IOTA address
+        - Show data collected in the session corresponding to the entered IOTA address on the map
+    - Administration dashboard: 
+        - Manage hardwares (create, read, update, delete in database)
+        - Tracking the status of all bikes in the system
+        - Visualize collected data of all bikes in the system
+        - etc. [more to be discussed]
 - Postgres database
     - [x] Define database schemas and structure
     - [x] Run Postgres and PgAdmin servers from Docker images. Check [Database Server documentation for details](../../documentation/database_server.md).
+
+    #### Frameworks
+- Python + Flask for API server and web application
+- PostgreSQL for database

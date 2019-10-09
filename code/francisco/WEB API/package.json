@@ -1,0 +1,24 @@
+{
+  "name": "web-api",
+  "version": "1.0.0",
+  "description": "Web API for ARP-B  project",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yenthusiastic/arp_b.git"
+  },
+  "author": "Francisco Susana Canela",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yenthusiastic/arp_b/issues"
+  },
+  "homepage": "https://github.com/yenthusiastic/arp_b#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "nodemon": "^1.19.3"
+  }
+}

@@ -68,7 +68,7 @@ The graphical view of the Tables (Schemas) in the database is as follows:
 
 <img src = "../media/db_new.png" width="720px">
 
-Upon created, the `HARDWARE_STATUS` table is manually inserted with the initital `session_address` (`address_index` = 0) for each `hardwareID`. Similarly, manual insertion is required for new hardware modules.
+Upon created, the `HARDWARE_STATUS` table is manually inserted with the initital `session_address` (`address_index` = 0) for each `hardwareID`. Similarly, manual insertion is required for new hardware modules. This is intended to be done through the administration dashboard at later phase of the project. For now, this is done through PgAdmin.
 #### 2.2. Access
 - The database is currently implemented using a Postgres server and can be accessed through the PgAdmin web interface at https://pg.dev.iota.hub with following credentials:
     - Email address: arpb@iota.dev
@@ -78,10 +78,11 @@ Upon created, the `HARDWARE_STATUS` table is manually inserted with the initital
 ```shell
 DB Host: 'db.dev.iota.pw'
 DB Port: 6000
-Database name: 'arp_b'
+Database name: 'arpb'
 User: 'arp_b'
 Password: 'iota999'
 ```
+With SQLAlchemy library, set `SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://arp_b:iota999@db.dev.iota.pw:6000/arpb"`
 
 ### 3. Server functions
 - Check validity of all **REST** requests, especially the format of the sent JSON data as defined in Section 1.2
