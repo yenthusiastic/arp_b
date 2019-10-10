@@ -20,3 +20,7 @@ Price: 3.5 €
 Price: 10€
 Supported GNSS: GPS,GLONASS,Galileo,BeiDou
 Provided data: data & time, latitude, longitude, altitude, number of received satelites, quality, speed_kmh, course(heading), [dop](https://gisgeography.com/gps-accuracy-hdop-pdop-gdop-multipath/))
+
+
+### CO2 Sensor - [MH-Z14A](https://www.banggood.com/NDIR-CO2-Sensor-MH-Z14A-PWM-NDIR-Infrared-Carbon-Dioxide-Sensor-Module-Serial-Port-0-5000PPM-Controller-p-1248270.html?rmmds=search&cur_warehouse=CN)
+Price: 20 €
