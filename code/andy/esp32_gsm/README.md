@@ -32,9 +32,9 @@
 |2 |TX |GPS |Serial |
 |4 |GSM_PWR |GSM Module |GPIO digital|
 |5 |GSM_RST |GSM Module |GPIO digital|
-|12 | |SDS011 Sensor |Serial |
+|12 |RX |SDS011 Sensor |Serial |
 |13 |LED1 |Buildin LED |GPIO digital|
-|14 | |SDS011 Sensor |Serial |
+|14 |TX |SDS011 Sensor |Serial |
 |15 |BTN1 |Button1 |GPIO digital|
 |18 | | | |
 |19 | | | |
