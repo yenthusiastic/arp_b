@@ -12,6 +12,8 @@
 ### SIM Card
 - Disable PIN
 - lookup APN name, username and password: [apnchanger.org](https://wiki.apnchanger.org/Germany#Vodafone)
+- Vodafone:
+	- web.vodafone.de, vodafone, vodafone
 
 
 ## MircoPython and Example Code
@@ -21,6 +23,33 @@
 [RTC Sync with NTP](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/rtc)
 
 [GSM Library](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm)
+
+
+## Pin Mapping
+|Pin ESP| Pin AUX|AUX Device|Protocol|
+|---    |---     |---       |---     |
+|0 |RX |GPS |Serial |
+|2 |TX |GPS |Serial |
+|4 |GSM_PWR |GSM Module |GPIO digital|
+|5 |GSM_RST |GSM Module |GPIO digital|
+|12 | |SDS011 Sensor |Serial |
+|13 |LED1 |Buildin LED |GPIO digital|
+|14 | |SDS011 Sensor |Serial |
+|15 |BTN1 |Button1 |GPIO digital|
+|18 | | | |
+|19 | | | |
+|21 |SDA |MPU6050, BM260 |I2C |
+|22 |SCL |MPU6050, BM260 |I2C |
+|23 |GSM_MODEM_PWR |GSM Module |GPIO digital|
+|25 | | | |
+|26 |TX |GSM Module |Serial |
+|27 |RX |GSM Module |Serial |
+|32 | | | |
+|33 | | | |
+|34 | | | |
+|35 | | | |
+|36/SVP |A0 |C02 Sensor |GPIO analog|
+|39/SVN | | | |
 
 
 ## Low power operation
