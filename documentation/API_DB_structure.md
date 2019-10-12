@@ -17,6 +17,7 @@ The API should have the following endpoints:
 }
 ```
 where `hardwareID` and `data` are **compulsory fields**, `address` is optional field. 
+
 Note:
     - The `address` is not required and will be saved as **empty string** in the database when the bike is parked. 
     - The `data` field contains 4 values (for now) in the following order: latitude, longitude, temperature, humidity.
@@ -50,7 +51,7 @@ Status Code | Message | Information
     - etc.
 
 #### 1.4. Response JSON format
-- The API endpoints should return a JSON body corresponding to the header status code above as follows:
+- The API endpoints should return a status code in the header and a JSON in the body corresponding to the header status code as follows:
 ```json
 {
     "HttpStatusCode": 200, 

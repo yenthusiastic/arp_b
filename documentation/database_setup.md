@@ -61,7 +61,7 @@ Go inside the container and run psql to connect to the database server using mat
 sudo docker exec -it <container-ID-here> bash 
 psql -U arp_b -d arp_b
 ```
-Using PgAdmin or psql to adjust the timezone and create 2 tables "HARDWARE" and "SENSOR_DATA" using following queries:
+Using PgAdmin or psql to adjust the timezone and create 3 tables "HARDWARE_STATUS", "SENSOR_DATA" and "USERS" using following queries:
 ```sql
 ALTER DATABASE arp_b SET timezone TO 'Europe/Berlin';
 
@@ -85,6 +85,16 @@ CREATE TABLE public."SENSOR_DATA"
     "humidity" real NOT NULL,
     "timestamp" timestamp with time zone NOT NULL,
  	 PRIMARY KEY ("index")
+);
+
+CREATE TABLE public."USERS"
+(
+    "id" bigserial NOT NULL,
+    "user" text NOT NULL,
+    "email" text NOT NULL,
+    "password" real NOT NULL,
+    PRIMARY KEY ("id"),
+    UNIQUE("user", "email", "password")
 );
 ```
 
