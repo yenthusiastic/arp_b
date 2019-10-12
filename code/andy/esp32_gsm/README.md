@@ -26,30 +26,30 @@
 
 
 ## Pin Mapping
-|Pin ESP| Pin AUX|AUX Device|Protocol|
-|---    |---     |---       |---     |
-|0 |RX |GPS |Serial |
-|2 |TX |GPS |Serial |
-|4 |GSM_PWR |GSM Module |GPIO digital|
-|5 |GSM_RST |GSM Module |GPIO digital|
-|12 |RX |SDS011 Sensor |Serial |
-|13 |LED1 |Buildin LED |GPIO digital|
-|14 |TX |SDS011 Sensor |Serial |
-|15 |BTN1 |Button1 |GPIO digital|
-|18 | | | |
-|19 | | | |
-|21 |SDA |MPU6050, BM260 |I2C |
-|22 |SCL |MPU6050, BM260 |I2C |
-|23 |GSM_MODEM_PWR |GSM Module |GPIO digital|
-|25 | | | |
-|26 |TX |GSM Module |Serial |
-|27 |RX |GSM Module |Serial |
-|32 | | | |
-|33 | | | |
-|34 | | | |
-|35 | | | |
-|36/SVP |A0 |C02 Sensor |GPIO analog|
-|39/SVN | | | |
+|Pin ESP| Pin AUX|AUX Device|Protocol|Note|
+|---    |---     |---       |---     |--- |
+|0 | | | | |
+|2 | | | | |
+|4 |GSM_PWR |GSM Module |GPIO digital| |
+|5 |GSM_RST |GSM Module |GPIO digital| |
+|12 |RX |SDS011 Sensor |Serial | |
+|13 | | | |buildin LED |
+|14 | | | | |
+|15 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
+|18 | | | | |
+|19 | | | | |
+|21 |SDA |MPU6050, BM260 |I2C | |
+|22 |SCL |MPU6050, BM260 |I2C | |
+|23 |GSM_MODEM_PWR |GSM Module |GPIO digital| |
+|25 | | | | |
+|26 |TX |GSM Module |Serial | |
+|27 |RX |GSM Module |Serial | |
+|32 |DAT |DHT 22 |1-Wire | |
+|33 | | | | |
+|34 |TX |SDS011 Sensor |Serial |input only, no pulls|
+|35 |TX |GPS |Serial |input only, no pulls |
+|36/SVP |A0 |C02 Sensor |GPIO analog|input only, no pulls |
+|39/SVN | | | |input only, no pulls |
 
 
 ## Low power operation
