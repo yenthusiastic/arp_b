@@ -1,7 +1,7 @@
 version: '3'
 services:
   postgres:
-    image: postgres
+    image: postgres:12
     hostname: postgres
     ports:
       - "6000:5432"
@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: iota999
       POSTGRES_DB: arp_b
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/storage
     restart: unless-stopped
 
   pgadmin:
