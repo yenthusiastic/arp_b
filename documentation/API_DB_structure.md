@@ -79,7 +79,7 @@ Upon created, the `HARDWARE_STATUS` table is manually inserted with the initital
 ```shell
 DB Host: 'db.dev.iota.pw'
 DB Port: 6000
-Database name: 'arpb'
+Database name: 'arp_b'
 User: 'arp_b'
 Password: 'iota999'
 ```
