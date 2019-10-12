@@ -4,10 +4,13 @@
 The SDS011 is using the principle of laser scattering to measure the concentration of particles of a size between 0.3 to 10 µm.
 Resolution of 0.3µg/m³.
 
-Running 70 mA
-sleep 3mA
+Power consumtion:
+  - Running 70 mA
+  - Sleep 3mA
 
 Price: 20€
+
+[Datasheet](https://cdn-reichelt.de/documents/datenblatt/X200/SDS011-DATASHEET.pdf)
 
 
 
