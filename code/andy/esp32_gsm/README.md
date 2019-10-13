@@ -28,25 +28,25 @@
 ## Pin Mapping
 |Pin ESP| Pin AUX|AUX Device|Protocol|Note|
 |---    |---     |---       |---     |--- |
-|0 | | | | |
-|2 | | | | |
+|0 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
+|2 |DAT |DHT 22 |1-Wire| |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
-|12 |RX |SDS011 Sensor |Serial | |
+|12 | | | | |
 |13 | | | |buildin LED |
 |14 | | | | |
 |15 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
-|18 | | | | |
-|19 | | | | |
+|18 |PM10 |SDS011 Sensor |PWM | |
+|19 |PM25 |SDS011 Sensor |PWM | |
 |21 |SDA |MPU6050, BM260 |I2C | |
 |22 |SCL |MPU6050, BM260 |I2C | |
 |23 |GSM_MODEM_PWR |GSM Module |GPIO digital| |
 |25 | | | | |
 |26 |TX |GSM Module |Serial | |
 |27 |RX |GSM Module |Serial | |
-|32 |DAT |DHT 22 |1-Wire | |
+|32 | | | | |
 |33 | | | | |
-|34 |TX |SDS011 Sensor |Serial |input only, no pulls|
+|34 | | | |input only, no pulls|
 |35 |TX |GPS |Serial |input only, no pulls |
 |36/SVP |A0 |C02 Sensor |GPIO analog|input only, no pulls |
 |39/SVN | | | |input only, no pulls |
