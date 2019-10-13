@@ -113,3 +113,7 @@ Therefore the to be developed prototype might not be able to suport any low-powe
 
 ## GSM Code
 [Python Example SIM800](http://www.python-exemplary.com/index_en.php?inhalt_links=navigation_en.inc.php&inhalt_mitte=raspi/en/gsm.inc.php)
+
+
+## Libraries USed
+[QR-Code generation](https://github.com/JASchilz/uQR)
