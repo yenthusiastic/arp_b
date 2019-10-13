@@ -32,20 +32,20 @@
 |2 |DAT |DHT 22 |1-Wire| |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
-|12 | | | | |
+|12 |mosi |TFT | | |
 |13 | | | |buildin LED |
-|14 | | | | |
+|14 |miso |TFT | | |
 |15 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
 |18 |PM10 |SDS011 Sensor |PWM | |
 |19 |PM25 |SDS011 Sensor |PWM | |
 |21 |SDA |MPU6050, BM260 |I2C | |
 |22 |SCL |MPU6050, BM260 |I2C | |
 |23 |GSM_MODEM_PWR |GSM Module |GPIO digital| |
-|25 | | | | |
+|25 |clk |TFT | | |
 |26 |TX |GSM Module |Serial | |
 |27 |RX |GSM Module |Serial | |
-|32 | | | | |
-|33 | | | | |
+|32 |dc |TFT | | |
+|33 |cs |TFT | | |
 |34 | | | |input only, no pulls|
 |35 |TX |GPS |Serial |input only, no pulls |
 |36/SVP |A0 |C02 Sensor |GPIO analog|input only, no pulls |
