@@ -28,11 +28,11 @@ Status Code | Message
     - any or both of the required keys contain empty data
     - sensor data does not contain 4 values
     
-Check [api_client IPython Notebook](../code/thu/api_client.ipynb) for a demo on different cases of response status code.
+Check [api_client IPython Notebook](../code/thu/api-server/api_client.ipynb) for a demo on different cases of response status code.
 
 - See [PostgreSQL Server setup documentation](database_server.md) to set up database server and install related tools. Upon success, API server can be run using:
 ```bash
 cd ../code/thu/
 python api_server.py
 ```
-- To send requests to API endpoint, use the code provided in [api_client IPython Notebook](../code/thu/api_client.ipynb).
+- To send requests to API endpoint, use the code provided in [api_client IPython Notebook](../code/thu/api-server/api_client.ipynb).
