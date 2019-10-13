@@ -17,7 +17,7 @@
 
 
 ## MircoPython and Example Code
-[Github - Xinyuan-LilyGO](https://github.com/Xinyuan-LilyGO/TTGO-T-Call/tree/master/examples/MicroPython_LoBo)
+[LoBo MicroPython for ESP32](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki)
 
 
 [RTC Sync with NTP](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/rtc)
@@ -36,8 +36,8 @@
 |13 | | | |buildin LED |
 |14 |miso |TFT | | |
 |15 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
-|18 |PM10 |SDS011 Sensor |PWM | |
-|19 |PM25 |SDS011 Sensor |PWM | |
+|18 |PM10 |SDS011 Sensor |GPIO digital |Input: pulse length |
+|19 |PM25 |SDS011 Sensor |GPIO digital |Input: pulse length |
 |21 |SDA |MPU6050, BM260 |I2C | |
 |22 |SCL |MPU6050, BM260 |I2C | |
 |23 |GSM_MODEM_PWR |GSM Module |GPIO digital| |
