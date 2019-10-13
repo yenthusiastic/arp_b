@@ -19,7 +19,7 @@ The API should have the following endpoints:
 where `hardwareID` and `data` are **compulsory fields**, `address` is optional field. 
 
 Note:
-    - The `address` is not required and will be saved as **empty string** in the database when the bike is parked. 
+    - The `address` is not always required and will be saved as **empty string** in the database when the bike is parked. 
     - The `data` field contains 4 values (for now) in the following order: latitude, longitude, temperature, humidity.
 
 - The JSON data in the **PUT** request body should have the following format:
@@ -30,7 +30,7 @@ Note:
     "location": [52.5157, 5.8992]
 }
 ```
-where `status` should be **only** one of the following states: "parked", "rented", "stolen". The location format is `[latitude, longitude]`.
+where `hardwareID` and **at least 1** of the remaining 2 fields are **compulsory**. `status` should be **only** one of the following states: "parked", "rented", "stolen". The location format is `[latitude, longitude]`. 
 
 #### 1.3. Response code
 - The API endpoints should return one of the following response status codes in the header
@@ -87,7 +87,7 @@ With SQLAlchemy library, set `SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://a
 
 ### 3. Server functions
 - Check validity of all **REST** requests, especially the format of the sent JSON data as defined in Section 1.2
-- Everytime a valid **PUT** request is received, update the `status`, `latitude` and `longitude` fields of given `hardwareID` in the `HARDWARE_STATUS` table with received data
+- Everytime a valid **PUT** request is received, update the `status` and/or `latitude` and `longitude` fields of given `hardwareID` in the `HARDWARE_STATUS` table with received data
     - example query to update data in PostgreSQL: `UPDATE "HARDWARE_STATUS" SET "status" = 'parked', latitude = 55.990, longitude = 6.001 WHERE "hardwareID" = 1`
 - Everytime a valid **GET** request is received (as the bike status changes from "rented" to "parked"), for the given `hardwareID`, 
     - query the value of current `address_index` in the `HARDWARE_STATUS` table, increment it by 1 and update its value in the table
@@ -97,3 +97,13 @@ With SQLAlchemy library, set `SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://a
     - insert all received data together with an auto generated timestamp in the `SENSOR_DATA` table
         - example query to insert data with automatic timestamp in PostgreSQL: `INSERT into "SENSOR_DATA" values (default, 1, 'ABC...999', 52.5157, 5.8992, 23.57, 40.5, current_timestamp)`
     - update the `latitude` and `longitude` fields of given `hardwareID` in the `HARDWARE_STATUS` table with received data
+    - send the sensor data as a JSON object to the Tangle using IOTA library as a non-value transaction to the address provided in the POST request. If no address is provided or the address field is empty (the bike is in `parked` state), retrieve the address of the corresponding `hardwareID` from the `HARDWARE_STATUS` table. Format of the JSON object (for now):
+```json
+{
+    "latitude": 61.123
+    "longitude": 7.933
+    "temperature": 19.2
+    "humidity": 35.7
+}
+```
+
