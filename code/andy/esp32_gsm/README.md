@@ -34,7 +34,7 @@
 |5 |GSM_RST |GSM Module |GPIO digital| |
 |12 |mosi |TFT | | |
 |13 | | | |buildin LED |
-|14 |miso |TFT | | |
+|14 | | | | |
 |15 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
 |18 |PM10 |SDS011 Sensor |GPIO digital |Input: pulse length |
 |19 |PM25 |SDS011 Sensor |GPIO digital |Input: pulse length |
@@ -46,7 +46,7 @@
 |27 |RX |GSM Module |Serial | |
 |32 |dc |TFT | | |
 |33 |cs |TFT | | |
-|34 | | | |input only, no pulls|
+|34 |miso |TFT | |input only, no pulls|
 |35 |TX |GPS |Serial |input only, no pulls |
 |36/SVP |A0 |C02 Sensor |GPIO analog|input only, no pulls |
 |39/SVN | | | |input only, no pulls |
@@ -117,3 +117,4 @@ Therefore the to be developed prototype might not be able to suport any low-powe
 
 ## Libraries USed
 [QR-Code generation](https://github.com/JASchilz/uQR)
+[MPU6050](https://github.com/adamjezek98/MPU6050-ESP8266-MicroPython) (modified)
