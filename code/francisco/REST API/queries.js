@@ -13,7 +13,10 @@ const conString = {
 let pool = new pg.Pool(conString)
 // DB Connection
 pool.connect(err => {
-    if (err) throw err
+    if (err) {
+        console.log("Problems when connecting to the database.")
+        throw err
+    }
 })
 // User queries
 const getUsers = (request, response) => {
@@ -40,24 +43,40 @@ const updateUser = (request, response) => {
 const getSessionAddress = (request, response) => {
     let hardwareID = request.params.hardwareID
     pool.query('SELECT * from "HARDWARE_STATUS" WHERE "hardwareID" = $1;',[hardwareID],(error,results) => {
-        if (error) throw error
+        if (error) {
+            response.status(500).send('Problems requesting data to the database.')
+            throw error
+        }
         response.status(200).json(results.rows)
     })
 }
 const saveSensorData = (request, response) => {
-    console.log(request.body)
     let {hardwareID, address, latitude, longitude, temperature, humidity, timestamp} = request.body
-    pool.query('INSERT INTO "SENSOR_DATA"("hardwareID", address, latitude, longitude, temperature, humidity, "timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7);',[hardwareID, address, latitude, longitude, temperature, humidity, timestamp], (error,results) => {
-        if (error) throw error
-        response.status(200).send("Data saved.")
-    })
+    if(!hardwareID || !address || !latitude || !longitude || !temperature || !humidity || !timestamp){
+        response.status(400).send("Post request does not content required value(s).")
+    }else{
+        pool.query('INSERT INTO "SENSOR_DATA"("hardwareID", address, latitude, longitude, temperature, humidity, "timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7);',[hardwareID, address, latitude, longitude, temperature, humidity, timestamp], (error,results) => {
+            if (error){
+                response.status(500).send('Problems requesting data to the database.')
+                throw error
+            }
+            response.status(200).send("Data saved.")
+        })
+    }
 }
 const updateHardware = (request, response) => {
     let { status, latitude, longitude, hardwareID } = request.body
-    pool.query('UPDATE "HARDWARE_STATUS" SET status = $1, latitude = $2, longitude = $3 WHERE "hardwareID" = $4;',[status, latitude, longitude, hardwareID],(error, results) => {
-        if (error) throw error
-        response.status(200).send(`${results.rowCount} row updated.`)
-    })
+    if(!status || !latitude || !longitude || !hardwareID){
+        response.status(400).send("Put request does not content required value(s).")
+    }else{
+        pool.query('UPDATE "HARDWARE_STATUS" SET status = $1, latitude = $2, longitude = $3 WHERE "hardwareID" = $4;',[status, latitude, longitude, hardwareID],(error, results) => {
+            if (error){
+                response.status(500).send('Problems requesting data to the database.')
+                throw error
+            }
+            response.status(200).send(`${results.rowCount} row updated.`)
+        })
+    }
 }
 
 module.exports = {
