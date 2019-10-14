@@ -1,7 +1,7 @@
 Summary
 ----------
 
-V1.0 
+V1.1 
 
 GET - api/address - Retrieve a new session address for the hardware
 POST - api/data - Add new sensor data
