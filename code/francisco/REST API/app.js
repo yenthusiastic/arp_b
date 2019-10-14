@@ -12,7 +12,7 @@ app.put('/users', bodyParser.json(), db.updateUser)
 app.get('/address/:hardwareID',db.getSessionAddress)
 // Add new sensor data
 app.post('/data', bodyParser.json(), db.saveSensorData)
-// Update the hardware (bike)'s statuss
-app.put('/status', bodyParser.json(), db.updateUser)
+// Update the hardware (bike)'s status
+app.put('/status', bodyParser.json(), db.updateHardware)
 
 app.listen(port,() => console.log(`Listening port ${port}\n`))

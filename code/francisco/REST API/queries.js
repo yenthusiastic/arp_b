@@ -23,14 +23,14 @@ const getUsers = (request, response) => {
     })
 }
 const createUser = (request, response) => {
-    const { user, email, password } = request.body
+    let { user, email, password } = request.body
     pool.query('INSERT INTO "USERS" ("user",email,password) VALUES ($1,$2,$3);', [user,email,password],(error,results) =>{
             if (error) throw error
             response.status(201).send(`User ${user} added`)
         })
 }
 const updateUser = (request, response) => {
-    const{ user, email } = request.body
+    let{ user, email } = request.body
     pool.query('UPDATE "USERS" SET "user" = $1 WHERE email = $2;',[user,email],(error,results) => {
         if (error) throw error
         response.status(200).send(`Name modified to ${user}`)
@@ -52,7 +52,13 @@ const saveSensorData = (request, response) => {
         response.status(200).send("Data saved.")
     })
 }
-const updateHardware = ""
+const updateHardware = (request, response) => {
+    let { status, latitude, longitude, hardwareID } = request.body
+    pool.query('UPDATE "HARDWARE_STATUS" SET status = $1, latitude = $2, longitude = $3 WHERE "hardwareID" = $4;',[status, latitude, longitude, hardwareID],(error, results) => {
+        if (error) throw error
+        response.status(200).send(`${results.rowCount} row updated.`)
+    })
+}
 
 module.exports = {
     getUsers,
