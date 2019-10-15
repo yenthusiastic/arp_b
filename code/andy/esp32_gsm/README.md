@@ -90,7 +90,13 @@ The following recommendations can be made:
 |Get Balance|240|5|
 |Get Balance|40|8|
 
-
+#### Sensor Power
+|Sensor Name| Voltage| Current active| Current sleep| Note|
+|---        |---     |---    	     |---           |---  |
+|DHT22 	    |3.3/ 5  | 0.040 mA      | 0.026 mA     | |
+|GPS 	    |3.3     | 50 mA	     | NA mA	    | 70 mA peak|
+|MPU6050    |5       | 5.4 mA	     | 0.05 mA	    | |
+|    |       | 0 mA	     | 0 mA	    | |
 
 ## Flash MicroPython
 ```bash
