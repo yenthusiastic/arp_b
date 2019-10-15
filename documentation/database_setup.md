@@ -111,3 +111,18 @@ cd psycopg2
 python setup.py build
 sudo python setup.py install
 ```
+
+#### 5. Install MessagePack Implementation
+**MessagePack** allows sending data (from hardware module side) and storing data (on the PostgreSQL server side) as bytes of JSON format in order to limit the usage of mobile Internet. Example:
+
+<img src="../media/messagepack.PNG" Swidth="70%">
+
+Follow instructions on this [MessagePack Implementation for PostgreSQL Github repo](https://github.com/patriksimek/msgpack-postgres) to execute `encode.sql` and `decode.sql` scripts on the Postgres server using **psql** client or **PgAdmin** web interface. To test the installation:
+```sql
+select msgpack_encode('{"hello": "world"}'::jsonb);
+-- returns 0x81a568656c6c6fa5776f726c64
+
+select msgpack_decode(decode('81a568656c6c6fa5776f726c64', 'hex'));
+-- returns '{"hello": "world"}'
+```
+
