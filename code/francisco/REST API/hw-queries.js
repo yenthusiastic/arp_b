@@ -1,5 +1,6 @@
 // DB setup
-let pg = require('pg')
+const pg = require('pg')
+
 const conString = {
     host: 'db.dev.iota.pw',
     // Do not hard code your username and password.
@@ -11,34 +12,15 @@ const conString = {
     port: 6000,
 }
 let pool = new pg.Pool(conString)
+
 // DB Connection
-pool.connect(err => {
-    if (err) {
+pool.connect(error => {
+    if (error) {
         console.log("Problems when connecting to the database.")
-        throw err
+        throw error
     }
 })
-// User queries
-const getUsers = (request, response) => {
-    pool.query('SELECT * FROM "USERS";', (error, results) => {
-        if (error) throw error
-        response.status(200).json(results.rows)
-    })
-}
-const createUser = (request, response) => {
-    let { user, email, password } = request.body
-    pool.query('INSERT INTO "USERS" ("user",email,password) VALUES ($1,$2,$3);', [user,email,password],(error,results) =>{
-            if (error) throw error
-            response.status(201).send(`User ${user} added`)
-        })
-}
-const updateUser = (request, response) => {
-    let{ user, email } = request.body
-    pool.query('UPDATE "USERS" SET "user" = $1 WHERE email = $2;',[user,email],(error,results) => {
-        if (error) throw error
-        response.status(200).send(`Name modified to ${user}`)
-    })
-}
+
 // Hardware queries
 const getSessionAddress = (request, response) => {
     let hardwareID = request.params.hardwareID
@@ -80,9 +62,6 @@ const updateHardware = (request, response) => {
 }
 
 module.exports = {
-    getUsers,
-    createUser,
-    updateUser,
     getSessionAddress,
     saveSensorData,
     updateHardware

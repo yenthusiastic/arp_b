@@ -64,32 +64,58 @@ GSM_MODEM_PWR = Pin(23, Pin.OUT)
 # Setup User IO Pins
 #LED = Pin(13, Pin.OUT)
 #LED.value(1)
+
 BTN1 = Pin(0, Pin.IN, Pin.PULL_UP)
 
 rtc.wake_on_ext0(pin=BTN1, level=0)
 
 # RX is not used
 gps = GPS(UART(2, rx=35, tx=33, baudrate=9600, bits=8, parity=None, stop=1, timeout=1500, buffer_size=1024, lineend='\r\n'))
+gps.startservice()
 
 
 #pm = sds011.SDS011(UART(1, baudrate=9600, tx=12, rx=34))
-
-dht = DHT(Pin(2), DHT.DHT2X)
-
 #pm.sleep()
-#gps.startservice()
-
 PM10_PIN = Pin(19, Pin.IN)
 PM25_PIN = Pin(18, Pin.IN)
+
+dht = DHT(Pin(2), DHT.DHT2X)
 
 #i2c = I2C(scl=Pin(22), sda=Pin(21))
 i2c = I2C(0, I2C.MASTER, scl=Pin(22), sda=Pin(21), freq=400000)
 import mpu6050 as mpu
 mpu.init_sensor(i2c)
 
+LED = Pin(13, Pin.OUT)
+LED.value(0)
 
 # =====TEMPORARY DISPLAY========
+from machine import Pin, SPI
+import epaper2in9b
+spi = SPI(2, baudrate=2000000, polarity=1, phase=0, sck=Pin(25), mosi=Pin(14), miso=Pin(39))
+cs = Pin(33)
+dc=Pin(32)
+rst=Pin(12)
+busy=Pin(34)
 
+black = 0
+white = 1
+
+import framebuf
+buf = bytearray(128 * 296 // 8)
+fb = framebuf.FrameBuffer(buf, 128, 296, framebuf.MONO_HLSB)
+bufy = bytearray(128 * 296 // 8)
+fby = framebuf.FrameBuffer(bufy, 128, 296, framebuf.MONO_HLSB)
+fby.fill(white)
+fb.fill(white)
+#fb.text('Hello World',30,0,black)
+
+#e.display_frame(buf,bufy)
+e=epaper2in9b.EPD(spi, cs, dc, rst, busy)
+e.init()
+
+"""
+128x160 RGB TFT Touch Display with ST7735 Controller
 import display
 d = display.TFT()
 d.init(d.ST7735B, mosi=12, miso=34, clk=25, cs=33, dc=32, width=130, height=161, speed=10000000, splash=False)
@@ -101,16 +127,14 @@ d.font(d.FONT_DefaultSmall)
 d.text(2, 32, "ID: {}".format(machine.nvs_getint('hardwareID')), d.WHITE)
 
 def draw_qr(m, xs=20, ys=71):
-    for y in range(len(m)*2):                   # Scaling the bitmap by 2
-        for x in range(len(m[0])*2):            # because my screen is tiny.
-            value = m[y//2][x//2]   # Inverting the values because
+    for y in range(len(m)*2):                   
+        for x in range(len(m[0])*2):            
+            value = m[y//2][x//2]   
             if value == 0:
                 value=0xFFFFFF
             else:
                 value=0x000000
             d.pixel(xs+x, ys+y, value)
-
-
 
 def make_qr(address=m_address):
     d.font(d.FONT_DefaultSmall)
@@ -122,7 +146,42 @@ def make_qr(address=m_address):
     m_address_matrix = qr.get_matrix()
     d.text(d.CENTER, 80, "Generating Address...", d.BLACK)
     draw_qr(m_address_matrix)
+"""
 
+def make_qr(address=m_address):
+    print("Making QR code...")
+    from uQR import QRCode
+    qr=QRCode(border=1)
+    #qr.clear()
+    qr.add_data(address)
+    m_address_matrix = qr.get_matrix()
+    return m_address_matrix
+
+def draw_qr(m=None, address=None, xs=0, ys=170, scale=1):
+    if m == None:
+        if address == None:
+            address = m_address
+        m = make_qr(address) 
+    for y in range(len(m)*scale):
+        for x in range(len(m[0])*scale):
+            value = m[y//scale][x//scale]
+            if value == 0:
+                value=0xFF
+            else:
+                value=0x00
+            fb.pixel(xs+x, ys+y, value)
+
+def draw_title():
+    fb.text("B I K O T A", 20, 0, 0)
+    e.draw_filled_rectangle(buf, 0,10,127,11, True)
+    #e.draw_filled_rectangle(bufy, 0,15,127,168, True)
+
+def draw_balance(iota=100):
+    fb.text("BALANCE: ", 0, 30, 0)
+    fb.text("{} i: ".format(iota),0,  45, 0)
+
+def update_display():
+    e.display_frame(buf,bufy)
 #===============================
 
 
@@ -163,7 +222,10 @@ def get_dht():
 
 def gps_location():
     data = gps.getdata()
-    return (data[1], data[2])
+    if gps.getdata()[0][0] != 1900:
+        return (data[1], data[2])
+    else:
+        return False
 
 
 def gsm_connect():
@@ -290,12 +352,16 @@ else:
     while True:
         if True: #BTN1.value() == 0:
             #break
-            make_qr(address=adr)
-            d.text(d.CENTER, 50, "Balance: 0 i", d.WHITE)
+            LED.value(1)
+            draw_qr(address=adr, scale=3)
+            draw_title()
+            draw_balance()
+            update_display()
+            #d.text(d.CENTER, 50, "Balance: 0 i", d.WHITE)
             while BTN1.value() != 0:
                 balance = get_balance(address=adr[:81])
-                d.text(d.CENTER, 50, "Balance: xxxxxxxxx i", d.BLACK)
-                d.text(d.CENTER, 50, "Balance: {} i".format(balance), d.WHITE)
+            #    d.text(d.CENTER, 50, "Balance: xxxxxxxxx i", d.BLACK)
+            #    d.text(d.CENTER, 50, "Balance: {} i".format(balance), d.WHITE)
                 #sleep(5)
             break
         print(counter)
@@ -310,4 +376,5 @@ else:
         #    
         #    sleep_ms(30)
     #"""
-    d.text(d.CENTER, 50, "   !!! TERMINATED !!!   ", d.RED)
+    #d.text(d.CENTER, 50, "   !!! TERMINATED !!!   ", d.RED)
+LED.value(0)

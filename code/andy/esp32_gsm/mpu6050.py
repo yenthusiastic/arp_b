@@ -10,6 +10,13 @@ def init_sensor(i2c_obj):
     i2c_.init()
     i2c_.writeto(addr, bytearray([107, 0]))
 
+def sleepmode():
+    global i2c_
+    i2c_.writeto(addr, bytearray([0x6B, 0x20]))
+
+def wakeup():
+    global i2c_
+    i2c_.writeto(addr, bytearray([0x6B, 0x00]))
 
 def get_raw_values():
     global i2c_
