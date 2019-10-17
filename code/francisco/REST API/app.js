@@ -5,6 +5,10 @@ const db_u = require ('./user-queries')
 const port = 5100;
 const app = express()
 
+// Code to test request from python
+let urlencodedParser = bodyParser.urlencoded({ extended: false });
+app.use(urlencodedParser);
+
 // Users view, registration, and login
 app.get('/no_production_users_view',db_u.getUsers)
 app.post('/register', bodyParser.json(), db_u.registerUsers)
