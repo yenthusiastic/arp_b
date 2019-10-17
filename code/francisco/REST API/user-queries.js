@@ -28,7 +28,7 @@ const getUsers = (request, response) => {
         response.status(200).send(result.rows)
     })
 }
-const createUsers = async (request, response) => {
+const registerUsers = async (request, response) => {
     const { user, email, password } = request.body
     let hashedPassword = await bcrypt.hash(password,10)
     pool.query('INSERT INTO "USERS" ("user",email,password) VALUES ($1,$2,$3);', [user, email, hashedPassword], (error, result) => {
@@ -56,6 +56,6 @@ const loginUsers = (request, response) => {
 
 module.exports = {
     getUsers,
-    createUsers,
+    registerUsers,
     loginUsers,
 }

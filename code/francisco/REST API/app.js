@@ -1,15 +1,15 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const db = require('./hw-queries')
+const db_u = require ('./user-queries')
 const port = 5100;
 const app = express()
-const db = require('./queries')
-const db_u = require ('./user-queries')
 
-app.get('/users',db_u.getUsers)
-app.post('/users', bodyParser.json(), db_u.createUsers)
-app.put('/users', bodyParser.json(), db.updateUser)
-
+// Users view, registration, and login
+app.get('/no_production_users_view',db_u.getUsers)
+app.post('/register', bodyParser.json(), db_u.registerUsers)
 app.post('/login', bodyParser.json(), db_u.loginUsers)
+// app.put('/users', bodyParser.json(), db.updateUser)
 
 // Retrieve a new session address for the hardware
 app.get('/address/:hardwareID',db.getSessionAddress)
