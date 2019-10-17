@@ -39,7 +39,7 @@ Method | URL | Body Parameters |Description
 Method | URL | Body Parameters| Description
 ---------|----------|---------|---------
  GET | url//no_production_users_view | N/A |Retrieve list of users registered
- POST | url/register' | user, email, password |Add new user
+ POST | url/register | user, email, password |Add new user
  PUT | url/login | email, password |Verify user on the database
 
 #### Status code
