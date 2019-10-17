@@ -68,10 +68,11 @@ ALTER DATABASE arp_b SET timezone TO 'Europe/Berlin';
 CREATE TABLE public."HARDWARE_STATUS"
 (
     "hardwareID" integer NOT NULL,
-    "address_index" integer NOT NULL,
-    "session_address" text NOT NULL,
-    "latitude" real NOT NULL,
-    "longitude" real NOT NULL,
+    "address_index" integer,
+    "session_address" text,
+    "status" text,
+    "latitude" real,
+    "longitude" real,
     PRIMARY KEY ("hardwareID")
 );
 
@@ -79,10 +80,10 @@ CREATE TABLE public."SENSOR_DATA"
 (	"index" bigserial NOT NULL,
     "hardwareID" integer NOT NULL,
     "address" text,
-    "latitude" real NOT NULL,
-    "longitude" real NOT NULL,
-    "temperature" real NOT NULL,
-    "humidity" real NOT NULL,
+    "latitude" real,
+    "longitude" real,
+    "temperature" real,
+    "humidity" real,
     "timestamp" timestamp with time zone NOT NULL,
  	 PRIMARY KEY ("index")
 );

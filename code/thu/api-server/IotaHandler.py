@@ -35,5 +35,5 @@ class IotaHandler():
         try:
             bundle = self.send_transaction(self.get_prop_transaction(msg=message_json_trytes, adr=addr))
             print("Transaction:\t https://thetangle.org/transaction/{0}\n".format(bundle['bundle'][0].hash))
-        except Exeception as e:
+        except Exception as e:
             print(e)
