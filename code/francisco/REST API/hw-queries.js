@@ -34,12 +34,9 @@ const getSessionAddress = (request, response) => {
 }
 const saveSensorData = (request, response) => {
     let {hardwareID, address, latitude, longitude, temperature, humidity, timestamp} = request.body
-    console.log("Request body type:"  + typeof(request.body))
-    console.log("Request body content:"  + request.body)
-    console.log("Request body content:"  + JSON.stringify(request.body))
-    // if(!hardwareID || !address || !latitude || !longitude || !temperature || !humidity || !timestamp){
-    //     response.status(400).send("Post request does not content required value(s).")
-    // }else{
+    if(!hardwareID || !address || !latitude || !longitude || !temperature || !humidity || !timestamp){
+        response.status(400).send("Post request does not content required value(s).")
+    }else{
         pool.query('INSERT INTO "SENSOR_DATA"("hardwareID", address, latitude, longitude, temperature, humidity, "timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7);',[hardwareID, address, latitude, longitude, temperature, humidity, timestamp], (error,results) => {
             if (error){
                 response.status(500).send('Problems requesting data to the database.')
@@ -48,7 +45,7 @@ const saveSensorData = (request, response) => {
             response.status(200).send("Data saved.")
         })
     }
-// }
+}
 const updateHardware = (request, response) => {
     let { status, latitude, longitude, hardwareID } = request.body
     if(!status || !latitude || !longitude || !hardwareID){
