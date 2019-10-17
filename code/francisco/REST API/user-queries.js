@@ -48,7 +48,7 @@ const loginUsers = (request, response) => {
             } else{
                 response.status(550).send("Wrong Password")
             }
-        } catch{
+        } catch(e) {
             result.status(500).send()
         }   
     })
