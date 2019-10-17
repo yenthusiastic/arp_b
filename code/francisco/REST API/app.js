@@ -3,10 +3,13 @@ const bodyParser = require('body-parser')
 const port = 5100;
 const app = express()
 const db = require('./queries')
+const db_u = require ('./user-queries')
 
-app.get('/users',db.getUsers)
-app.post('/users', bodyParser.json(), db.createUser)
+app.get('/users',db_u.getUsers)
+app.post('/users', bodyParser.json(), db_u.createUsers)
 app.put('/users', bodyParser.json(), db.updateUser)
+
+app.post('/login', bodyParser.json(), db_u.loginUsers)
 
 // Retrieve a new session address for the hardware
 app.get('/address/:hardwareID',db.getSessionAddress)

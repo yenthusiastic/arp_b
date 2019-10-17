@@ -1,5 +1,5 @@
 // DB setup
-let pg = require('pg')
+const pg = require('pg')
 const conString = {
     host: 'db.dev.iota.pw',
     // Do not hard code your username and password.
@@ -12,10 +12,10 @@ const conString = {
 }
 let pool = new pg.Pool(conString)
 // DB Connection
-pool.connect(err => {
-    if (err) {
+pool.connect(error => {
+    if (error) {
         console.log("Problems when connecting to the database.")
-        throw err
+        throw error
     }
 })
 // User queries
