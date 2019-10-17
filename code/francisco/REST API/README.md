@@ -1,27 +1,73 @@
-Summary
+BIKOTA REST API
 ----------
 
-V1.2
+Restful API appliction to store and retrieve information from the BIKOTA hardware to the PostgreSQL database.
 
-GET - api/address - Retrieve a new session address for the hardware
-POST - api/data - Add new sensor data
-PUT - api/status - Update the hardware (bike)'s status
+#### Version
 
-#### 1. GET
+V1.3
 
-Test the get method by sending a htttp GET request to:
+#### Pending
 
-http://be.dev.iota.pw:5100/address/1
+- [x] Develop Nodejs server.
+- [x] Program to execute HTTP request.
+- [x] Connecto to the remote PostgreSQL database.
+- [x] Program to execute CRUD operations on the database.
+- [x] Enable password hashing for user authentification.
+- [ ] Update the 'address_index' and generate a new 'session_address'.
+- [ ] Update 'latitude' and 'longitude' fields of the given 'hardware ID' in the 'HARDWARE_STATUS' table.
+- [ ] Send response with status code.
+- [ ] Add hardware authentication.
+- [ ] Confirm HTTPS support.
 
-**Still pending to update the 'address_index' and generate a new 'session_address'.**
+#### URL
 
-#### 2. POST
+http://be.dev.iota.pw
 
-Test the post method by sending a http POST request to:
+#### Endpoints
 
-http://be.dev.iota.pw:5100/data
+* Hardware data
 
-With the following data in JSON format:
+Method | URL | Body Parameters |Description
+---------|----------|---------|---------
+ GET | url/address/<Hardware_id> | N/A | Retrieve a new session address for the hardware
+ POST | url/data | hardwareID,address,latitude,longitude,temperature,humidity,timestamp|Add new sensor data
+ PUT | url/status | hardwareID,status,latitude,longitude |Update the hardware (bike)'s status
+
+* Users data
+
+Method | URL | Body Parameters| Description
+---------|----------|---------|---------
+ GET | url//no_production_users_view | N/A |Retrieve list of users registered
+ POST | url/register' | user, email, password |Add new user
+ PUT | url/login | email, password |Verify user on the database
+
+#### Status code
+
+<Insert table here>
+
+#### Examples
+
+* Postman
+
+Testing the post method:
+
+1. URL:
+1.1 Select the "POST" method request
+1.2 Paste the following URL: http://be.dev.iota.pw:5100/data
+2. Header: 
+2.1 Click on "Headers"
+2.2 Insert the following data in the Headers table:
+
+Key | Value | Description
+---------|----------|---------
+ Content-Type | application/json | 
+ 3. Body: 
+ 3.1 Click on "Body"
+ 3.2 Click on "raw"
+ 3.3 Click on "JSON"
+ 3.4 Paste the following JSON code in the body:
+
 ```json
 {
 	"hardwareID":"1",
@@ -33,20 +79,27 @@ With the following data in JSON format:
 	"timestamp":"2019-10-13 02:19:05.749277+02"
 }
 ```
-**Still pending to update 'latitude' and 'longitude' fields of the given 'hardware ID' in the 'HARDWARE_STATUS' table.**
+* Python's request library
 
-#### 3. PUT
+1. Import the libraries:
 
-Test the post method by sending a http PUT request to:
+```
+import requests as req
+import json
+```
+2. Run the code below:
 
-http://be.dev.iota.pw:5100/status
-
-With the following data in JSON format:
-```json
-{
-	"status":"rented",
+```
+# Example POST request to Javascript-based backend
+header = {"Content-Type": "application/json"}
+resp = req.post("https://be.dev.iota.pw/data", json={
+	"hardwareID":"1",
+	"address":"Postman_test",
 	"latitude":"61.123",
 	"longitude":"7.933",
-	"hardwareID":"1"
-}
+	"temperature":"19.2",
+	"humidity":"35.7",
+	"timestamp":"2019-10-15 13:37:05.749277+02"
+},headers = header)
+print(resp.text)
 ```
