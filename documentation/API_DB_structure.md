@@ -100,9 +100,9 @@ With SQLAlchemy library, set `SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://a
     - send the sensor data as a JSON object to the Tangle using IOTA library as a non-value transaction to the address provided in the POST request. If no address is provided or the address field is empty (the bike is in `parked` state), retrieve the address of the corresponding `hardwareID` from the `HARDWARE_STATUS` table. Format of the JSON object (for now):
 ```json
 {
-    "latitude": 61.123
-    "longitude": 7.933
-    "temperature": 19.2
+    "latitude": 61.123,
+    "longitude": 7.933,
+    "temperature": 19.2,
     "humidity": 35.7
 }
 ```

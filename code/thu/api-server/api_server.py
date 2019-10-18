@@ -21,19 +21,9 @@ user='arp_b'
 password='iota999'
 
 DEBUG = True
-SENSOR_COUNT = 4
-
-ADDR = "0.0.0.0" #0.0.0.0 for public
-PORT = 5000
-
-db_host='db.dev.iota.pw'
-db_port=6000
-database='arp_b'
-user='arp_b'
-password='iota999'
-
-DEBUG = True
-SENSOR_COUNT = 4
+SENSOR_DATA_KEYS = ["latitude", "longitude", "temperature", "humidity"]
+HARDWARE_STATUS_TABLE = "HARDWARE_STATUS"
+SENSOR_DATA_TABLE = "SENSOR_DATA"
 
 class ReqHandler(BaseHTTPRequestHandler):
     def _set_headers(self, status_code):
@@ -56,71 +46,99 @@ class ReqHandler(BaseHTTPRequestHandler):
         datalen = int(self.headers['Content-Length'])
         data = self.rfile.read(datalen)
         req_json = json.loads(json.loads(data))
+        addr = None
         
         if DEBUG:
             print(">>>Request: \n{0}".format(self.requestline))
             print(">>>Headers: \n{0}".format(self.headers))
             print(">>>JSON: \n{0}\n".format(req_json)) 
             print("JSON length", len(req_json))
-        if len(req_json) != 2:
-            self._set_response(400, 'Bad Request', 'Invalid JSON data. Dict of 2 is required')
+        if len(req_json) < 2:
+            self._set_response(400, 'Bad Request', 'Invalid JSON data. Minimum 2 data fields required')
         else:
             try:
                 hw_id = req_json["hardwareID"]
                 s_data = req_json["data"]
-                if hw_id is not None and s_data is not None:     
-                    if (len(s_data) != SENSOR_COUNT):
-                        info = 'Invalid JSON data. Sensor data should contain exactly {} values.'.format(SENSOR_COUNT)
-                        self._set_response(400, "Bad Request", info)
-                    else:
-                        data_str = ""
-                        data_arr = []
-                        for val in s_data:
-                            data_str+= str(val) + ","
-                            data_arr.append(val)
-                        data_str = data_str[:-1]
-                        print(data_str)
-                        ret_msg = self.insert_data(hw_id, data_str)
-                        print("returned message: {}".format(ret_msg))
-                        if ret_msg[0] == 0:
+                if len(req_json) == 3:
+                    addr = req_json["address"]
+                else:
+                    print('Address field not provided')
+                if hw_id is not None and s_data is not None: 
+                    data_str = ""
+                    data_arr = []
+                    for val in s_data:
+                        data_str+= str(val) + ", "
+                        data_arr.append(val)
+                    if len(data_arr) < len(SENSOR_DATA_KEYS):
+                        while len(data_arr) < len(SENSOR_DATA_KEYS):
+                            data_str += "null, "
+                            data_arr.append(None);
+                    data_str = data_str[:-2]
+                    print(data_str)
+                    ret_msg = self.insert_data(hw_id, addr, data_str)
+                    print("returned message: {}".format(ret_msg))
+                    if ret_msg[0] == 0:
+                        json_data = {}
+                        try:
+                            for count, data_header in enumerate(SENSOR_DATA_KEYS):
+                                json_data[data_header] = data_arr[count]
                             self._set_response(200, "OK", 'Success')
-                            json_data = {"latitude": data_arr[0], "longitude": data_arr[1], "temperature": data_arr[2], "humidity": data_arr[3]}
-                            i_handler = IotaHandler()
-                            i_handler.data_to_tangle(ret_msg[1], json.dumps(json_data))
-                        else:
-                            self._set_response(500, "Internal Server Error", 'Error inserting values to database')
+                        except Exception as e:
+                            self._set_response(200, "OK", 'One or more sensor values missing in JSON data')
+                        print(json.dumps(json_data))
+                        i_handler = IotaHandler()
+                        i_handler.data_to_tangle(ret_msg[1], json.dumps(json_data))
+                    else:
+                        self._set_response(500, "Internal Server Error", 'Error inserting values to database')
                 else:
                     self._set_response(400, "Bad Request", 'Invalid JSON data. One or more empty data fields provided')
             except KeyError as e:
-                self._set_response(400, "Bad Request", 'Invalid JSON data. "hardwareID" and "data" are required keys')
+                self._set_response(400, "Bad Request", "Invalid JSON data. 'hardwareID' and 'data' are required keys")
             
         
     def do_PUT(self):
         datalen = int(self.headers['Content-Length'])
         data = self.rfile.read(datalen)
         req_json = json.loads(json.loads(data))
+        status = None
+        location = None
+        key_len = 0
         
         if DEBUG:
             print(">>>Request: \n{0}".format(self.requestline))
             print(">>>Headers: \n{0}".format(self.headers))
             print(">>>JSON: \n{0}\n".format(req_json))
             print("JSON length", len(req_json))
-        if len(req_json) != 2:
-            self._set_response(400, "Bad Request", 'Invalid JSON data. Dict of 2 is required')
+        if len(req_json) < 2:
+            self._set_response(400, "Bad Request", 'Invalid JSON data. Minimum 2 data fields required')
         else:
             try:
                 hw_id = req_json["hardwareID"]
-                address = req_json["address"]
-                if hw_id is not None and address is not None:     
-                    err_code = self.update_address(hw_id, address)
-                    if err_code == 0:
-                        self._set_response(200, "OK", 'Success.')
-                    else:
-                        self._set_response(500, "Internal Server Error", 'Error inserting values to database')
-                else:
-                    self._set_response(400, "Bad Request", 'Invalid JSON data. One or more empty data fields provided')
+                key_len+=1
             except KeyError as e:
-                self._set_response(400, "Bad Request", 'Invalid JSON data. "hardwareID" and "address" are required keys')
+                self._set_response(400, "Bad Request", "Invalid JSON data. 'hardwareID' is required key")
+                return -1
+            try:
+                status = req_json["status"]
+                key_len+=1
+            except KeyError as e:
+                print('Status field not provided')
+                pass
+            try:
+                location = req_json["location"]
+                key_len+=1
+            except KeyError as e:
+                print('Location field not provided')
+                pass
+            if key_len > 1:    
+                err_code = self.update_status(hw_id, status, location)
+                if err_code == 0:
+                    self._set_response(200, "OK", 'Success.')
+                else:
+                    self._set_response(500, "Internal Server Error", 'Error inserting values to database')
+            else:
+                self._set_response(400, "Bad Request", 'Invalid JSON data. One or more required data fields are empty')
+           
 
     def connect(self, msg, resp=False):
         global conn
@@ -140,28 +158,40 @@ class ReqHandler(BaseHTTPRequestHandler):
             print(error)
             return -1
             
-    def insert_data(self, hw_id, data_str):
-        ses_address = self.connect("""SELECT "session_address" FROM public."HARDWARE" WHERE "hardwareID" = {0} """.format(hw_id), resp=True)[0]
-        sql_query = """INSERT INTO public."SENSOR_DATA" values (DEFAULT, '{0}', {1}, current_timestamp) """.format(ses_address, data_str)
+    def insert_data(self, hw_id, addr, data_str):
+        ses_addr = addr
+        if ses_addr is not None:
+            sql_query = """INSERT INTO public."{0}" values (DEFAULT, {1}, '{2}', {3}, current_timestamp) """.format(SENSOR_DATA_TABLE, hw_id, ses_addr, data_str)
+        else:
+            sql_query = """INSERT INTO public."{0}" values (DEFAULT, {1}, '', {2}, current_timestamp) """.format(SENSOR_DATA_TABLE, hw_id, data_str)
+            ses_addr = self.connect("""SELECT "session_address" FROM public."{0}" WHERE "hardwareID" = {1} """.format(HARDWARE_STATUS_TABLE, hw_id), resp=True)[0]
         if DEBUG:
-            print(ses_address)
-            print(sql_query)        
-        return self.connect(sql_query), ses_address
+            print(ses_addr)
+            print(sql_query)  
+        #sql_query = 'SELECT * FROM "SENSOR_DATA"' 
+        return self.connect(sql_query), ses_addr
             
             
-    def update_address(self, hw_id, ses_address):
-        res = self.connect("""SELECT * FROM public."HARDWARE" WHERE "hardwareID" = {0} """.format(hw_id), resp=True)
+    def update_status(self, hw_id, hw_status, location):
+        res = self.connect("""SELECT * FROM public."{0}" WHERE "hardwareID" = {1} """.format(HARDWARE_STATUS_TABLE, hw_id), resp=True)
         sql_query = ""
         if res is not None:
-            sql_query = """UPDATE public."HARDWARE" SET "session_address" = '{1}' where "hardwareID" = {0} """.format(hw_id, ses_address)
+            if location is not None:
+                if hw_status is not None:
+                    sql_query = """UPDATE public."{0}" SET "status" = '{2}', "latitude" = {3}, "longitude" = {4} where "hardwareID" = {1} """.format(HARDWARE_STATUS_TABLE, hw_id, hw_status, location[0], location[1])
+                else:
+                    sql_query = """UPDATE public."{0}" SET "latitude" = {2}, "longitude" = {3} where "hardwareID" = {1} """.format(HARDWARE_STATUS_TABLE, hw_id, location[0], location[1])
+            elif hw_status is not None and location is None:
+                sql_query = """UPDATE public."{0}" SET "status" = '{2}' where "hardwareID" = {1} """.format(HARDWARE_STATUS_TABLE, hw_id, hw_status)
             if DEBUG:
                 print(res)
                 print(sql_query)
         else:
-            sql_query = """INSERT INTO public."HARDWARE" values ({0}, '{1}') """.format(hw_id, ses_address)
+            sql_query = """INSERT INTO public."{0}" values ({1}, '{2}', '{3}', '{4}') """.format(HARDWARE_STATUS_TABLE, hw_id, hw_status, location[0], location[1])
             if DEBUG:
                 print(sql_query)
         return self.connect(sql_query)
+        
         
         
 def connect_DB():

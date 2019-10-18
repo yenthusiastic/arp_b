@@ -110,6 +110,27 @@ You can now select the kernel inside a notebook.
 If you install more packages afterwards, the above command has to be excecuted again, to override the old kernel version.
 
 
+### Install non-Python Kernels, example R
+Install R Kernel in Jupyter Notebooks
+[Install R](https://www.digitalocean.com/community/tutorials/how-to-install-r-on-ubuntu-18-04)
+Install build essentials:
+
+`sudo apt-get install build-essential`
+
+Start R, install IRkernel and install the Kernel. It's important to start R as sudo as JupyterHub runs with sudo privileges and is therefore using kernels in '/usr/local/share/jupyter/kernels'.  
+```
+sudo -i R
+install.packages('IRkernel')
+IRkernel::installspec(name = 'ir36', displayname = 'R 3.6')
+```
+Output:
+
+> [InstallKernelSpec] Installed kernelspec ir36 in /usr/local/share/jupyter/kernels/ir36
+
+A new launcher “R 3.6” should be visible in JupyterLab immediately.
+
+
+
 ### Make Group 'jupyterhub' and add users
 > GroupID need to be unique (here 10000)
 ```bash
