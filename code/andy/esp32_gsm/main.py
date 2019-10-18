@@ -89,29 +89,40 @@ mpu.init_sensor(i2c)
 LED = Pin(13, Pin.OUT)
 LED.value(0)
 
+def r():
+    machine.reset()
+
+
 # =====TEMPORARY DISPLAY========
 from machine import Pin, SPI
-import epaper2in9b
-spi = SPI(2, baudrate=2000000, polarity=1, phase=0, sck=Pin(25), mosi=Pin(14), miso=Pin(39))
-cs = Pin(33)
+#import epaper2in9b_mod as epaper2in9b
+import epaper2in9
+spi = SPI(2, baudrate=2000000, polarity=1, phase=0, sck=Pin(25), mosi=Pin(15), miso=Pin(0))
+
 dc=Pin(32)
 rst=Pin(12)
 busy=Pin(34)
+cs=Pin(33)
 
 black = 0
 white = 1
 
+w = 128
+h = 296
+x = 0
+y = 0
+
 import framebuf
 buf = bytearray(128 * 296 // 8)
 fb = framebuf.FrameBuffer(buf, 128, 296, framebuf.MONO_HLSB)
-bufy = bytearray(128 * 296 // 8)
-fby = framebuf.FrameBuffer(bufy, 128, 296, framebuf.MONO_HLSB)
-fby.fill(white)
+#bufy = bytearray(128 * 296 // 8)
+#fby = framebuf.FrameBuffer(bufy, 128, 296, framebuf.MONO_HLSB)
+#fby.fill(white)
 fb.fill(white)
 #fb.text('Hello World',30,0,black)
 
 #e.display_frame(buf,bufy)
-e=epaper2in9b.EPD(spi, cs, dc, rst, busy)
+e=epaper2in9.EPD(spi, cs, dc, rst, busy)
 e.init()
 
 """
@@ -172,16 +183,26 @@ def draw_qr(m=None, address=None, xs=0, ys=170, scale=1):
             fb.pixel(xs+x, ys+y, value)
 
 def draw_title():
-    fb.text("B I K O T A", 20, 0, 0)
-    e.draw_filled_rectangle(buf, 0,10,127,11, True)
+    fb.text("B I K O T A", 20, 1, 0)
+    #e.draw_filled_rectangle(buf, 0,10,127,11, True)
     #e.draw_filled_rectangle(bufy, 0,15,127,168, True)
+    fb.fill_rect(0,10,127,3, black)
+    fb.fill_rect(0,25,127,3, black)
+
+def draw_status(stat="SLEEPING"):
+    fb.fill_rect(0,14,127,11, 1)
+    fb.text(str(stat), 30, 15, 0)
 
 def draw_balance(iota=100):
-    fb.text("BALANCE: ", 0, 30, 0)
-    fb.text("{} i: ".format(iota),0,  45, 0)
+    fb.text("Balance:".format(iota), 0, 45, 0)
+    fb.fill_rect(0,53,127,11, 1)
+    fb.text("{} i".format(iota),0,  55, 0)
+    
 
 def update_display():
-    e.display_frame(buf,bufy)
+    #e.display_frame(buf,bufy)
+    e.set_frame_memory(buf, x, y, w, h)
+    e.display_frame()
 #===============================
 
 
@@ -332,8 +353,8 @@ def get_balance(url=NODE_URL, address=m_address, threshold=100):
 
 
 def hibernate():
-    d.font(d.FONT_DejaVu24)
-    d.text(d.CENTER, 45, "SLEEPING", d.YELLOW)
+    #d.font(d.FONT_DejaVu24)
+    #d.text(d.CENTER, 45, "SLEEPING", d.YELLOW)
     deepsleep()
 
 print("\n\n",machine.wake_description())
@@ -359,7 +380,10 @@ else:
             update_display()
             #d.text(d.CENTER, 50, "Balance: 0 i", d.WHITE)
             while BTN1.value() != 0:
+                e.set_lut(e.LUT_PARTIAL_UPDATE)
                 balance = get_balance(address=adr[:81])
+                draw_balance(balance)
+                update_display()
             #    d.text(d.CENTER, 50, "Balance: xxxxxxxxx i", d.BLACK)
             #    d.text(d.CENTER, 50, "Balance: {} i".format(balance), d.WHITE)
                 #sleep(5)
