@@ -162,13 +162,13 @@ def make_qr(address=m_address):
 def make_qr(address=m_address):
     print("Making QR code...")
     from uQR import QRCode
-    qr=QRCode(border=1)
+    qr=QRCode(border=0)
     #qr.clear()
     qr.add_data(address)
     m_address_matrix = qr.get_matrix()
     return m_address_matrix
 
-def draw_qr(m=None, address=None, xs=0, ys=170, scale=1):
+def draw_qr(m=None, address=None, xs=0, ys=166, scale=1):
     if m == None:
         if address == None:
             address = m_address
@@ -366,6 +366,36 @@ print("\n\n",machine.wake_description())
 
 #"""
 
+
+def draw_status_updating():
+    draw_status("Updating")
+    update_display()
+    sleep(0.5)
+    draw_status("Updating.")
+    update_display()
+    sleep(0.5)
+    draw_status("Updating..")
+    update_display()
+    sleep(0.5)
+    draw_status("Updating...")
+    update_display()
+    sleep(0.5)
+
+def draw_qr_updating():
+    fb.fill_rect(0,166,127,296, white)
+    draw_qr(m=m_qr, scale=1)
+    update_display()
+    #sleep(0.5)
+    fb.fill_rect(0,166,127,296, white)
+    draw_qr(m=m_qr, scale=2)
+    update_display()
+    #sleep(0.5)
+    fb.fill_rect(0,166,127,296, white)
+    draw_qr(m=m_qr, scale=3)
+    update_display()
+    #sleep(0.5)
+
+
 counter = 0
 if BTN1.value() == 0:
     pass
@@ -376,11 +406,13 @@ else:
             LED.value(1)
             draw_qr(address=adr, scale=3)
             draw_title()
+            draw_status()
             draw_balance()
             update_display()
             #d.text(d.CENTER, 50, "Balance: 0 i", d.WHITE)
             while BTN1.value() != 0:
                 e.set_lut(e.LUT_PARTIAL_UPDATE)
+                draw_status("Checking Balance")
                 balance = get_balance(address=adr[:81])
                 draw_balance(balance)
                 update_display()
