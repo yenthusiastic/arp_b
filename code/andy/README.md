@@ -20,10 +20,11 @@ Interface: I2C
 
 
 
-### Humidity and Temperature Sensor - [ASAIR AM2302 (DHT22)](https://www.banggood.com/AM2302-DHT22-Temperature-And-Humidity-Sensor-Module-For-Arduino-SCM-p-937403.html?rmmds=detail-top-buytogether-auto&cur_warehouse=CN)
-Price: 3.5 €  
-Interface: 1-wire  
-[Datasheet](https://cdn-shop.adafruit.com/datasheets/Digital+humidity+and+temperature+sensor+AM2302.pdf)
+### Temperature/ Humidity/ Atmospheric Pressure Sensor - [BME280](https://www.banggood.com/BME280-Digital-Sensor-Temperature-Humidity-Atmospheric-Pressure-Sensor-Module-p-1354769.html?rmmds=search&cur_warehouse=CN)~
+Price: 4€  
+Interface: I2C  
+Data: barometic pressure, temperature, humidity  
+[Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME280-DS002.pdf)
 
 
 
@@ -45,11 +46,10 @@ Power consumtion:
 
 
 
-### [Currently not used] ~Atmosperic Pressure Sensor - [BME280](https://www.banggood.com/BME280-Digital-Sensor-Temperature-Humidity-Atmospheric-Pressure-Sensor-Module-p-1354769.html?rmmds=search&cur_warehouse=CN)~
-Price: 4€  
-Interface: I2C  
-Data: barometic pressure, temperature, humidity  
-[Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME280-DS002.pdf)
+### [NOT USED ANYMORE]** ~Humidity and Temperature Sensor - [ASAIR AM2302 (DHT22)](https://www.banggood.com/AM2302-DHT22-Temperature-And-Humidity~-Sensor-Module-For-Arduino-SCM-p-937403.html?rmmds=detail-top-buytogether-auto&cur_warehouse=CN)~
+Price: 3.5 €  
+Interface: 1-wire  
+[Datasheet](https://cdn-shop.adafruit.com/datasheets/Digital+humidity+and+temperature+sensor+AM2302.pdf)
 
 
 
