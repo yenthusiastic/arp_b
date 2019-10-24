@@ -45,8 +45,11 @@ Power consumtion:
 
 
 
-
-
+### [Currently not used] ~Atmosperic Pressure Sensor - [BME280](https://www.banggood.com/BME280-Digital-Sensor-Temperature-Humidity-Atmospheric-Pressure-Sensor-Module-p-1354769.html?rmmds=search&cur_warehouse=CN)~
+Price: 4€  
+Interface: I2C  
+Data: barometic pressure, temperature, humidity  
+[Datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME280-DS002.pdf)
 
 
 
