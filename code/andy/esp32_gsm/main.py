@@ -31,7 +31,7 @@ m_states = {"offline": 0, "parked":1, "rented":2, "broken":3, "stolen":4}
 
 
 import machine, sys 
-from machine import Pin, UART, I2C, GPS, DHT, RTC, deepsleep
+from machine import Pin, ADC, UART, I2C, GPS, DHT, RTC, deepsleep
 import gsm
 import sds011
 import socket
@@ -68,6 +68,8 @@ GSM_MODEM_PWR = Pin(23, Pin.OUT)
 BTN1 = Pin(0, Pin.IN, Pin.PULL_UP)
 
 rtc.wake_on_ext0(pin=BTN1, level=0)
+
+adc=ADC(Pin(36))
 
 # RX is not used
 gps = GPS(UART(2, rx=35, tx=33, baudrate=9600, bits=8, parity=None, stop=1, timeout=1500, buffer_size=1024, lineend='\r\n'))
@@ -231,6 +233,25 @@ def get_pm(p10=PM10_PIN, p25=PM25_PIN):
         sp_25=ticks_ms()
     print("PM10:", (sp_10-st_10)-2)
     print("PM25:", (sp_25-st_25)-2)
+
+
+
+def get_co2():
+    ppm = 400
+    if adc.progress()[0] == False:
+        av_mv = adc.collected()[2]
+        adc.collect(1, len=10, readmv=True)
+        ppm = ((av_mv-400)/1600)*5000
+        return ppm, av_mv
+    return ppm, 0
+
+
+def adc_read():
+  x=(adc.read()/4096)*3.9
+  for i in range(10):
+      x=(x+(adc.read()/4096)*3.9)/2
+      sleep(0.1)
+  return x
 
 
 def get_dht():
