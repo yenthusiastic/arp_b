@@ -5,8 +5,8 @@
 Price: 10€  
 Interface: Serial
 
-Supported GNSS: GPS,GLONASS,Galileo,BeiDou
-Provided data: data & time, latitude, longitude, altitude, number of received satelites, quality, speed_kmh, course(heading), [dop](https://gisgeography.com/gps-accuracy-hdop-pdop-gdop-multipath/))  
+Supported GNSS: GPS,GLONASS,Galileo,BeiDou  
+Provided data: data & time, latitude, longitude, altitude, number of received satelites, quality, speed_kmh, course (heading), [dop](https://gisgeography.com/gps-accuracy-hdop-pdop-gdop-multipath/)  
 [Datasheet](https://files.banggood.com/2016/11/BN-220%20GPS+Antenna%20datasheet.pdf)
 
 
