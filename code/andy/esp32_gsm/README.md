@@ -32,21 +32,21 @@
 |2 |DAT |DHT 22 |1-Wire| |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
-|12 |mosi |TFT | | |
+|12 | | | | |
 |13 | | | |buildin LED |
 |14 | | | | |
-|15 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
+|15 |DIN |epaper| | |
 |18 |PM10 |SDS011 Sensor |GPIO digital |Input: pulse length |
 |19 |PM25 |SDS011 Sensor |GPIO digital |Input: pulse length |
 |21 |SDA |MPU6050, BM260 |I2C | |
 |22 |SCL |MPU6050, BM260 |I2C | |
 |23 |GSM_MODEM_PWR |GSM Module |GPIO digital| |
-|25 |clk |TFT | | |
+|25 |CLK |epaper | | |
 |26 |TX |GSM Module |Serial | |
 |27 |RX |GSM Module |Serial | |
-|32 |dc |TFT | | |
-|33 |cs |TFT | | |
-|34 |miso |TFT | |input only, no pulls|
+|32 |DC |epape | | |
+|33 |CS |epaper | | |
+|34 |BUSY |epaper | |input only, no pulls|
 |35 |TX |GPS |Serial |input only, no pulls |
 |36/SVP |A0 |C02 Sensor |GPIO analog|input only, no pulls |
 |39/SVN | | | |input only, no pulls |
@@ -91,12 +91,15 @@ The following recommendations can be made:
 |Get Balance|40|8|
 
 #### Sensor Power
-|Sensor Name| Voltage| Current active| Current sleep| Note|
-|---        |---     |---    	     |---           |---  |
-|DHT22 	    |3.3/ 5  | 0.040 mA      | 0.026 mA     | |
-|GPS 	    |3.3     | 50 mA	     | NA mA	    | 70 mA peak|
-|MPU6050    |5       | 5.4 mA	     | 0.05 mA	    | |
+|Sensor Name| Voltage| Current reading| Current standby| Note|
+|---        |---     |---    	      |---             |---  |
+|DHT22 	    |3.3/ 5  | 1.38 mA        | 0.28 mA        | |
+|GPS 	    |3.3/ 5  | 50 mA	      | NA	       | 70 mA peak|
+|MPU6050    |5       | 5.4 mA	      | 0.05 mA	       | |
+|BME280     |3.3     | 0.082 mA	      | NA	       | |
+|MZ-14      |5       | 100 mA	      | 7.8 mA	       | |
 |    |       | 0 mA	     | 0 mA	    | |
+
 
 ## Flash MicroPython
 ```bash
@@ -121,6 +124,8 @@ Therefore the to be developed prototype might not be able to suport any low-powe
 [Python Example SIM800](http://www.python-exemplary.com/index_en.php?inhalt_links=navigation_en.inc.php&inhalt_mitte=raspi/en/gsm.inc.php)
 
 
-## Libraries USed
-[QR-Code generation](https://github.com/JASchilz/uQR)
+## Libraries Used
+[QR-Code Generation](https://github.com/JASchilz/uQR)
 [MPU6050](https://github.com/adamjezek98/MPU6050-ESP8266-MicroPython) (modified)
+[BME280](https://github.com/robert-hh/BME280)
+[E-Paper](https://github.com/mcauser/micropython-waveshare-epaper/blob/master/epaper2in9.py)
