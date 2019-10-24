@@ -237,21 +237,16 @@ def get_pm(p10=PM10_PIN, p25=PM25_PIN):
 
 
 def get_co2():
-    ppm = 400
+    ppm = 0
+    av_mv = 0
     if adc.progress()[0] == False:
         av_mv = adc.collected()[2]
         adc.collect(1, len=10, readmv=True)
         ppm = ((av_mv-400)/1600)*5000
-        return ppm, av_mv
-    return ppm, 0
+        if ppm < 350:
+            ppm = 0
+    return ppm, av_mv
 
-
-def adc_read():
-  x=(adc.read()/4096)*3.9
-  for i in range(10):
-      x=(x+(adc.read()/4096)*3.9)/2
-      sleep(0.1)
-  return x
 
 
 def get_dht():
