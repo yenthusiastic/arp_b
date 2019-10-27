@@ -32,7 +32,7 @@
 |2 |DAT |DHT 22 |1-Wire| |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
-|12 | | | | |
+|12 |BUZ |Buzzer |GPIO digital |needs pull-up ad startup |
 |13 | | | |buildin LED |
 |14 | | | | |
 |15 |DIN |epaper| | |
