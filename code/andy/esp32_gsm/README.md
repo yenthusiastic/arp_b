@@ -29,10 +29,10 @@
 |Pin ESP| Pin AUX|AUX Device|Protocol|Note|
 |---    |---     |---       |---     |--- |
 |0 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
-|2 |DAT |DHT 22 |1-Wire| |
+|2 | | | | |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
-|12 |BUZ |Buzzer |GPIO digital |needs pull-up ad startup |
+|12 |BUZ |Buzzer |GPIO digital |needs pull-up at startup |
 |13 | | | |buildin LED |
 |14 | | | | |
 |15 |DIN |epaper| | |
@@ -48,7 +48,7 @@
 |33 |CS |epaper | | |
 |34 |BUSY |epaper | |input only, no pulls|
 |35 |TX |GPS |Serial |input only, no pulls |
-|36/SVP |A0 |C02 Sensor |GPIO analog|input only, no pulls |
+|36/SVP |A0 |Co2 Sensor |GPIO analog|input only, no pulls |
 |39/SVN | | | |input only, no pulls |
 
 
