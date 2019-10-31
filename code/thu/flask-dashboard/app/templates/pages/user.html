@@ -7,24 +7,24 @@
                                     <h4 class="card-title">Edit Profile</h4>
                                 </div>
                                 <div class="card-body">
-                                    <form>
+                                    <form method=post>
                                         <div class="row">
                                             <div class="col-md-5 pr-1">
                                                 <div class="form-group">
                                                     <label>Company (disabled)</label>
-                                                    <input type="text" class="form-control" disabled="" placeholder="Company" value="Creative Code Inc.">
+                                                    <input type="text" class="form-control" disabled="" placeholder="Company" value="Bikota">
                                                 </div>
                                             </div>
                                             <div class="col-md-3 px-1">
                                                 <div class="form-group">
                                                     <label>Username</label>
-                                                    <input type="text" class="form-control" placeholder="Username" value="michael23">
+                                                    <input type="text" class="form-control" placeholder="Username" name="username" value="{{username}}">
                                                 </div>
                                             </div>
                                             <div class="col-md-4 pl-1">
                                                 <div class="form-group">
                                                     <label for="exampleInputEmail1">Email address</label>
-                                                    <input type="email" class="form-control" placeholder="Email">
+                                                    <input type="email" class="form-control" placeholder="Email" name="email" value="{{email}}">
                                                 </div>
                                             </div>
                                         </div>
@@ -32,13 +32,13 @@
                                             <div class="col-md-6 pr-1">
                                                 <div class="form-group">
                                                     <label>First Name</label>
-                                                    <input type="text" class="form-control" placeholder="Company" value="Mike">
+                                                    <input type="text" class="form-control" placeholder="First Name" name ="first_name" value="{{firstname}}">
                                                 </div>
                                             </div>
                                             <div class="col-md-6 pl-1">
                                                 <div class="form-group">
                                                     <label>Last Name</label>
-                                                    <input type="text" class="form-control" placeholder="Last Name" value="Andrew">
+                                                    <input type="text" class="form-control" placeholder="Last Name" name="last_name" value="{{lastname}}">
                                                 </div>
                                             </div>
                                         </div>
@@ -46,7 +46,7 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Address</label>
-                                                    <input type="text" class="form-control" placeholder="Home Address" value="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09">
+                                                    <input type="text" class="form-control" placeholder="Home Address" name="address" value="{{address}}">
                                                 </div>
                                             </div>
                                         </div>
@@ -54,19 +54,19 @@
                                             <div class="col-md-4 pr-1">
                                                 <div class="form-group">
                                                     <label>City</label>
-                                                    <input type="text" class="form-control" placeholder="City" value="Mike">
+                                                    <input type="text" class="form-control" placeholder="City" name="city" value="{{city}}">
                                                 </div>
                                             </div>
                                             <div class="col-md-4 px-1">
                                                 <div class="form-group">
                                                     <label>Country</label>
-                                                    <input type="text" class="form-control" placeholder="Country" value="Andrew">
+                                                    <input type="text" class="form-control" placeholder="Country" name = "country" value="{{country}}">
                                                 </div>
                                             </div>
                                             <div class="col-md-4 pl-1">
                                                 <div class="form-group">
                                                     <label>Postal Code</label>
-                                                    <input type="number" class="form-control" placeholder="ZIP Code">
+                                                    <input type="number" class="form-control" placeholder="ZIP Code" name="zip" value="{{zip}}">
                                                 </div>
                                             </div>
                                         </div>
@@ -74,11 +74,11 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>About Me</label>
-                                                    <textarea rows="4" cols="80" class="form-control" placeholder="Here can be your description" value="Mike">Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo.</textarea>
+                                                    <textarea rows="4" cols="80" class="form-control" placeholder="Here can be your description" name="desc_text">{{user_desc}}</textarea>
                                                 </div>
                                             </div>
                                         </div>
-                                        <button type="submit" class="btn btn-info btn-fill pull-right">Update Profile</button>
+                                        <button type="submit" name="btn" value="update_profile" class="btn btn-info btn-fill pull-right">Update Profile</button>
                                         <div class="clearfix"></div>
                                     </form>
                                 </div>
@@ -87,23 +87,19 @@
                         <div class="col-md-4">
                             <div class="card card-user">
                                 <div class="card-image">
-                                    <img src="https://ununsplash.imgix.net/photo-1431578500526-4d9613015464?fit=crop&fm=jpg&h=300&q=75&w=400" alt="...">
+                                    <img src="/static/assets/img/full-screen-image-3.jpg" alt="...">
                                 </div>
                                 <div class="card-body">
                                     <div class="author">
-                                        <a href="#">
-                                            <img class="avatar border-gray" src="/static/assets/img/faces/face-3.jpg" alt="...">
-                                            <h5 class="title">Mike Andrew</h5>
+                                        <a href="mailto:{{email}}">
+                                            <img class="avatar border-gray" src="/static/assets/img/faces/face-0.jpg" alt="...">
+                                            <h5 class="title">{{firstname}} {{lastname}}</h5>
                                         </a>
                                         <p class="description">
-                                            michael24
+                                            {{user_desc}}
                                         </p>
                                     </div>
-                                    <p class="description text-center">
-                                        "Lamborghini Mercy
-                                        <br> Your chick she so thirsty
-                                        <br> I'm in that two seat Lambo"
-                                    </p>
+                                    
                                 </div>
                                 <hr>
                                 <div class="button-container mr-auto ml-auto">
@@ -116,6 +112,46 @@
                                     <button href="#" class="btn btn-simple btn-link btn-icon">
                                         <i class="fa fa-google-plus-square"></i>
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Change Password</h4>
+                                </div>
+                                <div class="card-body">
+                                      {% if error %}
+                                        <p class=error style="color: red;"><strong>Error:</strong> {{ error }}
+                                      {% endif %}
+                                    <form method=post>
+                                        <div class="row">
+                                            <div class="col-md-5 pr-1">
+                                                <div class="form-group">
+                                                    <label>Current Password</label>
+                                                    <input type="password" class="form-control" name="curr_pwd" placeholder="Current Password">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-5 pr-1">
+                                                <div class="form-group">
+                                                    <label>New Password</label>
+                                                    <input type="password" class="form-control" name="new_pwd" placeholder="New Password">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-5 pr-1">
+                                                <div class="form-group">
+                                                    <label>Confirm New Password</label>
+                                                    <input type="password" class="form-control" name="new_pwd_conf" placeholder="Confirm Password">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" name="btn" value="change_pwd" class="btn btn-info btn-fill pull-right">Update Password</button>
+                                        <div class="clearfix"></div>
+                                    </form>
                                 </div>
                             </div>
                         </div>

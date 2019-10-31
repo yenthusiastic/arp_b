@@ -8,14 +8,14 @@ License : MIT
 Support : https://appseed.us/support 
 """
 
-from flask               import render_template, request, url_for, redirect
+from flask               import render_template, request, url_for, redirect, flash
 from flask_login         import login_user, logout_user, current_user, login_required
 from werkzeug.exceptions import HTTPException, NotFound, abort
 from werkzeug.security   import generate_password_hash
 from werkzeug.security   import check_password_hash
 
 from app        import app, lm, db, bc
-from app.models import User, Hardware, SensorData
+from app.models import User
 from app.forms  import LoginForm, RegisterForm
 
 # provide login manager with load_user callback
@@ -62,7 +62,7 @@ def register():
         
         else:         
 
-            user = User(username, email, pw_hash)
+            user = User(username, email, pw_hash, {})
 
             user.save()
 
@@ -101,6 +101,7 @@ def login():
             #if bc.check_password_hash(user.password, password):
             if check_password_hash(user.password, password):
                 login_user(user)
+                current_user.user = username
                 return redirect(url_for('index'))
             else:
                 msg = "Wrong password. Please try again."
@@ -111,11 +112,84 @@ def login():
                             content=render_template( 'pages/login.html', form=form, msg=msg ) )
 
 # Render the user page
-@app.route('/user.html')
+@app.route('/user.html', methods=['GET', 'POST'])
 def user():
-
+    error = None
+    if request.method == "POST":
+        if request.form["btn"] == "update_profile":
+            username = request.form["username"]
+            email = request.form["email"]
+            user = User.query.filter_by(user=username).first()  #find user by username
+            if user:
+                if email != "":
+                    user.email = email  #username exists, save new email
+            else:
+                user = User.query.filter_by(email=email).first()    #username does not exists, find user by email
+            if user:
+                #email exists, save new username and data
+                if username != "":
+                    user.user = username    
+                firstname = request.form["first_name"]
+                lastname = request.form["last_name"]
+                address = request.form["address"]
+                city = request.form["city"]
+                zip = request.form["zip"]
+                country = request.form["country"]
+                bio = request.form["desc_text"]
+                user.data = {"firstname": firstname,
+                            "lastname": lastname,
+                            "address" : address,
+                            "city": city,
+                            "zip": zip,
+                            "country": country,
+                            "bio": bio}
+                #update database
+                db.session.commit()
+                current_user.user = username
+                flash("Successfully updated user profile")
+            else:
+                #both username and email do not exist, show error
+                error = "Invalid username or email"
+        elif request.form["btn"] == "change_pwd":
+            username = current_user.user
+            user = User.query.filter_by(user=username).first()  #find user by username
+            password = request.form["curr_pwd"]
+            new_pwd = request.form["new_pwd"]
+            if request.form["new_pwd_conf"] == new_pwd:
+                if check_password_hash(user.password, password):
+                    user.password = generate_password_hash(new_pwd)
+                    db.session.commit()
+                    flash("Successfully updated password")
+                else:
+                    error = "Current password is invalid"
+                    flash(error)
+            else:
+                error = "Passwords do not match"
+                flash(error)
+            
+    else:
+        # GET request
+        if current_user.is_authenticated:
+            username = current_user.user
+        else:
+            flash("Please log in or register to access user profile")
+            return redirect('/login.html')
+    # filter User out of database through username
+    user = User.query.filter_by(user=username).first()
+    data = user.data
+    
     return render_template('layouts/default.html',
-                            content=render_template( 'pages/user.html') )
+                            content=render_template( 'pages/user.html', 
+                            username = user.user,
+                            firstname=data["firstname"], 
+                            lastname=data["lastname"], 
+                            email=user.email, 
+                            address=data["address"],
+                            city=data["city"],
+                            country = data["country"],
+                            zip = data["zip"], 
+                            user_desc=data["bio"], 
+                            error = error))
 
 # Render the table page
 @app.route('/table.html')
@@ -138,12 +212,38 @@ def icons():
     return render_template('layouts/default.html',
                             content=render_template( 'pages/icons.html') )
 
-# Render the icons page
+# Render the notification page
 @app.route('/notifications.html')
 def notifications():
 
     return render_template('layouts/default.html',
                             content=render_template( 'pages/notifications.html') )
+
+
+# Render the charts page
+@app.route('/charts.html')
+def charts():
+    chart_title = "Chart.js Demo"
+    chart_subtitle = "for Bikota"
+    series_label = ["L1", "L2", "L3"]
+    x_axis = "Time"
+    y_axis = "Voltage (V)"
+    labels = ['9:00AM', '12:00AM', '3:00PM', '6:00PM', '9:00PM', '12:00PM', '3:00AM', '6:00AM']
+    values = [287, 385, 490, 492, 554, 586, 698, 695, 752, 788, 846, 944]
+    minutes = 5
+    return render_template('layouts/default.html',
+                            content=render_template( 'pages/charts.html',
+                            chart_title = chart_title,
+                            chart_subtitle = chart_subtitle,
+                            x_axis = x_axis,
+                            y_axis = y_axis,
+                            values = values,
+                            labels = labels,
+                            legend = series_label,
+                            minutes=minutes),
+                           )
+
+
 
 # App main route + generic routing
 @app.route('/', defaults={'path': 'index.html'})
