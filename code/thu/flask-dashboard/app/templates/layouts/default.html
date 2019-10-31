@@ -30,20 +30,23 @@
     <link href="/static/assets/css/demo.css" rel="stylesheet" />
 
 </head>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-  <div class="alert-warning block-message error">
-  <button type="button" class="close" data-dismiss="alert-warning">&times;</button>
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-    </div>
-  {% endif %}
-{% endwith %}
-<body>
+<!-- <div class="row" style="margin:0px">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{category}} alert-with-icon col-md-12 text-center">
+                        <button type="button" aria-hidden="true" class="close" data-dismiss="alert"><i class="nc-icon nc-simple-remove icon-bold"></i></button>
+                         <span data-notify="message" class="flashes">
+                           <i class="nc-icon nc-notification-70 icon-bold"></i>
+                             <strong>{{ message}}</strong></span>
+                    </div>
+                {% endfor %}
+        {% endif %}
+    {% endwith %} 
 
+</div> -->
+<body>
+    
     <div class="wrapper">
 
         {% include 'includes/sidebar.html' %}
@@ -59,9 +62,7 @@
         </div>
 
     </div>
-
+    {% include 'includes/scripts.html' %}
 </body>
-
-{% include 'includes/scripts.html' %}
 
 </html>

@@ -27,6 +27,7 @@ def load_user(user_id):
 @app.route('/logout.html')
 def logout():
     logout_user()
+    flash("Successfully logged out", "success")
     return redirect(url_for('index'))
 
 # register user
@@ -41,15 +42,16 @@ def register():
     if request.method == 'GET': 
 
         return render_template('layouts/default.html',
-                                content=render_template( 'pages/register.html', form=form, msg=msg ) )
+                                content=render_template( 'pages/register.html', form=form) )
 
     # check if both http method is POST and form is valid on submit
     if form.validate_on_submit():
 
         # assign form data to variables
-        username = request.form.get('username', '', type=str)
-        pw_hash = generate_password_hash(request.form.get('password', '', type=str)) 
-        email    = request.form.get('email'   , '', type=str) 
+        username = request.form["username"]
+        password = request.form["password"]
+        pw_hash = generate_password_hash(password) 
+        email = request.form["email"]
 
         # filter User out of database through username
         user = User.query.filter_by(user=username).first()
@@ -58,23 +60,37 @@ def register():
         user_by_email = User.query.filter_by(email=email).first()
 
         if user or user_by_email:
-            msg = 'Error: User exists!'
+            if user:
+                msg = 'Error: User {} already exists!'.format(username)
+            elif user_by_email:
+                 msg = 'Error: Email {} already exists!'.format(email)
+            flash(msg, "danger")
         
         else:         
-
-            user = User(username, email, pw_hash, {})
+            data = {"firstname": "",
+                    "lastname": "",
+                    "address" : "",
+                    "city": "",
+                    "zip": "",
+                    "country": "",
+                    "bio": ""
+            
+            }
+            user = User(username, email, pw_hash, data)
 
             user.save()
 
             msg = 'User created, please login' 
+            flash(msg, "success")
             return render_template('layouts/default.html',
-                            content=render_template( 'pages/login.html', form=form, msg=msg ) )
+                            content=render_template( 'pages/login.html', form=form) )
 
     else:
-        msg = 'Input error'     
+        msg = 'Invalid input'
+        flash(msg, "danger")
 
     return render_template('layouts/default.html',
-                            content=render_template( 'pages/register.html', form=form, msg=msg ) )
+                            content=render_template( 'pages/register.html', form=form ) )
 
 # authenticate user
 @app.route('/login.html', methods=['GET', 'POST'])
@@ -90,8 +106,8 @@ def login():
     if form.validate_on_submit():
 
         # assign form data to variables
-        username = request.form.get('username', '', type=str)
-        password = request.form.get('password', '', type=str)
+        username = request.form["username"]
+        password = request.form["password"]
 
         # filter User out of database through username
         user = User.query.filter_by(user=username).first()
@@ -102,14 +118,17 @@ def login():
             if check_password_hash(user.password, password):
                 login_user(user)
                 current_user.user = username
+                flash("Successfully logged in", "success")
                 return redirect(url_for('index'))
             else:
-                msg = "Wrong password. Please try again."
+                msg = "Invalid password. Please try again."
+                flash(msg, "danger")
         else:
-            msg = "Unknown user"
+            msg = "Invalid username. Please try again."
+            flash(msg, "danger")
 
     return render_template('layouts/default.html',
-                            content=render_template( 'pages/login.html', form=form, msg=msg ) )
+                            content=render_template( 'pages/login.html', form=form) )
 
 # Render the user page
 @app.route('/user.html', methods=['GET', 'POST'])
@@ -146,7 +165,7 @@ def user():
                 #update database
                 db.session.commit()
                 current_user.user = username
-                flash("Successfully updated user profile")
+                flash("Successfully updated profile for user {}".format(username), "success")
             else:
                 #both username and email do not exist, show error
                 error = "Invalid username or email"
@@ -159,20 +178,20 @@ def user():
                 if check_password_hash(user.password, password):
                     user.password = generate_password_hash(new_pwd)
                     db.session.commit()
-                    flash("Successfully updated password")
+                    flash("Successfully updated password for user {}".format(username), "success")
                 else:
                     error = "Current password is invalid"
-                    flash(error)
+                    flash(error, "danger")
             else:
-                error = "Passwords do not match"
-                flash(error)
+                error = "New passwords do not match"
+                flash(error, "warning")
             
     else:
         # GET request
         if current_user.is_authenticated:
             username = current_user.user
         else:
-            flash("Please log in or register to access user profile")
+            flash("Please log in or register to access user profile", "warning")
             return redirect('/login.html')
     # filter User out of database through username
     user = User.query.filter_by(user=username).first()
@@ -198,50 +217,34 @@ def table():
     return render_template('layouts/default.html',
                             content=render_template( 'pages/table.html') )
 
-# Render the typography page
-@app.route('/typography.html')
-def typography():
-
-    return render_template('layouts/default.html',
-                            content=render_template( 'pages/typography.html') )
-
-# Render the icons page
-@app.route('/icons.html')
-def icons():
-
-    return render_template('layouts/default.html',
-                            content=render_template( 'pages/icons.html') )
-
-# Render the notification page
-@app.route('/notifications.html')
-def notifications():
-
-    return render_template('layouts/default.html',
-                            content=render_template( 'pages/notifications.html') )
-
 
 # Render the charts page
 @app.route('/charts.html')
 def charts():
-    chart_title = "Chart.js Demo"
-    chart_subtitle = "for Bikota"
-    series_label = ["L1", "L2", "L3"]
-    x_axis = "Time"
-    y_axis = "Voltage (V)"
-    labels = ['9:00AM', '12:00AM', '3:00PM', '6:00PM', '9:00PM', '12:00PM', '3:00AM', '6:00AM']
-    values = [287, 385, 490, 492, 554, 586, 698, 695, 752, 788, 846, 944]
-    minutes = 5
-    return render_template('layouts/default.html',
-                            content=render_template( 'pages/charts.html',
-                            chart_title = chart_title,
-                            chart_subtitle = chart_subtitle,
-                            x_axis = x_axis,
-                            y_axis = y_axis,
-                            values = values,
-                            labels = labels,
-                            legend = series_label,
-                            minutes=minutes),
-                           )
+    if current_user.is_authenticated:
+        chart_title = "Chart.js Demo"
+        chart_subtitle = "for Bikota"
+        series_label = ["L1", "L2", "L3"]
+        x_axis = "Time"
+        y_axis = "Voltage (V)"
+        labels = ['9:00AM', '12:00AM', '3:00PM', '6:00PM', '9:00PM', '12:00PM', '3:00AM', '6:00AM']
+        values = [287, 385, 490, 492, 554, 586, 698, 695, 752, 788, 846, 944]
+        minutes = 5
+        return render_template('layouts/default.html',
+                                content=render_template( 'pages/charts.html',
+                                chart_title = chart_title,
+                                chart_subtitle = chart_subtitle,
+                                x_axis = x_axis,
+                                y_axis = y_axis,
+                                values = values,
+                                labels = labels,
+                                legend = series_label,
+                                minutes=minutes),
+                               )
+    else:
+        flash("Please log in or register to access dashboard", "warning")
+        return redirect('/login.html')
+        
 
 
 
@@ -249,14 +252,17 @@ def charts():
 @app.route('/', defaults={'path': 'index.html'})
 @app.route('/<path>')
 def index(path):
+    if current_user.is_authenticated:
+        content = None
 
-    content = None
+        try:
 
-    try:
+            # try to match the pages defined in -> pages/<input file>
+            return render_template('layouts/default.html',
+                                    content=render_template( 'pages/'+path) )
+        except:
 
-        # try to match the pages defined in -> pages/<input file>
-        return render_template('layouts/default.html',
-                                content=render_template( 'pages/'+path) )
-    except:
+            return  render_template('pages/404.html')
+    else:
         
-        return 'Oupsss :(', 404
+        return redirect('/login.html')
