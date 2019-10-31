@@ -12,12 +12,9 @@
     {% else %}
         <title>Bikota Dashboard</title>
     {% endif %}
-
-    {% if description %}    
-        <meta name="description" content="{{ description }}">
-    {% else %}
-        <meta name="description" content="Admin Panel with Argon Design crafted by Creative-Tim and coded in Flask  with SQLite database, ORM and authentication.">
-    {% endif %}
+    
+    <meta name="description" content="Bikota Dashboard">
+    
 
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
 
@@ -30,10 +27,21 @@
     <link href="/static/assets/css/light-bootstrap-dashboard.css?v=2.0.0 " rel="stylesheet" />
     
     <!-- CSS Just for demo purpose, don't include it in your project -->
-    <!-- <link href="/static/assets/css/demo.css" rel="stylesheet" /> -->
+    <link href="/static/assets/css/demo.css" rel="stylesheet" />
 
 </head>
-
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <div class="alert-warning block-message error">
+  <button type="button" class="close" data-dismiss="alert-warning">&times;</button>
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+    </div>
+  {% endif %}
+{% endwith %}
 <body>
 
     <div class="wrapper">

@@ -1,4 +1,10 @@
-
+<script type="text/javascript">
+    {% if not current_user.is_authenticated %}
+    window.onload = function() {
+        demo.showNotification();
+    };
+    {% endif %}
+</script> 
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">
