@@ -15,7 +15,7 @@ from werkzeug.security   import generate_password_hash
 from werkzeug.security   import check_password_hash
 
 from app        import app, lm, db, bc
-from app.models import User
+from app.models import User, SensorData, Hardware
 from app.forms  import LoginForm, RegisterForm
 
 # provide login manager with load_user callback
@@ -133,7 +133,6 @@ def login():
 # Render the user page
 @app.route('/user.html', methods=['GET', 'POST'])
 def user():
-    error = None
     if request.method == "POST":
         if request.form["btn"] == "update_profile":
             username = request.form["username"]
@@ -168,7 +167,7 @@ def user():
                 flash("Successfully updated profile for user {}".format(username), "success")
             else:
                 #both username and email do not exist, show error
-                error = "Invalid username or email"
+                flash("Invalid username or email", "danger")
                 username = current_user.user
         elif request.form["btn"] == "change_pwd":
             username = current_user.user
@@ -217,8 +216,7 @@ def user():
                             city=data["city"],
                             country = data["country"],
                             zip = data["zip"], 
-                            user_desc=data["bio"], 
-                            error = error))
+                            user_desc=data["bio"]))
 
 # Render the table page
 @app.route('/table.html')
@@ -232,26 +230,67 @@ def table():
 @app.route('/charts.html', methods=['GET', 'POST'])
 def charts():
     if current_user.is_authenticated:
-        sensors = ["Temperature", "Humidity", "CO2", "Particulate Matter"]
-        session_addresses = {
-            "1" : ["QCWAVASCPCXAXAYABBRCXASCCBRCCBBBUAUCABQCSCVAYARAXAYAZAXAYARCRCQCTCCBXATCABCBABX", "Test Session 1"],
-            "2" : ["Test Session 2", "Test Session 3"]
-        } 
-        chart_data = [{
-            "chart_id" : "chart1",
-            "chart_title" : "Temperature",
-            "legend" : "L1",
-            "y_axis" : "Temperature (°C)",
-            "series" : [28.7, 28.9, 29.0, 28.8, 30.0, 30.1, 30.3, 30.4, 30.5, 30.6, 30.8, 31.0]
-        },
-        {
-            "chart_id" : "chart2",
-            "chart_title" : "Humidity",
-            "legend": "L2",
-            "y_axis" : "Humidity (%)",
-            "series" : [33.4, 33.5, 33.7, 33.8, 33.9, 40.0, 40.1, 40.2, 40.3, 40.5, 40.7, 41.0]
+        session_addresses = dict()
+        hw_ids_str = "1"
+        sensors_str = "Temperature, Humidity"
+        addr_str = ""
+        units = {
+            "Temperature" : "°C",
+            "Humidity" : "%H",
+            "CO2" : "PPM",
+            "Pressure" : "hPa"
+        }
+        
+        if request.method == "POST":
+            chart_data = []
+            try:
+                hw_ids_str = request.form["hw_label"]
+                hw_ids = hw_ids_str.split(", ")
+            except:
+                hw_ids = [hw_ids_str]
+            try:
+                sensors_str = request.form["sensor_label"]                
+                sensors = sensors_str.split(", ")
+            except:
+                sensors = [sensors_str]
+            try:
+                addr_str = request.form["addr_label"]
+                addr_arr = addr_str.split(", ")
+            except:                
+                addr_arr = [addr_str]
+            finally:
+                for sensor in sensors:
+                    data = {}
+                    data["chart_id"] = "chart_{}".format(sensor)
+                    data["chart_title"] = sensor
+                    data["y_axis"] = "{} ({})".format(sensor, units[sensor])
+                    data["series"] = [28.7, 28.9, 29.0, 28.8, 30.0, 30.1, 30.3, 30.4, 30.5, 30.6, 30.8, 31.0]
+                    chart_data.append(data)
+            
+        else:
+                
+            chart_data = [{
+                "chart_id" : "chart1",
+                "chart_title" : "Temperature",
+                "legend" : "L1",
+                "y_axis" : "Temperature (°C)",
+                "series" : [28.7, 28.9, 29.0, 28.8, 30.0, 30.1, 30.3, 30.4, 30.5, 30.6, 30.8, 31.0]
+            },
+            {
+                "chart_id" : "chart2",
+                "chart_title" : "Humidity",
+                "legend": "L2",
+                "y_axis" : "Humidity (%)",
+                "series" : [33.4, 33.5, 33.7, 33.8, 33.9, 40.0, 40.1, 40.2, 40.3, 40.5, 40.7, 41.0]
 
-        }]
+            }]
+
+        hw_ids = [hardware.hardwareID for hardware in Hardware.query.order_by(Hardware.hardwareID).all() if hardware.hardwareID != ""]
+        sensors = ["Temperature", "Humidity", "CO2", "Pressure"]
+        for hw_id in hw_ids:
+            hw_id = "{}".format(hw_id)
+            addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct().all() if hardware.address != ""]
+            session_addresses[hw_id] = addresses
         labels = ['9:00AM', '12:00AM', '3:00PM', '6:00PM', '9:00PM', '12:00PM', '3:00AM', '6:00AM']
         x_axis = "Time"
         minutes = 5
@@ -262,7 +301,10 @@ def charts():
                                 minutes=minutes,
                                 chart_data = chart_data,
                                 sensors=sensors,
-                                addresses = session_addresses),
+                                addresses = session_addresses,
+                                hw_ids_str=hw_ids_str,
+                                sensors_str=sensors_str,
+                                addr_str=addr_str),
                                )
     else:
         flash("Please log in or register to access dashboard", "warning")

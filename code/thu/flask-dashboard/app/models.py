@@ -41,7 +41,7 @@ class User(UserMixin, db.Model):
 
 class SensorData(db.Model):
     __tablename__ = 'SENSOR_DATA'
-    id = db.Column(db.BigInteger, primary_key = True, nullable = False)
+    index = db.Column(db.BigInteger, primary_key = True, nullable = False)
     hardwareID = db.Column(db.Integer, nullable = False)
     address = db.Column(db.Text, nullable = False) 
     latitude = db.Column(db.Float, nullable = False)
@@ -72,9 +72,10 @@ class Hardware(db.Model):
     longitude = db.Column(db.Float, nullable = False)
    
     
-    def __init__(self, hardwareID, address_index, status, latitude, longitude):
+    def __init__(self, hardwareID, address_index, session_address, status, latitude, longitude):
         self.hardwareID = hardwareID
         self.address_index = address_index
+        self.session_address = session_address
         self.status = status
         self.latitude = latitude
         self.longitude = longitude
