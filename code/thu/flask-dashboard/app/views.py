@@ -169,6 +169,7 @@ def user():
             else:
                 #both username and email do not exist, show error
                 error = "Invalid username or email"
+                username = current_user.user
         elif request.form["btn"] == "change_pwd":
             username = current_user.user
             user = User.query.filter_by(user=username).first()  #find user by username
@@ -180,11 +181,20 @@ def user():
                     db.session.commit()
                     flash("Successfully updated password for user {}".format(username), "success")
                 else:
-                    error = "Current password is invalid"
-                    flash(error, "danger")
+                    flash("Current password is invalid", "danger")
             else:
-                error = "New passwords do not match"
-                flash(error, "warning")
+                flash("New passwords do not match", "warning")
+        elif request.form["btn"] == "delete_acc":
+            username = current_user.user
+            user = User.query.filter_by(user=username).first()  #find user by username
+            password = request.form["pwd_del"]
+            if check_password_hash(user.password, password):
+                db.session.delete(user)
+                db.session.commit()
+                flash("Successfully deleted user account {}".format(username), "success")
+                return redirect(url_for('index'))
+            else:
+                flash("Password is invalid", "danger")
             
     else:
         # GET request
@@ -219,27 +229,40 @@ def table():
 
 
 # Render the charts page
-@app.route('/charts.html')
+@app.route('/charts.html', methods=['GET', 'POST'])
 def charts():
     if current_user.is_authenticated:
-        chart_title = "Chart.js Demo"
-        chart_subtitle = "for Bikota"
-        series_label = ["L1", "L2", "L3"]
-        x_axis = "Time"
-        y_axis = "Voltage (V)"
+        sensors = ["Temperature", "Humidity", "CO2", "Particulate Matter"]
+        session_addresses = {
+            "1" : ["QCWAVASCPCXAXAYABBRCXASCCBRCCBBBUAUCABQCSCVAYARAXAYAZAXAYARCRCQCTCCBXATCABCBABX", "Test Session 1"],
+            "2" : ["Test Session 2", "Test Session 3"]
+        } 
+        chart_data = [{
+            "chart_id" : "chart1",
+            "chart_title" : "Temperature",
+            "legend" : "L1",
+            "y_axis" : "Temperature (°C)",
+            "series" : [28.7, 28.9, 29.0, 28.8, 30.0, 30.1, 30.3, 30.4, 30.5, 30.6, 30.8, 31.0]
+        },
+        {
+            "chart_id" : "chart2",
+            "chart_title" : "Humidity",
+            "legend": "L2",
+            "y_axis" : "Humidity (%)",
+            "series" : [33.4, 33.5, 33.7, 33.8, 33.9, 40.0, 40.1, 40.2, 40.3, 40.5, 40.7, 41.0]
+
+        }]
         labels = ['9:00AM', '12:00AM', '3:00PM', '6:00PM', '9:00PM', '12:00PM', '3:00AM', '6:00AM']
-        values = [287, 385, 490, 492, 554, 586, 698, 695, 752, 788, 846, 944]
+        x_axis = "Time"
         minutes = 5
         return render_template('layouts/default.html',
                                 content=render_template( 'pages/charts.html',
-                                chart_title = chart_title,
-                                chart_subtitle = chart_subtitle,
                                 x_axis = x_axis,
-                                y_axis = y_axis,
-                                values = values,
                                 labels = labels,
-                                legend = series_label,
-                                minutes=minutes),
+                                minutes=minutes,
+                                chart_data = chart_data,
+                                sensors=sensors,
+                                addresses = session_addresses),
                                )
     else:
         flash("Please log in or register to access dashboard", "warning")

@@ -2,90 +2,296 @@
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-8">
-                            <div class="card ">
-                                <div class="card-header ">
-                                    <h4 class="card-title">{{chart_title}}</h4>
-                                    <p class="card-category">{{chart_subtitle}}</p>
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Customize Charts</h4>
                                 </div>
-                                <div class="card-body ">
-                                    <canvas id="js_chart"></canvas>
-                                    <script>
-                                    chart_loader = {                      
-                                        initDashboardPageCharts: function() {
-                                            var chartData = {
-                                                labels : [{% for item in labels %}
-                                                            "{{item}}",
-                                                            {% endfor %}],
-                                                datasets : [{
-                                                    title: "{{chart_title}}",
-                                                    label: "{{ legend[0] }}",
-                                                    fill: true,
-                                                    lineTension: 0.1,
-                                                    backgroundColor: "rgba(75,192,192,0.4)",
-                                                    borderColor: "rgba(75,192,192,1)",
-                                                    borderCapStyle: 'butt',
-                                                    borderDash: [],
-                                                    borderDashOffset: 0.0,
-                                                    borderJoinStyle: 'miter',
-                                                    pointBorderColor: "rgba(75,192,192,1)",
-                                                    pointBackgroundColor: "#fff",
-                                                    pointBorderWidth: 1,
-                                                    pointHoverRadius: 5,
-                                                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                                                    pointHoverBorderColor: "rgba(220,220,220,1)",
-                                                    pointHoverBorderWidth: 2,
-                                                    pointRadius: 1,
-                                                    pointHitRadius: 10,
-                                                    data : [{% for item in values %}
-                                                                {{item}},
-                                                            {% endfor %}],
-                                                    spanGaps: false
-                                                }]
-                                            };
-                                            var ctx = document.getElementById('js_chart').getContext('2d');
-                                            window.myChart = new Chart(ctx, {
-                                                type: 'line',
-                                                data: chartData,
-                                                options: {
-                                                    scales: {
-                                                        xAxes: [{
-                                                            scaleLabel: {
-                                                                display: true,
-                                                                labelString: '{{x_axis}}'
-                                                            }
-                                                        }],
-                                                        yAxes: [{
-                                                            type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
-                                                            display: true,
-                                                            position: 'left',
-                                                            id: 'y-axis-1',
-                                                            scaleLabel: {
-                                                                display: true,
-                                                                labelString: '{{y_axis}}'
-                                                            }
-                                                        }
-                                                        ],
-                                                    }
-                                                }
-                                            });
-                                        },
-                                    };
-                                    window.onload = function() {
-                                        chart_loader.initDashboardPageCharts();
-                                    };
-                                </script>
-                                </div>
-                                <div class="card-footer ">
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="fa fa-history"></i> Updated {{minutes}} minutes ago
-                                    </div>
+                                <div class="card-body">
+                                    <form method=post>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    
+                                                    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" >
+                                                        Hardware ID
+                                                    </a>
+                                                    {% if addresses %}
+                                                    <table class="dropdown-menu" style="padding:5px">
+                                                        <tbody>
+                                                            {% for key, value in addresses.items()%}
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input class="form-check-input" type="checkbox" value="" onclick="toggle_hw_id('{{key}}')">
+                                                                            <span class="form-check-sign"></span>
+                                                                        </label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>{{key}}</td>
+                                                                
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                    {%endif%}
+                                                    <input type="text" class="form-control" placeholder="Hardware ID" id="hw_label">
+                                                </div>   
+                                            </div> 
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    
+                                                    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" >
+                                                        Sensor Type
+                                                    </a>
+                                                    {% if sensors %}
+                                                    <!-- <ul class="dropdown-menu">
+                                                        {% for sensor in sensors%}
+                                                        <a class="dropdown-item" onClick="setSensorType('{{sensor}}')">{{sensor}}</a>
+                                                        {% endfor %}
+                                                    </ul> -->
+                                                    <table class="dropdown-menu" style="padding:5px">
+                                                        <tbody>
+                                                            {% for sensor in sensors%}
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input class="form-check-input" type="checkbox" onclick="toggle_sensors('{{sensor}}')">
+                                                                            <span class="form-check-sign"></span>
+                                                                        </label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>{{sensor}}</td>
+                                                                
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                    {%endif%}
+                                                    <input type="text" class="form-control" placeholder="Sensor Type" id="sensor_label">
+                                                </div>  
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" disabled id="addr_dropdown">
+                                                            Session Address
+                                                        </a>
+                                                        {% if addresses %}
+                                                        <!-- <ul class="dropdown-menu">
+                                                            {% for sensor in sensors%}
+                                                            <a class="dropdown-item" onClick="setSensorType('{{sensor}}')">{{sensor}}</a>
+                                                            {% endfor %}
+                                                        </ul> -->
+                                                        <table class="dropdown-menu" style="padding:5px">
+                                                            <tbody id="addr_list">
+                                                                
+                                                                <!-- {% for value in addresses["1"]%}
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <label class="form-check-label">
+                                                                                <input class="form-check-input" type="checkbox" onclick="toggle_addr('1','{{value}}')">
+                                                                                <span class="form-check-sign"></span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>{{value}}</td>
+                                                                    
+                                                                </tr>
+                                                                {% endfor %} -->
+                                                            </tbody>
+                                                        </table>
+                                                        {%endif%}
+                                                        <input type="text" class="form-control" placeholder="Session Address" disabled id="addr_label">
+                                                    </div> 
+                                            </div>
+                                        </div>
+                                        <button type="submit" name="btn" value="update_charts" class="btn btn-info btn-fill pull-left">Update Charts</button> 
+                                        <div class="clearfix"></div>   
+                                        
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
+               
+                    <div class="row">
+                        {% if chart_data %}
+                            {% for data in chart_data%}
+                                <div class="col-md-6">
+                                    <div class="card ">
+                                        <div class="card-header ">
+                                            <h4 class="card-title">{{data.chart_title}}</h4>
+                                        </div>
+                                        <div class="card-body ">
+                                            <canvas id="{{data.chart_id}}"></canvas>
+                                        </div>
+                                        <div class="card-footer ">
+                                            <hr>
+                                            <div class="stats">
+                                                <i class="fa fa-history"></i> Updated {{minutes}} minutes ago
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+<script>
+    {% if addresses %}
+    var id_checks = {
+        {% for key in addresses%}
+        "{{key}}" : false,
+        {%endfor%}
+    };
 
+    var addr_checks = {
+        {% for key in addresses%}
+        {% for value in addresses[key]%}
+        "{{value}}" : false,
+        {%endfor%}
+        {%endfor%}
+    };
+    
+    {%endif%}
+
+
+    {% if sensors %}
+    var sensor_checks = {
+        {% for sensor in sensors%}
+        "{{sensor}}" : false,
+        {%endfor%}
+    };
+    {%endif%}
+
+    function toggle_sensors(sensor){
+        {% if sensors %}
+        sensor_checks[sensor] = ! sensor_checks[sensor];
+        var sensor_str = "";
+        {% for sensor in sensors%}
+            if (sensor_checks["{{sensor}}"]){
+                sensor_str += "{{sensor}}" + ", ";
+            }
+        {%endfor%}  
+        sensor_str = sensor_str.substring(0, sensor_str.length-2);   
+        document.getElementById("sensor_label").value = sensor_str;
+        {%endif%} 
+    };
+
+    function toggle_hw_id(id){
+        {% if addresses %}
+        id_checks[id] = ! id_checks[id];
+        var ids_str = "";
+        var hw_count = 0;
+        {% for key in addresses%}
+            if (id_checks["{{key}}"]){
+                ids_str += "{{key}}" + ", ";
+                hw_count ++;
+                document.getElementById("addr_list").innerHTML = "{% for value in addresses[key]%}<tr><td><div class=\"form-check\"><label class=\"form-check-label\"><input class=\"form-check-input\" type=\"checkbox\" onclick=\"toggle_addr('{{value}}')\"><span class=\"form-check-sign\"></span></label></div></td><td>{{value}}</td></tr>{% endfor %}";
+                
+                //"{% for value in addresses[key]%}<tr>{{value}}</tr>{% endfor %}";
+            }
+            
+        {%endfor%}  
+        if (hw_count > 1){
+            document.getElementById("addr_label").disabled = true;
+            document.getElementById("addr_label").value = "";
+            document.getElementById("addr_dropdown").disabled = true;
+        } else {
+            document.getElementById("addr_label").disabled = false;
+            document.getElementById("addr_dropdown").disabled = false;
+                                        
+        }
+        ids_str = ids_str.substring(0, ids_str.length-2);
+        document.getElementById("hw_label").value = ids_str;
+        {%endif%} 
+    };
+
+    function toggle_addr(addr){
+        {% if addresses %}
+        addr_checks[addr] = ! addr_checks[addr];
+        var addr_str = "";
+        for (entry in addr_checks) {
+            if (addr_checks[entry]){
+                addr_str += entry + ", ";
+            }
+        }   
+        addr_str = addr_str.substring(0, addr_str.length-2);
+        document.getElementById("addr_label").value = addr_str;
+        {%endif%}
+        console.log(addr_checks);
+    }
+
+        chart_loader = {                      
+            initDashboardPageCharts: function() {
+                {% if chart_data %}
+                    {% for ch_dat in chart_data %}
+                        var chartData = {
+                        labels : [{% for item in labels %}
+                                    "{{item}}",
+                                    {% endfor %}],
+                        datasets : [{
+                            label: "{{ch_dat.legend}}",
+                            fill: true,
+                            lineTension: 0.1,
+                            backgroundColor: "rgba(75,192,192,0.4)",
+                            borderColor: "rgba(75,192,192,1)",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "rgba(75,192,192,1)",
+                            pointBackgroundColor: "#fff",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                            pointHoverBorderColor: "rgba(220,220,220,1)",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 1,
+                            pointHitRadius: 10,
+                            data : {{ch_dat.series}},
+                            spanGaps: false
+                        }]
+                    };
+                        var ctx = document.getElementById('{{ch_dat.chart_id}}').getContext('2d');
+                        window.myChart = new Chart(ctx, {
+                            type: 'line',
+                            data: chartData,
+                            options: {
+                                scales: {
+                                    xAxes: [{
+                                        scaleLabel: {
+                                            display: true,
+                                            labelString: '{{x_axis}}'
+                                        }
+                                    }],
+                                    yAxes: [{
+                                        type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                                        display: true,
+                                        position: 'left',
+                                        id: 'y-axis-1',
+                                        scaleLabel: {
+                                            display: true,
+                                            labelString: '{{ch_dat.y_axis}}'
+                                        }
+                                    }
+                                    ],
+                                }
+                            }
+                        });
+                    {%endfor%}
+                {%endif%}
+            },
+        };
+        window.onload = function() {
+            chart_loader.initDashboardPageCharts();
+            
+        };
+    </script>
 
