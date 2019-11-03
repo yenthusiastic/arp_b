@@ -28,13 +28,15 @@
 ## Pin Mapping
 |Pin ESP| Pin AUX|AUX Device|Protocol|Note|
 |---    |---     |---       |---     |--- |
+|3V3 	| | epaper, BME280E| | |
+|5V 	| | MPU6050, Buzzer, [GPS, Co2, SDS011]| | |
 |0 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
 |2 | | | | |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
-|12 |BUZ |Buzzer |GPIO digital |needs pull-up at startup |
+|12 |GND |Buzzer |GPIO digital |needs pull-up at startup |
 |13 | | | |buildin LED |
-|14 | | | | |
+|14 | Gate| Mosfet 5V (GPS, Co2, SDS011) | |switched off in sleep |
 |15 |DIN |epaper| | |
 |18 |PM10 |SDS011 Sensor |GPIO digital |Input: pulse length |
 |19 |PM25 |SDS011 Sensor |GPIO digital |Input: pulse length |
@@ -49,7 +51,7 @@
 |34 |BUSY |epaper | |input only, no pulls|
 |35 |TX |GPS |Serial |input only, no pulls |
 |36/SVP |A0 |Co2 Sensor |GPIO analog|input only, no pulls |
-|39/SVN | | | |input only, no pulls |
+|39/SVN |BAT | Battery Voltage |GPIO analog |input only, no pulls |
 
 
 ## Low power operation

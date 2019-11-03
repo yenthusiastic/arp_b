@@ -15,8 +15,10 @@ from werkzeug.security   import generate_password_hash
 from werkzeug.security   import check_password_hash
 
 from app        import app, lm, db, bc
-from app.models import User
+from app.models import User, SensorData, Hardware
 from app.forms  import LoginForm, RegisterForm
+
+
 
 # provide login manager with load_user callback
 @lm.user_loader
@@ -27,6 +29,7 @@ def load_user(user_id):
 @app.route('/logout.html')
 def logout():
     logout_user()
+    flash("Successfully logged out", "success")
     return redirect(url_for('index'))
 
 # register user
@@ -41,15 +44,16 @@ def register():
     if request.method == 'GET': 
 
         return render_template('layouts/default.html',
-                                content=render_template( 'pages/register.html', form=form, msg=msg ) )
+                                content=render_template( 'pages/register.html', form=form) )
 
     # check if both http method is POST and form is valid on submit
     if form.validate_on_submit():
 
         # assign form data to variables
-        username = request.form.get('username', '', type=str)
-        pw_hash = generate_password_hash(request.form.get('password', '', type=str)) 
-        email    = request.form.get('email'   , '', type=str) 
+        username = request.form["username"]
+        password = request.form["password"]
+        pw_hash = generate_password_hash(password) 
+        email = request.form["email"]
 
         # filter User out of database through username
         user = User.query.filter_by(user=username).first()
@@ -58,23 +62,37 @@ def register():
         user_by_email = User.query.filter_by(email=email).first()
 
         if user or user_by_email:
-            msg = 'Error: User exists!'
+            if user:
+                msg = 'Error: User {} already exists!'.format(username)
+            elif user_by_email:
+                 msg = 'Error: Email {} already exists!'.format(email)
+            flash(msg, "danger")
         
         else:         
-
-            user = User(username, email, pw_hash, {})
+            data = {"firstname": "",
+                    "lastname": "",
+                    "address" : "",
+                    "city": "",
+                    "zip": "",
+                    "country": "",
+                    "bio": ""
+            
+            }
+            user = User(username, email, pw_hash, data)
 
             user.save()
 
             msg = 'User created, please login' 
+            flash(msg, "success")
             return render_template('layouts/default.html',
-                            content=render_template( 'pages/login.html', form=form, msg=msg ) )
+                            content=render_template( 'pages/login.html', form=form) )
 
     else:
-        msg = 'Input error'     
+        msg = 'Invalid input'
+        flash(msg, "danger")
 
     return render_template('layouts/default.html',
-                            content=render_template( 'pages/register.html', form=form, msg=msg ) )
+                            content=render_template( 'pages/register.html', form=form ) )
 
 # authenticate user
 @app.route('/login.html', methods=['GET', 'POST'])
@@ -90,8 +108,8 @@ def login():
     if form.validate_on_submit():
 
         # assign form data to variables
-        username = request.form.get('username', '', type=str)
-        password = request.form.get('password', '', type=str)
+        username = request.form["username"]
+        password = request.form["password"]
 
         # filter User out of database through username
         user = User.query.filter_by(user=username).first()
@@ -102,19 +120,21 @@ def login():
             if check_password_hash(user.password, password):
                 login_user(user)
                 current_user.user = username
+                flash("Successfully logged in", "success")
                 return redirect(url_for('index'))
             else:
-                msg = "Wrong password. Please try again."
+                msg = "Invalid password. Please try again."
+                flash(msg, "danger")
         else:
-            msg = "Unknown user"
+            msg = "Invalid username. Please try again."
+            flash(msg, "danger")
 
     return render_template('layouts/default.html',
-                            content=render_template( 'pages/login.html', form=form, msg=msg ) )
+                            content=render_template( 'pages/login.html', form=form) )
 
 # Render the user page
 @app.route('/user.html', methods=['GET', 'POST'])
 def user():
-    error = None
     if request.method == "POST":
         if request.form["btn"] == "update_profile":
             username = request.form["username"]
@@ -146,10 +166,11 @@ def user():
                 #update database
                 db.session.commit()
                 current_user.user = username
-                flash("Successfully updated user profile")
+                flash("Successfully updated profile for user {}".format(username), "success")
             else:
                 #both username and email do not exist, show error
-                error = "Invalid username or email"
+                flash("Invalid username or email", "danger")
+                username = current_user.user
         elif request.form["btn"] == "change_pwd":
             username = current_user.user
             user = User.query.filter_by(user=username).first()  #find user by username
@@ -159,20 +180,29 @@ def user():
                 if check_password_hash(user.password, password):
                     user.password = generate_password_hash(new_pwd)
                     db.session.commit()
-                    flash("Successfully updated password")
+                    flash("Successfully updated password for user {}".format(username), "success")
                 else:
-                    error = "Current password is invalid"
-                    flash(error)
+                    flash("Current password is invalid", "danger")
             else:
-                error = "Passwords do not match"
-                flash(error)
+                flash("New passwords do not match", "warning")
+        elif request.form["btn"] == "delete_acc":
+            username = current_user.user
+            user = User.query.filter_by(user=username).first()  #find user by username
+            password = request.form["pwd_del"]
+            if check_password_hash(user.password, password):
+                db.session.delete(user)
+                db.session.commit()
+                flash("Successfully deleted user account {}".format(username), "success")
+                return redirect(url_for('index'))
+            else:
+                flash("Password is invalid", "danger")
             
     else:
         # GET request
         if current_user.is_authenticated:
             username = current_user.user
         else:
-            flash("Please log in or register to access user profile")
+            flash("Please log in or register to access user profile", "warning")
             return redirect('/login.html')
     # filter User out of database through username
     user = User.query.filter_by(user=username).first()
@@ -188,8 +218,7 @@ def user():
                             city=data["city"],
                             country = data["country"],
                             zip = data["zip"], 
-                            user_desc=data["bio"], 
-                            error = error))
+                            user_desc=data["bio"]))
 
 # Render the table page
 @app.route('/table.html')
@@ -198,50 +227,131 @@ def table():
     return render_template('layouts/default.html',
                             content=render_template( 'pages/table.html') )
 
-# Render the typography page
-@app.route('/typography.html')
-def typography():
-
-    return render_template('layouts/default.html',
-                            content=render_template( 'pages/typography.html') )
-
-# Render the icons page
+# Render the table page
 @app.route('/icons.html')
 def icons():
-
-    return render_template('layouts/default.html',
-                            content=render_template( 'pages/icons.html') )
-
-# Render the notification page
-@app.route('/notifications.html')
-def notifications():
-
-    return render_template('layouts/default.html',
-                            content=render_template( 'pages/notifications.html') )
+    return render_template('pages/icons.html') 
 
 
 # Render the charts page
-@app.route('/charts.html')
+@app.route('/charts.html', methods=['GET', 'POST'])
 def charts():
-    chart_title = "Chart.js Demo"
-    chart_subtitle = "for Bikota"
-    series_label = ["L1", "L2", "L3"]
-    x_axis = "Time"
-    y_axis = "Voltage (V)"
-    labels = ['9:00AM', '12:00AM', '3:00PM', '6:00PM', '9:00PM', '12:00PM', '3:00AM', '6:00AM']
-    values = [287, 385, 490, 492, 554, 586, 698, 695, 752, 788, 846, 944]
-    minutes = 5
-    return render_template('layouts/default.html',
-                            content=render_template( 'pages/charts.html',
-                            chart_title = chart_title,
-                            chart_subtitle = chart_subtitle,
-                            x_axis = x_axis,
-                            y_axis = y_axis,
-                            values = values,
-                            labels = labels,
-                            legend = series_label,
-                            minutes=minutes),
-                           )
+    if current_user.is_authenticated:
+        session_addresses = dict()
+        hw_ids_str = "1"
+        sensors_str = "Temperature, Humidity"
+        addr_str = ""
+        data_limit = 30
+        hw_ids = [hardware.hardwareID for hardware in SensorData.query.order_by(SensorData.hardwareID).order_by(SensorData.timestamp.asc()).all() if hardware.hardwareID != ""]
+        units = {
+            "Temperature" : "°C",
+            "Humidity" : "%H",
+            "CO2" : "PPM",
+            "Pressure" : "hPa",
+            "PM10" : "PPM",
+            "PM25" : "PPM"
+        }
+        chart_colors = ["75,192,192", 
+                        "245,206,66", 
+                        "112, 214, 96", 
+                        "123, 152, 237",
+                        "222, 129, 227",
+                        "75,192,192", 
+                        "245,206,66", 
+                        "112, 214, 96", 
+                        "123, 152, 237",
+                        "222, 129, 227"]
+        
+        time_unit = "second"
+        
+        if request.method == "POST":
+            chart_data = []
+            try:
+                hw_ids_str = request.form["hw_label"]
+                selected_hw_ids = hw_ids_str.split(", ")
+            except:
+                selected_hw_ids = [hw_ids_str]
+            try:
+                sensors_str = request.form["sensor_label"]                
+                sensors = sensors_str.split(", ")
+            except:
+                sensors = [sensors_str]
+            try:
+                addr_str = request.form["addr_label"]
+                addr_arr = addr_str.split(", ")
+            except:                
+                addr_arr = [addr_str]
+           
+            finally:
+                for sensor in sensors:
+                    data = {}
+                    data["chart_id"] = "chart_{}".format(sensor)
+                    data["chart_title"] = sensor
+                    data["y_axis"] = "{} ({})".format(sensor, units[sensor])
+                    data["legend"] = []
+                    data["series"] = []
+                    sensor = sensor.lower()
+                    
+                    for hw_id in selected_hw_ids:
+                        data["legend"].append("Hardware {}".format(hw_id)) 
+                        res = db.session.query(SensorData.timestamp, getattr(SensorData, sensor)).filter(SensorData.hardwareID==hw_id, getattr(SensorData, sensor)!= None).order_by(SensorData.timestamp.asc()).limit(data_limit)
+                        data["series"].append([getattr(hardware, sensor) for hardware in res])
+                        data['labels'] = [hardware.timestamp for hardware in res]
+                        if not data['labels']:
+                            flash("No data found for selected hardware(s) and sensor(s)", "warning")
+                    chart_data.append(data)
+                    #print(data["series"])
+                   
+        else:
+            res = db.session.query(SensorData.timestamp, SensorData.temperature, SensorData.humidity).filter(SensorData.hardwareID==1,SensorData.temperature != None, SensorData.humidity != None).order_by(SensorData.timestamp.asc()).limit(data_limit)
+            time_labels = [hardware.timestamp for hardware in res]    
+            chart_data = [{
+                "chart_id" : "chart_1",
+                "chart_title" : "Temperature",
+                "legend" : ["Hardware 1"],
+                "y_axis" : "Temperature (°C)",
+                'series' : [[hardware.temperature for hardware in res]],
+                'labels' : time_labels,
+                "chart_color" : chart_colors[0]
+            },
+            {
+                "chart_id" : "chart2",
+                "chart_title" : "Humidity",
+                "legend" : ["Hardware 1"],
+                "y_axis" : "Humidity (%)",
+                'series' : [[hardware.humidity for hardware in res]],
+                'labels' : time_labels,
+                "chart_color" : chart_colors[0]
+
+            }]
+
+        # dummy data
+        # hw_ids = [1,2,3,4,5]
+        
+        sensors = [sensor for sensor in units]
+        for hw_id in hw_ids:
+            hw_id = "{}".format(hw_id)
+            addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct().all() if hardware.address != ""]
+            session_addresses[hw_id] = addresses
+        x_axis = "Time"
+        minutes = 5
+        return render_template('layouts/default.html',
+                                content=render_template( 'pages/charts.html',
+                                x_axis = x_axis,
+                                minutes=minutes,
+                                chart_data = chart_data,
+                                sensors=sensors,
+                                addresses = session_addresses,
+                                hw_ids_str=hw_ids_str,
+                                sensors_str=sensors_str,
+                                addr_str=addr_str,
+                                time_unit=time_unit,
+                                chart_colors = chart_colors),
+                               )
+    else:
+        flash("Please log in or register to access dashboard", "warning")
+        return redirect('/login.html')
+        
 
 
 
@@ -249,14 +359,17 @@ def charts():
 @app.route('/', defaults={'path': 'index.html'})
 @app.route('/<path>')
 def index(path):
+    if current_user.is_authenticated:
+        content = None
 
-    content = None
+        try:
 
-    try:
+            # try to match the pages defined in -> pages/<input file>
+            return render_template('layouts/default.html',
+                                    content=render_template( 'pages/'+path) )
+        except:
 
-        # try to match the pages defined in -> pages/<input file>
-        return render_template('layouts/default.html',
-                                content=render_template( 'pages/'+path) )
-    except:
+            return  render_template('pages/404.html')
+    else:
         
-        return 'Oupsss :(', 404
+        return redirect('/login.html')

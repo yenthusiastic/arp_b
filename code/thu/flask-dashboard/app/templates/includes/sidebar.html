@@ -28,39 +28,29 @@
                             <p>Charts</p>
                         </a>
                     </li>
-                   <li>
-                        <a class="nav-link" href="/user.html">
-                            <i class="nc-icon nc-circle-09"></i>
-                            <p>User Profile</p>
-                        </a>
-                    </li>
                     <li>
                         <a class="nav-link" href="/table.html">
                             <i class="nc-icon nc-notes"></i>
                             <p>Table List</p>
                         </a>
                     </li>
-                    <!-- <li>
-                        <a class="nav-link" href="/typography.html">
-                            <i class="nc-icon nc-paper-2"></i>
-                            <p>Typography</p>
-                        </a>
-                    </li>
+                    
                     <li>
-                        <a class="nav-link" href="/icons.html">
-                            <i class="nc-icon nc-atom"></i>
-                            <p>Icons</p>
-                        </a>
-                    </li> -->
-                    <li>
-                        <a class="nav-link" href="/notifications.html">
-                            <i class="nc-icon nc-bell-55"></i>
-                            <p>Notifications</p>
+                        <a class="nav-link" href="/settings.html">
+                            <i class="nc-icon nc-settings-gear-64"></i>
+                            <p>Settings</p>
                         </a>
                     </li>
 
+                    
+                    <li>
+                        <a class="nav-link" href="/user.html">
+                            <i class="nc-icon nc-circle-09"></i>
+                            <p>User Profile</p>
+                        </a>
+                    </li>
+                    
                     {% if current_user.is_authenticated %}
-
                     <li>
                         <a class="nav-link" href={{ url_for('logout') }}>
                             <i class="nc-icon nc-single-02"></i>

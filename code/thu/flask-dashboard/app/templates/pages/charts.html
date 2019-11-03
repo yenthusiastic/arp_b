@@ -2,90 +2,418 @@
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-8">
-                            <div class="card ">
-                                <div class="card-header ">
-                                    <h4 class="card-title">{{chart_title}}</h4>
-                                    <p class="card-category">{{chart_subtitle}}</p>
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Customize Charts</h4>
                                 </div>
-                                <div class="card-body ">
-                                    <canvas id="js_chart"></canvas>
-                                    <script>
-                                    chart_loader = {                      
-                                        initDashboardPageCharts: function() {
-                                            var chartData = {
-                                                labels : [{% for item in labels %}
-                                                            "{{item}}",
-                                                            {% endfor %}],
-                                                datasets : [{
-                                                    title: "{{chart_title}}",
-                                                    label: "{{ legend[0] }}",
-                                                    fill: true,
-                                                    lineTension: 0.1,
-                                                    backgroundColor: "rgba(75,192,192,0.4)",
-                                                    borderColor: "rgba(75,192,192,1)",
-                                                    borderCapStyle: 'butt',
-                                                    borderDash: [],
-                                                    borderDashOffset: 0.0,
-                                                    borderJoinStyle: 'miter',
-                                                    pointBorderColor: "rgba(75,192,192,1)",
-                                                    pointBackgroundColor: "#fff",
-                                                    pointBorderWidth: 1,
-                                                    pointHoverRadius: 5,
-                                                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                                                    pointHoverBorderColor: "rgba(220,220,220,1)",
-                                                    pointHoverBorderWidth: 2,
-                                                    pointRadius: 1,
-                                                    pointHitRadius: 10,
-                                                    data : [{% for item in values %}
-                                                                {{item}},
-                                                            {% endfor %}],
-                                                    spanGaps: false
-                                                }]
-                                            };
-                                            var ctx = document.getElementById('js_chart').getContext('2d');
-                                            window.myChart = new Chart(ctx, {
-                                                type: 'line',
-                                                data: chartData,
-                                                options: {
-                                                    scales: {
-                                                        xAxes: [{
-                                                            scaleLabel: {
-                                                                display: true,
-                                                                labelString: '{{x_axis}}'
-                                                            }
-                                                        }],
-                                                        yAxes: [{
-                                                            type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
-                                                            display: true,
-                                                            position: 'left',
-                                                            id: 'y-axis-1',
-                                                            scaleLabel: {
-                                                                display: true,
-                                                                labelString: '{{y_axis}}'
-                                                            }
-                                                        }
-                                                        ],
-                                                    }
-                                                }
-                                            });
-                                        },
-                                    };
-                                    window.onload = function() {
-                                        chart_loader.initDashboardPageCharts();
-                                    };
-                                </script>
-                                </div>
-                                <div class="card-footer ">
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="fa fa-history"></i> Updated {{minutes}} minutes ago
-                                    </div>
+                                <div class="card-body">
+                                    <form method=post name="input_form" onsubmit="return validateForm()">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    
+                                                    <a href="#" class="nav-link" data-toggle="dropdown" >
+                                                        Hardware ID  <i class="fa fa-chevron-down"></i>
+                                                    </a>
+                                                    {% if addresses %}
+                                                    <table class="dropdown-menu" style="padding:5px">
+                                                        <tbody>
+                                                            {% for key in addresses%}
+                                                            <tr onclick="toggle_hw_id('{{key}}')">
+                                                                <td>
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input class="form-check-input hardware_checkbox" type="checkbox" name="check_{{key}}" value="" >
+                                                                            <span class="form-check-sign"></span>
+                                                                        </label>
+                                                                    </div>
+                                                                </td>
+                                                                <td><a class="dropdown-item" href="#" >{{key}}</a></td>
+                                                                
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                    {%endif%}
+                                                    <div style="display:flex; flex-direction:row;">
+                                                            <input style="flex:1;" type="text" class="form-control" placeholder="Hardware ID" name="hw_label" id="hw_label" value="{{hw_ids_str}}">
+                                                        <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('hardware')">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                    
+                                                </div>   
+                                            </div> 
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    
+                                                    <a href="#" class="nav-link" data-toggle="dropdown">
+                                                        Sensor Type <i class="fa fa-chevron-down"></i>
+                                                    </a>
+                                                           
+                                                        {% if sensors %}
+                                                        <!-- <ul class="dropdown-menu">
+                                                            {% for sensor in sensors%}
+                                                            <a class="dropdown-item" onClick="setSensorType('{{sensor}}')">{{sensor}}</a>
+                                                            {% endfor %}
+                                                        </ul> -->
+                                                        <table class="dropdown-menu" style="padding:5px">
+                                                            <tbody>
+                                                                {% for sensor in sensors%}
+                                                                <tr onClick="toggle_sensors('{{sensor}}')">
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <label class="form-check-label">
+                                                                                <input class="form-check-input sensor_checkbox" name="check_{{sensor}}" type="checkbox">
+                                                                                <span class="form-check-sign"></span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td> <a class="dropdown-item" href="#" >{{sensor}}</a></td>
+                                                                    
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                        {%endif%}
+                                                        <div style="display:flex; flex-direction:row;">
+                                                            <input type="text" class="form-control" placeholder="Sensor Type" name="sensor_label" id="sensor_label" value="{{sensors_str}}"> 
+                                                            <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('sensor')">
+                                                                <i class="fa fa-times"></i>
+                                                            </button>
+                                                        </div>
+                                                    
+                                                    
+                                                </div>  
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div >
+                                                    <a href="#" class="nav-link" diabled>
+                                                        Time Range
+                                                    </a>
+                                                    
+                                                    <div class='input-group date'>
+                                                        <input type="text" id="dtp" class="form-control">
+                                                        
+                                                        <span class="input-group-addon">
+                                                           
+                                                            <span class="fa fa-calendar" onclick="updateConfig()">
+                                                            </span>
+                                                        </span>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                           
+                                            <div class="col-md-3"> 
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <a href="#" class="nav-link" data-toggle="dropdown" disabled id="addr_dropdown">
+                                                        Session Address  <i class="fa fa-chevron-down"></i>
+                                                    </a>
+                                                    {% if addresses %}
+                                                    <table class="dropdown-menu" style="padding:5px" id="addr_list">
+                                                        
+                                                    </table>
+                                                    {%endif%}
+                                                    <div style="display:flex; flex-direction:row;">
+                                                    <input style="flex:1;" type="text" class="form-control" placeholder="Session Address" name="addr_label" disabled id="addr_label" value="{{addr_str}}"> 
+                                                    <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('address')">
+                                                        <i class="fa fa-times"></i>
+                                                    </button>
+                                                    </div>
+                                                </div> 
+                                            </div>
+                                        </div>
+                                        <button type="submit" name="btn" value="update_charts" class="btn btn-info btn-fill pull-left">Update Charts</button> 
+                                        <div class="clearfix"></div>   
+                                        
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
+               
+                    <div class="row">
+                        {% if chart_data %}
+                            {% for data in chart_data%}
+                                <div class="col-md-6">
+                                    <div class="card ">
+                                        <div class="card-header ">
+                                            <h4 class="card-title">{{data.chart_title}}</h4>
+                                        </div>
+                                        <div class="card-body ">
+                                            <canvas id="{{data.chart_id}}"></canvas>
+                                        </div>
+                                        <div class="card-footer ">
+                                            <hr>
+                                            <div class="stats">
+                                                <i class="fa fa-history"></i> Updated {{minutes}} minutes ago
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+
+
+<script>
+    function validateForm() {
+        if (document.forms["input_form"]["hw_label"].value == ""){
+            demo.showNotification(from="top", align="center", msg="Please select at least one hardware to show graph", color="warning");
+            return false;
+        }
+        if (document.forms["input_form"]["sensor_label"].value == ""){
+            demo.showNotification(from="top", align="center", msg="Please select at least one sensor type to show graph", color="warning");
+            return false;
+        }
+        
+    }
+
+
+    function toggle_hw_id(id){
+        var ids_str = "";
+        var hw_count = 0;
+        var checked_el = document.getElementsByName("check_" + id)[0];
+        document.getElementsByName("check_" + id)[0].checked = !checked_el.checked;
+        hw_checkboxes = document.getElementsByClassName("hardware_checkbox");
+        for (var i = 0; i < hw_checkboxes.length; i++){
+            if (hw_checkboxes[i].checked){
+                ids_str += hw_checkboxes[i].getAttribute("name").substring(6,) + ", ";
+                hw_count ++;
+                //"<tr onclick=\"toggle_addr('{{addr}}')\"><td><div class=\"form-check\"><label class=\"form-check-label\"><input class=\"form-check-input addr_checkbox\" name=\"check_{{addr}}\" type=\"checkbox\" ><span class=\"form-check-sign\"></span></label></div></td><td><a class=\"dropdown-item\" href=\"#\" >{{addr}}</a></td></tr>";
+            }
+        }
+        {% for key in addresses%}
+            if (document.getElementsByName("check_{{key}}")[0].checked){
+                document.getElementById("addr_list").innerHTML = "<tbody>{% for value in addresses[key]%}<tr onclick=\"toggle_addr('{{value}}')\"><td><div class=\"form-check\"><label class=\"form-check-label\"><input class=\"form-check-input addr_checkbox\" name=\"check_{{value}}\" type=\"checkbox\" ><span class=\"form-check-sign\"></span></label></div></td><td><a class=\"dropdown-item\" href=\"#\">{{value}}</a></td></tr>{% endfor %}</tbody>";
+            }
+            
+        {%endfor%}  
+
+             
+        if (hw_count > 1){
+            document.getElementById("addr_label").disabled = true;
+            document.getElementById("addr_label").value = "";
+            document.getElementById("addr_dropdown").disabled = true;
+        } else {
+            document.getElementById("addr_label").disabled = false;
+            document.getElementById("addr_dropdown").disabled = false;
+                                        
+        }
+        ids_str = ids_str.substring(0, ids_str.length-2);
+        document.getElementById("hw_label").value = ids_str;
+    };
+
+    function toggle_sensors(sensor){
+        var sensor_str = "";
+        var checked_el = document.getElementsByName("check_" + sensor)[0];
+        document.getElementsByName("check_" + sensor)[0].checked = !checked_el.checked;
+        sensor_checkboxes = document.getElementsByClassName("sensor_checkbox");
+        for (var i = 0; i < sensor_checkboxes.length; i++){
+            if (sensor_checkboxes[i].checked){
+                sensor_str += sensor_checkboxes[i].getAttribute("name").substring(6,) + ", ";
+            }
+        }
+        sensor_str = sensor_str.substring(0, sensor_str.length-2);   
+        document.getElementById("sensor_label").value = sensor_str;
+    };
+
+    function toggle_addr(addr){
+        var addr_str = "";
+        var checked_el = document.getElementsByName("check_" + addr)[0];
+        document.getElementsByName("check_" + addr)[0].checked = !checked_el.checked;
+        addr_checkboxes = document.getElementsByClassName("addr_checkbox")
+        ckbx_count = 0
+        for (var i = 0; i < addr_checkboxes.length; i++){
+            if (addr_checkboxes[i].checked){
+                addr_str += addr_checkboxes[i].getAttribute("name").substring(6,) + ", ";
+                document.getElementById('dtp').disabled = true;
+                document.getElementsByClassName('fa-calendar')[0].disabled = true;
+            } else {
+                ckbx_count++;
+            }
+            if (ckbx_count == addr_checkboxes.length){
+                document.getElementById('dtp').disabled = false;
+                document.getElementsByClassName('fa-calendar')[0].disabled = false;
+            }
+        }  
+        addr_str = addr_str.substring(0, addr_str.length-2);
+        document.getElementById("addr_label").value = addr_str;
+       
+    };
+
+
+    function clear_fields(type){
+        var chk_boxes = []
+        switch(type){
+            case "address":
+                document.getElementById("addr_label").value = "";
+                chk_boxes = document.getElementsByClassName("addr_checkbox");
+                document.getElementById('dtp').disabled = false;
+                document.getElementsByClassName('fa-calendar')[0].disabled = false;
+                break;
+            case "sensor":
+                document.getElementById("sensor_label").value = "";
+                chk_boxes = document.getElementsByClassName("sensor_checkbox");
+                break;
+            case "hardware":
+                document.getElementById("hw_label").value = "";
+                chk_boxes = document.getElementsByClassName("hardware_checkbox");
+                break;
+
+        }
+        for (var i = 0; i < chk_boxes.length; i++){
+            chk_boxes[i].checked = false;
+        } 
+        
+    };
+    
+
+    chart_loader = {                      
+        initDashboardPageCharts: function() {
+            {% if chart_data %}
+                {% for ch_dat in chart_data %}
+                    var chartData = {
+                    labels : [{% for item in ch_dat.labels %}
+                                "{{item}}",
+                                {% endfor %}],
+                    
+                    datasets : [
+                        {%for lg in ch_dat.legend%}    
+                        {
+                            label:  "{{lg}}",
+                            fill: true,
+                            lineTension: 0.1,
+                            backgroundColor: "rgba({{chart_colors[loop.index0]}},0.4)",
+                            borderColor: "rgba({{chart_colors[loop.index0]}},1.0)",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "rgba({{chart_colors[loop.index0]}},1.0)",
+                            pointBackgroundColor: "#fff",
+                            pointRadius: 3,
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "rgba({{chart_colors[loop.index0]}},1.0)",
+                            pointHoverBorderColor: "rgba(220,220,220,1)",
+                            pointHoverBorderWidth: 2,
+                            pointHitRadius: 7,
+                            data : {{ch_dat.series[loop.index0]}},
+                            spanGaps: false
+                        },
+                        {%endfor%}
+                    ]
+                    
+                };
+                    var ctx = document.getElementById('{{ch_dat.chart_id}}').getContext('2d');
+                    window.myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: chartData,
+                        options: {
+                            scales: {
+                                xAxes: [{
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: '{{x_axis}}'
+                                    },
+                                    type: 'time',
+                                    distribution: 'series',
+                                    time: {
+                                        unit: "{{time_unit}}",
+                                        displayFormats: {
+                                            'second' : 'HH:mm:ss',
+                                            'minute' : 'HH:mm',
+                                            'hour' : 'HH:mm',
+                                            'day' : 'DD.MM HH:mm',
+                                            'week' : 'DD.MM',
+                                            'month' : "MM.YY",
+                                            'year' : "YYYY"
+                                        }
+                                    }
+                                }],
+                                yAxes: [{
+                                    type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                                    display: true,
+                                    position: 'left',
+                                    id: 'y-axis-1',
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: '{{ch_dat.y_axis}}'
+                                    }
+                                }
+                                ],
+                            }
+                        }
+                    });
+                {%endfor%}
+            {%endif%}
+        }
+    };
+    function updateConfig() {
+        $('#rtl-wrap').show();
+        var options = {};
+        options.timePicker = true;
+        options.timePicker24Hour = true;
+        options.timePickerIncrement = 5;
+        options.showCustomRangeLabel = true;
+        options.ranges = {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            };
+        options.locale = {
+            direction: $('#rtl').is(':checked') ? 'rtl' : 'ltr',
+            format: 'DD.MM.YYYY HH:mm',
+            separator: ' - ',
+            applyLabel: 'Apply',
+            cancelLabel: 'Cancel',
+            fromLabel: 'From',
+            toLabel: 'To',
+            customRangeLabel: 'Custom',
+            daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
+            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            firstDay: 2
+        };
+        options.autoApply = true;
+        options.autoUpdateInput = true;
+        options.alwaysShowCalendars = false;
+
+        
+        $('#dtp').daterangepicker(options, function(start, end, label) { console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')'); }).click();;
+        
+    }
+    $(document).ready(function() {
+        chart_loader.initDashboardPageCharts();
+        $('#rtl-wrap').hide();
+        $('#startDate').daterangepicker({
+          startDate: moment().subtract(6, 'days')
+        });
+
+        $('#endDate').daterangepicker({
+          startDate: moment()
+        });
+        
+
+        
+    });
+
+</script>
+
+
+
 
 

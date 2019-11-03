@@ -1,3 +1,6 @@
+#datepicker{width:180px; margin: 0 20px 20px 20px;}
+#datepicker > span:hover{cursor: pointer;}
+
 .tim-row {
     margin-bottom: 20px;
 }

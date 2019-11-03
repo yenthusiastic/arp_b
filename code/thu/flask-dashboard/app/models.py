@@ -41,22 +41,30 @@ class User(UserMixin, db.Model):
 
 class SensorData(db.Model):
     __tablename__ = 'SENSOR_DATA'
-    id = db.Column(db.BigInteger, primary_key = True, nullable = False)
+    index = db.Column(db.BigInteger, primary_key = True, nullable = False)
     hardwareID = db.Column(db.Integer, nullable = False)
-    address = db.Column(db.Text, nullable = False) 
-    latitude = db.Column(db.Float, nullable = False)
-    longitude = db.Column(db.Float, nullable = False)
-    temperature = db.Column(db.Float, nullable = False)
-    humidity = db.Column(db.Float, nullable = False)
+    address = db.Column(db.Text) 
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    temperature = db.Column(db.Float)
+    humidity = db.Column(db.Float)
+    co2 = db.Column(db.Float)
+    pressure = db.Column(db.Float)
+    pm10 = db.Column(db.Float)
+    pm25 = db.Column(db.Float)
     timestamp = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
     
-    def __init__(self, hardwareID, address, latitude, longitude, temperature, humidity):
+    def __init__(self, hardwareID, address, latitude, longitude, temperature, humidity, co2, pressure, pm10, pm25):
         self.hardwareID = hardwareID
         self.address = address
         self.latitude = latitude
         self.longitude = longitude
         self.temperature = temperature
         self.humidity = humidity
+        self.co2 = co2
+        self.pressure = pressure
+        self.pm10 = pm10
+        self.pm25 = pm25
     
     def __repr__(self):
         return '<Hardware ID: {}, address: {}>'.format(self.hardwareID, self.address)
@@ -65,16 +73,17 @@ class SensorData(db.Model):
 class Hardware(db.Model):
     __tablename__ = 'HARDWARE_STATUS'
     hardwareID = db.Column(db.Integer, primary_key = True, nullable = False)
-    address_index = db.Column(db.Integer, nullable = False) 
-    session_address = db.Column(db.Text, nullable = False) 
-    status = db.Column(db.String(10), nullable=False)
-    latitude = db.Column(db.Float, nullable = False)
-    longitude = db.Column(db.Float, nullable = False)
+    address_index = db.Column(db.Integer) 
+    session_address = db.Column(db.Text) 
+    status = db.Column(db.String(10))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
    
     
-    def __init__(self, hardwareID, address_index, status, latitude, longitude):
+    def __init__(self, hardwareID, address_index, session_address, status, latitude, longitude):
         self.hardwareID = hardwareID
         self.address_index = address_index
+        self.session_address = session_address
         self.status = status
         self.latitude = latitude
         self.longitude = longitude

@@ -9,19 +9,19 @@
                                 <div class="card-body">
                                     <form method=post>
                                         <div class="row">
-                                            <div class="col-md-5 pr-1">
+                                            <div class="col-md-5">
                                                 <div class="form-group">
                                                     <label>Company (disabled)</label>
                                                     <input type="text" class="form-control" disabled="" placeholder="Company" value="Bikota">
                                                 </div>
                                             </div>
-                                            <div class="col-md-3 px-1">
+                                            <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Username</label>
                                                     <input type="text" class="form-control" placeholder="Username" name="username" value="{{username}}">
                                                 </div>
                                             </div>
-                                            <div class="col-md-4 pl-1">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="exampleInputEmail1">Email address</label>
                                                     <input type="email" class="form-control" placeholder="Email" name="email" value="{{email}}">
@@ -29,13 +29,13 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-6 pr-1">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>First Name</label>
                                                     <input type="text" class="form-control" placeholder="First Name" name ="first_name" value="{{firstname}}">
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 pl-1">
+                                            <div class="col-md-6 ">
                                                 <div class="form-group">
                                                     <label>Last Name</label>
                                                     <input type="text" class="form-control" placeholder="Last Name" name="last_name" value="{{lastname}}">
@@ -51,19 +51,19 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-4 pr-1">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>City</label>
                                                     <input type="text" class="form-control" placeholder="City" name="city" value="{{city}}">
                                                 </div>
                                             </div>
-                                            <div class="col-md-4 px-1">
+                                            <div class="col-md-4 ">
                                                 <div class="form-group">
                                                     <label>Country</label>
                                                     <input type="text" class="form-control" placeholder="Country" name = "country" value="{{country}}">
                                                 </div>
                                             </div>
-                                            <div class="col-md-4 pl-1">
+                                            <div class="col-md-4 ">
                                                 <div class="form-group">
                                                     <label>Postal Code</label>
                                                     <input type="number" class="form-control" placeholder="ZIP Code" name="zip" value="{{zip}}">
@@ -93,8 +93,9 @@
                                     <div class="author">
                                         <a href="mailto:{{email}}">
                                             <img class="avatar border-gray" src="/static/assets/img/faces/face-0.jpg" alt="...">
-                                            <h5 class="title">{{firstname}} {{lastname}}</h5>
+                                            <h5 class="title">{{email}}</h5>
                                         </a>
+                                        <h4>{{firstname}} {{lastname}}</h4>
                                         <p class="description">
                                             {{user_desc}}
                                         </p>
@@ -121,9 +122,6 @@
                                     <h4 class="card-title">Change Password</h4>
                                 </div>
                                 <div class="card-body">
-                                      {% if error %}
-                                        <p class=error style="color: red;"><strong>Error:</strong> {{ error }}
-                                      {% endif %}
                                     <form method=post>
                                         <div class="row">
                                             <div class="col-md-5 pr-1">
@@ -149,7 +147,29 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <button type="submit" name="btn" value="change_pwd" class="btn btn-info btn-fill pull-right">Update Password</button>
+                                        <button type="submit" name="btn" value="change_pwd" class="btn btn-info btn-fill pull-left">Update Password</button>
+                                        <div class="clearfix"></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title" style="color: red;">Delete Account</h4>
+                                </div>
+                                <div class="card-body">
+                                    <form method=post>
+                                        <span>Enter password to delete account. Be careful, your account will be permanently deleted.</span>
+                                        <div class="row">
+                                            <div class="col-md-5 pr-1">
+                                                <div class="form-group">
+                                                    <label>Password</label>
+                                                    <input type="password" class="form-control" name="pwd_del" placeholder="Current Password">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" name="btn" value="delete_acc" class="btn btn-danger btn-fill ">Delete Account</button>
                                         <div class="clearfix"></div>
                                     </form>
                                 </div>
