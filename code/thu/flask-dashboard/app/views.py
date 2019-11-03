@@ -18,6 +18,8 @@ from app        import app, lm, db, bc
 from app.models import User, SensorData, Hardware
 from app.forms  import LoginForm, RegisterForm
 
+
+
 # provide login manager with load_user callback
 @lm.user_loader
 def load_user(user_id):
@@ -239,6 +241,8 @@ def charts():
         hw_ids_str = "1"
         sensors_str = "Temperature, Humidity"
         addr_str = ""
+        data_limit = 5
+        hw_ids = [hardware.hardwareID for hardware in SensorData.query.order_by(SensorData.hardwareID).order_by(SensorData.timestamp.asc()).all() if hardware.hardwareID != ""]
         units = {
             "Temperature" : "°C",
             "Humidity" : "%H",
@@ -247,15 +251,26 @@ def charts():
             "PM10" : "PPM",
             "PM25" : "PPM"
         }
-        chart_colors = ["rgba(75,192,192,0.4)", "rgba(245,206,66,0.4)", "rgba(112, 214, 96,0.4)"]
+        chart_colors = ["75,192,192", 
+                        "245,206,66", 
+                        "112, 214, 96", 
+                        "123, 152, 237",
+                        "222, 129, 227",
+                        "75,192,192", 
+                        "245,206,66", 
+                        "112, 214, 96", 
+                        "123, 152, 237",
+                        "222, 129, 227"]
+        
+        time_unit = "second"
         
         if request.method == "POST":
             chart_data = []
             try:
                 hw_ids_str = request.form["hw_label"]
-                hw_ids = hw_ids_str.split(", ")
+                selected_hw_ids = hw_ids_str.split(", ")
             except:
-                hw_ids = [hw_ids_str]
+                selected_hw_ids = [hw_ids_str]
             try:
                 sensors_str = request.form["sensor_label"]                
                 sensors = sensors_str.split(", ")
@@ -270,62 +285,73 @@ def charts():
             finally:
                 for sensor in sensors:
                     if sensor:
+                        
                         data = {}
                         data["chart_id"] = "chart_{}".format(sensor)
                         data["chart_title"] = sensor
                         data["y_axis"] = "{} ({})".format(sensor, units[sensor])
                         data["legend"] = []
                         data["series"] = []
-                        data["chart_color"] = chart_colors
-                        for hw_id in hw_ids:
+                        sensor = sensor.lower()
+                        
+                        for index, hw_id in enumerate(selected_hw_ids):
                             if hw_id:
                                 data["legend"].append("Hardware {}".format(hw_id)) 
+                                res = db.session.query(SensorData.timestamp, getattr(SensorData, sensor)).filter(SensorData.hardwareID==hw_id, getattr(SensorData, sensor)!= None).order_by(SensorData.timestamp.asc()).limit(data_limit)
+                                data["series"].append([getattr(hardware, sensor) for hardware in res])
+                                data['labels'] = [hardware.timestamp for hardware in res]
+                                data["chart_color"] = chart_colors[index]
                             else:
                                 flash("Please select at least one hardware to show graph", "warning")
-                        data["series"].append([28.7, 28.9, 29.0, 28.8, 30.0, 30.1, 30.3, 30.4, 30.5, 30.6, 30.8, 31.0])
-                        data["series"].append([29.7, 29.9, 30.0, 29.8, 31.0, 31.1, 31.3, 31.4, 31.5, 31.6, 31.8, 32.0])
                         chart_data.append(data)
+                        print(data["series"])
                     else:
                         flash("Please select at least one sensor type to show graph", "warning")
             
         else:
-                
+            res = db.session.query(SensorData.timestamp, SensorData.temperature, SensorData.humidity).filter(SensorData.hardwareID==1,SensorData.temperature != None, SensorData.humidity != None).order_by(SensorData.timestamp.asc()).limit(data_limit)
+            time_labels = [hardware.timestamp for hardware in res]    
             chart_data = [{
-                "chart_id" : "chart1",
+                "chart_id" : "chart_1",
                 "chart_title" : "Temperature",
-                "legend" : "L1",
+                "legend" : ["Hardware 1"],
                 "y_axis" : "Temperature (°C)",
-                "series" : [28.7, 28.9, 29.0, 28.8, 30.0, 30.1, 30.3, 30.4, 30.5, 30.6, 30.8, 31.0]
+                'series' : [[hardware.temperature for hardware in res]],
+                'labels' : time_labels,
+                "chart_color" : chart_colors[0]
             },
             {
                 "chart_id" : "chart2",
                 "chart_title" : "Humidity",
-                "legend": "L2",
+                "legend" : ["Hardware 1"],
                 "y_axis" : "Humidity (%)",
-                "series" : [33.4, 33.5, 33.7, 33.8, 33.9, 40.0, 40.1, 40.2, 40.3, 40.5, 40.7, 41.0]
+                'series' : [[hardware.humidity for hardware in res]],
+                'labels' : time_labels,
+                "chart_color" : chart_colors[0]
 
             }]
 
-        hw_ids = [hardware.hardwareID for hardware in Hardware.query.order_by(Hardware.hardwareID).all() if hardware.hardwareID != ""]
+        # dummy data
+        # hw_ids = [1,2,3,4,5]
+        
         sensors = [sensor for sensor in units]
         for hw_id in hw_ids:
             hw_id = "{}".format(hw_id)
             addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct().all() if hardware.address != ""]
             session_addresses[hw_id] = addresses
-        labels = ['9:00AM', '12:00AM', '3:00PM', '6:00PM', '9:00PM', '12:00PM', '3:00AM', '6:00AM']
         x_axis = "Time"
         minutes = 5
         return render_template('layouts/default.html',
                                 content=render_template( 'pages/charts.html',
                                 x_axis = x_axis,
-                                labels = labels,
                                 minutes=minutes,
                                 chart_data = chart_data,
                                 sensors=sensors,
                                 addresses = session_addresses,
                                 hw_ids_str=hw_ids_str,
                                 sensors_str=sensors_str,
-                                addr_str=addr_str),
+                                addr_str=addr_str,
+                                time_unit=time_unit),
                                )
     else:
         flash("Please log in or register to access dashboard", "warning")

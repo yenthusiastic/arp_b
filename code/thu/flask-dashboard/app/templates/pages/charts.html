@@ -220,9 +220,18 @@
         var checked_el = document.getElementsByName("check_" + addr)[0];
         document.getElementsByName("check_" + addr)[0].checked = !checked_el.checked;
         addr_checkboxes = document.getElementsByClassName("addr_checkbox")
+        ckbx_count = 0
         for (var i = 0; i < addr_checkboxes.length; i++){
             if (addr_checkboxes[i].checked){
                 addr_str += addr_checkboxes[i].getAttribute("name").substring(6,) + ", ";
+                document.getElementById('dtp').disabled = true;
+                document.getElementsByClassName('fa-calendar')[0].disabled = true;
+            } else {
+                ckbx_count++;
+            }
+            if (ckbx_count == addr_checkboxes.length){
+                document.getElementById('dtp').disabled = false;
+                document.getElementsByClassName('fa-calendar')[0].disabled = false;
             }
         }  
         addr_str = addr_str.substring(0, addr_str.length-2);
@@ -237,6 +246,8 @@
             case "address":
                 document.getElementById("addr_label").value = "";
                 chk_boxes = document.getElementsByClassName("addr_checkbox");
+                document.getElementById('dtp').disabled = false;
+                document.getElementsByClassName('fa-calendar')[0].disabled = false;
                 break;
             case "sensor":
                 document.getElementById("sensor_label").value = "";
@@ -260,7 +271,7 @@
             {% if chart_data %}
                 {% for ch_dat in chart_data %}
                     var chartData = {
-                    labels : [{% for item in labels %}
+                    labels : [{% for item in ch_dat.labels %}
                                 "{{item}}",
                                 {% endfor %}],
                     
@@ -270,21 +281,21 @@
                             label:  "{{lg}}",
                             fill: true,
                             lineTension: 0.1,
-                            backgroundColor: "{{ch_dat.chart_color[loop.index0]}}",
-                            borderColor: "{{ch_dat.chart_color[loop.index0]}}",
+                            backgroundColor: "rgba({{ch_dat.chart_color}},0.4)",
+                            borderColor: "rgba({{ch_dat.chart_color}},1.0)",
                             borderCapStyle: 'butt',
                             borderDash: [],
                             borderDashOffset: 0.0,
                             borderJoinStyle: 'miter',
-                            pointBorderColor: "{{ch_dat.chart_color[loop.index0]}}",
+                            pointBorderColor: "rgba({{ch_dat.chart_color}},1.0)",
                             pointBackgroundColor: "#fff",
+                            pointRadius: 3,
                             pointBorderWidth: 1,
                             pointHoverRadius: 5,
-                            pointHoverBackgroundColor: "{{ch_dat.chart_color[loop.index0]}}",
+                            pointHoverBackgroundColor: "rgba({{ch_dat.chart_color}},1.0)",
                             pointHoverBorderColor: "rgba(220,220,220,1)",
                             pointHoverBorderWidth: 2,
-                            pointRadius: 1,
-                            pointHitRadius: 10,
+                            pointHitRadius: 7,
                             data : {{ch_dat.series[loop.index0]}},
                             spanGaps: false
                         },
@@ -302,6 +313,20 @@
                                     scaleLabel: {
                                         display: true,
                                         labelString: '{{x_axis}}'
+                                    },
+                                    type: 'time',
+                                    distribution: 'series',
+                                    time: {
+                                        unit: "{{time_unit}}",
+                                        displayFormats: {
+                                            'second' : 'HH:mm:ss',
+                                            'minute' : 'HH:mm',
+                                            'hour' : 'HH:mm',
+                                            'day' : 'DD.MM HH:mm',
+                                            'week' : 'DD.MM',
+                                            'month' : "MM.YY",
+                                            'year' : "YYYY"
+                                        }
                                     }
                                 }],
                                 yAxes: [{
