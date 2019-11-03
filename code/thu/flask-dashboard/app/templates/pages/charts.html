@@ -8,7 +8,7 @@
                                     <h4 class="card-title">Customize Charts</h4>
                                 </div>
                                 <div class="card-body">
-                                    <form method=post>
+                                    <form method=post name="input_form" onsubmit="return validateForm()">
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group">
@@ -167,6 +167,19 @@
 
 
 <script>
+    function validateForm() {
+        if (document.forms["input_form"]["hw_label"].value == ""){
+            demo.showNotification(from="top", align="center", msg="Please select at least one hardware to show graph", color="warning");
+            return false;
+        }
+        if (document.forms["input_form"]["sensor_label"].value == ""){
+            demo.showNotification(from="top", align="center", msg="Please select at least one sensor type to show graph", color="warning");
+            return false;
+        }
+        
+    }
+
+
     function toggle_hw_id(id){
         var ids_str = "";
         var hw_count = 0;
@@ -281,18 +294,18 @@
                             label:  "{{lg}}",
                             fill: true,
                             lineTension: 0.1,
-                            backgroundColor: "rgba({{ch_dat.chart_color}},0.4)",
-                            borderColor: "rgba({{ch_dat.chart_color}},1.0)",
+                            backgroundColor: "rgba({{chart_colors[loop.index0]}},0.4)",
+                            borderColor: "rgba({{chart_colors[loop.index0]}},1.0)",
                             borderCapStyle: 'butt',
                             borderDash: [],
                             borderDashOffset: 0.0,
                             borderJoinStyle: 'miter',
-                            pointBorderColor: "rgba({{ch_dat.chart_color}},1.0)",
+                            pointBorderColor: "rgba({{chart_colors[loop.index0]}},1.0)",
                             pointBackgroundColor: "#fff",
                             pointRadius: 3,
                             pointBorderWidth: 1,
                             pointHoverRadius: 5,
-                            pointHoverBackgroundColor: "rgba({{ch_dat.chart_color}},1.0)",
+                            pointHoverBackgroundColor: "rgba({{chart_colors[loop.index0]}},1.0)",
                             pointHoverBorderColor: "rgba(220,220,220,1)",
                             pointHoverBorderWidth: 2,
                             pointHitRadius: 7,

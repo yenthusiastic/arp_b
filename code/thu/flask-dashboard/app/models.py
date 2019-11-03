@@ -48,15 +48,23 @@ class SensorData(db.Model):
     longitude = db.Column(db.Float)
     temperature = db.Column(db.Float)
     humidity = db.Column(db.Float)
+    co2 = db.Column(db.Float)
+    pressure = db.Column(db.Float)
+    pm10 = db.Column(db.Float)
+    pm25 = db.Column(db.Float)
     timestamp = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
     
-    def __init__(self, hardwareID, address, latitude, longitude, temperature, humidity):
+    def __init__(self, hardwareID, address, latitude, longitude, temperature, humidity, co2, pressure, pm10, pm25):
         self.hardwareID = hardwareID
         self.address = address
         self.latitude = latitude
         self.longitude = longitude
         self.temperature = temperature
         self.humidity = humidity
+        self.co2 = co2
+        self.pressure = pressure
+        self.pm10 = pm10
+        self.pm25 = pm25
     
     def __repr__(self):
         return '<Hardware ID: {}, address: {}>'.format(self.hardwareID, self.address)

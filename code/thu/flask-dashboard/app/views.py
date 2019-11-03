@@ -241,7 +241,7 @@ def charts():
         hw_ids_str = "1"
         sensors_str = "Temperature, Humidity"
         addr_str = ""
-        data_limit = 5
+        data_limit = 30
         hw_ids = [hardware.hardwareID for hardware in SensorData.query.order_by(SensorData.hardwareID).order_by(SensorData.timestamp.asc()).all() if hardware.hardwareID != ""]
         units = {
             "Temperature" : "°C",
@@ -284,30 +284,24 @@ def charts():
            
             finally:
                 for sensor in sensors:
-                    if sensor:
-                        
-                        data = {}
-                        data["chart_id"] = "chart_{}".format(sensor)
-                        data["chart_title"] = sensor
-                        data["y_axis"] = "{} ({})".format(sensor, units[sensor])
-                        data["legend"] = []
-                        data["series"] = []
-                        sensor = sensor.lower()
-                        
-                        for index, hw_id in enumerate(selected_hw_ids):
-                            if hw_id:
-                                data["legend"].append("Hardware {}".format(hw_id)) 
-                                res = db.session.query(SensorData.timestamp, getattr(SensorData, sensor)).filter(SensorData.hardwareID==hw_id, getattr(SensorData, sensor)!= None).order_by(SensorData.timestamp.asc()).limit(data_limit)
-                                data["series"].append([getattr(hardware, sensor) for hardware in res])
-                                data['labels'] = [hardware.timestamp for hardware in res]
-                                data["chart_color"] = chart_colors[index]
-                            else:
-                                flash("Please select at least one hardware to show graph", "warning")
-                        chart_data.append(data)
-                        print(data["series"])
-                    else:
-                        flash("Please select at least one sensor type to show graph", "warning")
-            
+                    data = {}
+                    data["chart_id"] = "chart_{}".format(sensor)
+                    data["chart_title"] = sensor
+                    data["y_axis"] = "{} ({})".format(sensor, units[sensor])
+                    data["legend"] = []
+                    data["series"] = []
+                    sensor = sensor.lower()
+                    
+                    for hw_id in selected_hw_ids:
+                        data["legend"].append("Hardware {}".format(hw_id)) 
+                        res = db.session.query(SensorData.timestamp, getattr(SensorData, sensor)).filter(SensorData.hardwareID==hw_id, getattr(SensorData, sensor)!= None).order_by(SensorData.timestamp.asc()).limit(data_limit)
+                        data["series"].append([getattr(hardware, sensor) for hardware in res])
+                        data['labels'] = [hardware.timestamp for hardware in res]
+                        if not data['labels']:
+                            flash("No data found for selected hardware(s) and sensor(s)", "warning")
+                    chart_data.append(data)
+                    #print(data["series"])
+                   
         else:
             res = db.session.query(SensorData.timestamp, SensorData.temperature, SensorData.humidity).filter(SensorData.hardwareID==1,SensorData.temperature != None, SensorData.humidity != None).order_by(SensorData.timestamp.asc()).limit(data_limit)
             time_labels = [hardware.timestamp for hardware in res]    
@@ -351,7 +345,8 @@ def charts():
                                 hw_ids_str=hw_ids_str,
                                 sensors_str=sensors_str,
                                 addr_str=addr_str,
-                                time_unit=time_unit),
+                                time_unit=time_unit,
+                                chart_colors = chart_colors),
                                )
     else:
         flash("Please log in or register to access dashboard", "warning")
