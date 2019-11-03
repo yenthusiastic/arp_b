@@ -15,7 +15,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login      import LoginManager
 from flask_bcrypt     import Bcrypt
 
-
 # Grabs the folder where the script runs.
 basedir = os.path.abspath(os.path.dirname(__file__))
 

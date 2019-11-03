@@ -10,7 +10,8 @@ Support : https://appseed.us/support
 
 from flask_wtf          import FlaskForm
 from flask_wtf.file     import FileField, FileRequired
-from wtforms            import StringField, TextAreaField, SubmitField, PasswordField
+from wtforms            import StringField, TextAreaField, SubmitField, PasswordField, DateField
+from wtforms.fields		import DateField
 from wtforms.validators import InputRequired, Email, DataRequired, Length
 
 class LoginForm(FlaskForm):

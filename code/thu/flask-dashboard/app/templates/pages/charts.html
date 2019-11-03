@@ -13,8 +13,8 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     
-                                                    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" >
-                                                        Hardware ID
+                                                    <a href="#" class="nav-link" data-toggle="dropdown" >
+                                                        Hardware ID  <i class="fa fa-chevron-down"></i>
                                                     </a>
                                                     {% if addresses %}
                                                     <table class="dropdown-menu" style="padding:5px">
@@ -48,78 +48,87 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     
-                                                    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" >
-                                                        Sensor Type
+                                                    <a href="#" class="nav-link" data-toggle="dropdown">
+                                                        Sensor Type <i class="fa fa-chevron-down"></i>
                                                     </a>
-                                                    {% if sensors %}
-                                                    <!-- <ul class="dropdown-menu">
-                                                        {% for sensor in sensors%}
-                                                        <a class="dropdown-item" onClick="setSensorType('{{sensor}}')">{{sensor}}</a>
-                                                        {% endfor %}
-                                                    </ul> -->
-                                                    <table class="dropdown-menu" style="padding:5px">
-                                                        <tbody>
+                                                           
+                                                        {% if sensors %}
+                                                        <!-- <ul class="dropdown-menu">
                                                             {% for sensor in sensors%}
-                                                            <tr onClick="toggle_sensors('{{sensor}}')">
-                                                                <td>
-                                                                    <div class="form-check">
-                                                                        <label class="form-check-label">
-                                                                            <input class="form-check-input sensor_checkbox" name="check_{{sensor}}" type="checkbox">
-                                                                            <span class="form-check-sign"></span>
-                                                                        </label>
-                                                                    </div>
-                                                                </td>
-                                                                <td> <a class="dropdown-item" href="#" >{{sensor}}</a></td>
-                                                                
-                                                            </tr>
+                                                            <a class="dropdown-item" onClick="setSensorType('{{sensor}}')">{{sensor}}</a>
                                                             {% endfor %}
-                                                        </tbody>
-                                                    </table>
-                                                    {%endif%}
-                                                    <div style="display:flex; flex-direction:row;">
-                                                        <input style="flex:1;" type="text" class="form-control" placeholder="Sensor Type" name="sensor_label" id="sensor_label" value="{{sensors_str}}"> 
-                                                        <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('sensor')">
-                                                            <i class="fa fa-times"></i>
-                                                        </button>
-                                                    </div>
+                                                        </ul> -->
+                                                        <table class="dropdown-menu" style="padding:5px">
+                                                            <tbody>
+                                                                {% for sensor in sensors%}
+                                                                <tr onClick="toggle_sensors('{{sensor}}')">
+                                                                    <td>
+                                                                        <div class="form-check">
+                                                                            <label class="form-check-label">
+                                                                                <input class="form-check-input sensor_checkbox" name="check_{{sensor}}" type="checkbox">
+                                                                                <span class="form-check-sign"></span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td> <a class="dropdown-item" href="#" >{{sensor}}</a></td>
+                                                                    
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                        {%endif%}
+                                                        <div style="display:flex; flex-direction:row;">
+                                                            <input type="text" class="form-control" placeholder="Sensor Type" name="sensor_label" id="sensor_label" value="{{sensors_str}}"> 
+                                                            <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('sensor')">
+                                                                <i class="fa fa-times"></i>
+                                                            </button>
+                                                        </div>
+                                                    
                                                     
                                                 </div>  
                                             </div>
                                         </div>
                                         <div class="row">
+                                            <div class="col-md-6">
+                                                <div >
+                                                    <a href="#" class="nav-link" diabled>
+                                                        Time Range
+                                                    </a>
+                                                    
+                                                    <div class='input-group date'>
+                                                        <input type="text" id="dtp" class="form-control">
+                                                        
+                                                        <span class="input-group-addon">
+                                                           
+                                                            <span class="fa fa-calendar" onclick="updateConfig()">
+                                                            </span>
+                                                        </span>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                           
+                                            <div class="col-md-3"> 
+                                            </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" disabled id="addr_dropdown">
-                                                            Session Address
-                                                        </a>
-                                                        {% if addresses %}
-                                                        <table class="dropdown-menu" style="padding:5px">
-                                                            <tbody id="addr_list">
-                                                                
-                                                                <!-- {% for value in addresses["1"]%}
-                                                                <tr>
-                                                                    <td>
-                                                                        <div class="form-check">
-                                                                            <label class="form-check-label">
-                                                                                <input class="form-check-input" type="checkbox" onclick="toggle_addr('1','{{value}}')">
-                                                                                <span class="form-check-sign"></span>
-                                                                            </label>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>{{value}}</td>
-                                                                    
-                                                                </tr>
-                                                                {% endfor %} -->
-                                                            </tbody>
-                                                        </table>
-                                                        {%endif%}
-                                                        <div style="display:flex; flex-direction:row;">
-                                                        <input style="flex:1;" type="text" class="form-control" placeholder="Session Address" name="addr_label" disabled id="addr_label" value="{{addr_str}}"> 
-                                                        <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('address')">
-                                                            <i class="fa fa-times"></i>
-                                                        </button>
-                                                        </div>
-                                                    </div> 
+                                                <div class="form-group">
+                                                    <a href="#" class="nav-link" data-toggle="dropdown" disabled id="addr_dropdown">
+                                                        Session Address  <i class="fa fa-chevron-down"></i>
+                                                    </a>
+                                                    {% if addresses %}
+                                                    <table class="dropdown-menu" style="padding:5px" id="addr_list">
+                                                        
+                                                    </table>
+                                                    {%endif%}
+                                                    <div style="display:flex; flex-direction:row;">
+                                                    <input style="flex:1;" type="text" class="form-control" placeholder="Session Address" name="addr_label" disabled id="addr_label" value="{{addr_str}}"> 
+                                                    <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('address')">
+                                                        <i class="fa fa-times"></i>
+                                                    </button>
+                                                    </div>
+                                                </div> 
                                             </div>
                                         </div>
                                         <button type="submit" name="btn" value="update_charts" class="btn btn-info btn-fill pull-left">Update Charts</button> 
@@ -157,7 +166,6 @@
             </div>
 
 
-
 <script>
     function toggle_hw_id(id){
         var ids_str = "";
@@ -174,7 +182,7 @@
         }
         {% for key in addresses%}
             if (document.getElementsByName("check_{{key}}")[0].checked){
-                document.getElementById("addr_list").innerHTML = "{% for value in addresses[key]%}<tr onclick=\"toggle_addr('{{value}}')\"><td><div class=\"form-check\"><label class=\"form-check-label\"><input class=\"form-check-input addr_checkbox\" name=\"check_{{value}}\" type=\"checkbox\" ><span class=\"form-check-sign\"></span></label></div></td><td><a class=\"dropdown-item\" href=\"#\">{{value}}</a></td></tr>{% endfor %}";
+                document.getElementById("addr_list").innerHTML = "<tbody>{% for value in addresses[key]%}<tr onclick=\"toggle_addr('{{value}}')\"><td><div class=\"form-check\"><label class=\"form-check-label\"><input class=\"form-check-input addr_checkbox\" name=\"check_{{value}}\" type=\"checkbox\" ><span class=\"form-check-sign\"></span></label></div></td><td><a class=\"dropdown-item\" href=\"#\">{{value}}</a></td></tr>{% endfor %}</tbody>";
             }
             
         {%endfor%}  
@@ -244,7 +252,7 @@
             chk_boxes[i].checked = false;
         } 
         
-    }
+    };
     
 
     chart_loader = {                      
@@ -255,28 +263,34 @@
                     labels : [{% for item in labels %}
                                 "{{item}}",
                                 {% endfor %}],
-                    datasets : [{
-                        label: "{{ch_dat.legend}}",
-                        fill: true,
-                        lineTension: 0.1,
-                        backgroundColor: "rgba(75,192,192,0.4)",
-                        borderColor: "rgba(75,192,192,1)",
-                        borderCapStyle: 'butt',
-                        borderDash: [],
-                        borderDashOffset: 0.0,
-                        borderJoinStyle: 'miter',
-                        pointBorderColor: "rgba(75,192,192,1)",
-                        pointBackgroundColor: "#fff",
-                        pointBorderWidth: 1,
-                        pointHoverRadius: 5,
-                        pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                        pointHoverBorderColor: "rgba(220,220,220,1)",
-                        pointHoverBorderWidth: 2,
-                        pointRadius: 1,
-                        pointHitRadius: 10,
-                        data : {{ch_dat.series}},
-                        spanGaps: false
-                    }]
+                    
+                    datasets : [
+                        {%for lg in ch_dat.legend%}    
+                        {
+                            label:  "{{lg}}",
+                            fill: true,
+                            lineTension: 0.1,
+                            backgroundColor: "{{ch_dat.chart_color[loop.index0]}}",
+                            borderColor: "{{ch_dat.chart_color[loop.index0]}}",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "{{ch_dat.chart_color[loop.index0]}}",
+                            pointBackgroundColor: "#fff",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "{{ch_dat.chart_color[loop.index0]}}",
+                            pointHoverBorderColor: "rgba(220,220,220,1)",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 1,
+                            pointHitRadius: 10,
+                            data : {{ch_dat.series[loop.index0]}},
+                            spanGaps: false
+                        },
+                        {%endfor%}
+                    ]
+                    
                 };
                     var ctx = document.getElementById('{{ch_dat.chart_id}}').getContext('2d');
                     window.myChart = new Chart(ctx, {
@@ -306,11 +320,62 @@
                     });
                 {%endfor%}
             {%endif%}
-        },
+        }
     };
-    window.onload = function() {
-        chart_loader.initDashboardPageCharts();
+    function updateConfig() {
+        $('#rtl-wrap').show();
+        var options = {};
+        options.timePicker = true;
+        options.timePicker24Hour = true;
+        options.timePickerIncrement = 5;
+        options.showCustomRangeLabel = true;
+        options.ranges = {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            };
+        options.locale = {
+            direction: $('#rtl').is(':checked') ? 'rtl' : 'ltr',
+            format: 'DD.MM.YYYY HH:mm',
+            separator: ' - ',
+            applyLabel: 'Apply',
+            cancelLabel: 'Cancel',
+            fromLabel: 'From',
+            toLabel: 'To',
+            customRangeLabel: 'Custom',
+            daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
+            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            firstDay: 2
+        };
+        options.autoApply = true;
+        options.autoUpdateInput = true;
+        options.alwaysShowCalendars = false;
+
         
-    };
+        $('#dtp').daterangepicker(options, function(start, end, label) { console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')'); }).click();;
+        
+    }
+    $(document).ready(function() {
+        chart_loader.initDashboardPageCharts();
+        $('#rtl-wrap').hide();
+        $('#startDate').daterangepicker({
+          startDate: moment().subtract(6, 'days')
+        });
+
+        $('#endDate').daterangepicker({
+          startDate: moment()
+        });
+        
+
+        
+    });
+
 </script>
+
+
+
+
 

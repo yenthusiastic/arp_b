@@ -225,6 +225,11 @@ def table():
     return render_template('layouts/default.html',
                             content=render_template( 'pages/table.html') )
 
+# Render the table page
+@app.route('/icons.html')
+def icons():
+    return render_template('pages/icons.html') 
+
 
 # Render the charts page
 @app.route('/charts.html', methods=['GET', 'POST'])
@@ -238,8 +243,11 @@ def charts():
             "Temperature" : "°C",
             "Humidity" : "%H",
             "CO2" : "PPM",
-            "Pressure" : "hPa"
+            "Pressure" : "hPa",
+            "PM10" : "PPM",
+            "PM25" : "PPM"
         }
+        chart_colors = ["rgba(75,192,192,0.4)", "rgba(245,206,66,0.4)", "rgba(112, 214, 96,0.4)"]
         
         if request.method == "POST":
             chart_data = []
@@ -258,14 +266,27 @@ def charts():
                 addr_arr = addr_str.split(", ")
             except:                
                 addr_arr = [addr_str]
+           
             finally:
                 for sensor in sensors:
-                    data = {}
-                    data["chart_id"] = "chart_{}".format(sensor)
-                    data["chart_title"] = sensor
-                    data["y_axis"] = "{} ({})".format(sensor, units[sensor])
-                    data["series"] = [28.7, 28.9, 29.0, 28.8, 30.0, 30.1, 30.3, 30.4, 30.5, 30.6, 30.8, 31.0]
-                    chart_data.append(data)
+                    if sensor:
+                        data = {}
+                        data["chart_id"] = "chart_{}".format(sensor)
+                        data["chart_title"] = sensor
+                        data["y_axis"] = "{} ({})".format(sensor, units[sensor])
+                        data["legend"] = []
+                        data["series"] = []
+                        data["chart_color"] = chart_colors
+                        for hw_id in hw_ids:
+                            if hw_id:
+                                data["legend"].append("Hardware {}".format(hw_id)) 
+                            else:
+                                flash("Please select at least one hardware to show graph", "warning")
+                        data["series"].append([28.7, 28.9, 29.0, 28.8, 30.0, 30.1, 30.3, 30.4, 30.5, 30.6, 30.8, 31.0])
+                        data["series"].append([29.7, 29.9, 30.0, 29.8, 31.0, 31.1, 31.3, 31.4, 31.5, 31.6, 31.8, 32.0])
+                        chart_data.append(data)
+                    else:
+                        flash("Please select at least one sensor type to show graph", "warning")
             
         else:
                 
@@ -286,7 +307,7 @@ def charts():
             }]
 
         hw_ids = [hardware.hardwareID for hardware in Hardware.query.order_by(Hardware.hardwareID).all() if hardware.hardwareID != ""]
-        sensors = ["Temperature", "Humidity", "CO2", "Pressure"]
+        sensors = [sensor for sensor in units]
         for hw_id in hw_ids:
             hw_id = "{}".format(hw_id)
             addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct().all() if hardware.address != ""]
