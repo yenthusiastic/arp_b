@@ -33,13 +33,17 @@ m_states = {"offline": 0, "parked":1, "rented":2, "broken":3, "stolen":4}
 import machine, sys 
 from machine import Pin, ADC, UART, I2C, GPS, DHT, RTC, deepsleep
 import gsm
-import sds011
 import socket
 import urequests as requests
 import json
 from time import sleep
 from time import sleep_ms
 from time import ticks_ms
+
+import mpu6050 as mpu
+import bme280_no_hum as bme280_float
+import sds011
+
 rtc = RTC()
 
 """
@@ -66,43 +70,53 @@ GSM_MODEM_PWR = Pin(23, Pin.OUT)
 #LED.value(1)
 
 BTN1 = Pin(0, Pin.IN, Pin.PULL_UP)
+LED = Pin(13, Pin.OUT, value=0)
 
+# wake-up source for deepsleep
 rtc.wake_on_ext0(pin=BTN1, level=0)
 
+# alarm buzzer
+BUZ = Pin(2, Pin.OUT, value=1)
+
+# CO2 sensor, MH-Z14
 adc=ADC(Pin(36))
 
+# GPS
 # RX is not used
 gps = GPS(UART(2, rx=35, tx=33, baudrate=9600, bits=8, parity=None, stop=1, timeout=1500, buffer_size=1024, lineend='\r\n'))
 gps.startservice()
 
 
-#pm = sds011.SDS011(UART(1, baudrate=9600, tx=12, rx=34))
-#pm.sleep()
+# PM sensor, SSD011
 PM10_PIN = Pin(19, Pin.IN)
 PM25_PIN = Pin(18, Pin.IN)
 
-dht = DHT(Pin(2), DHT.DHT2X)
 
-#i2c = I2C(scl=Pin(22), sda=Pin(21))
+# I2C
 i2c = I2C(0, I2C.MASTER, scl=Pin(22), sda=Pin(21), freq=400000)
-import mpu6050 as mpu
+
+# accelerometer/ gyroscope, MPU6050
 mpu.init_sensor(i2c)
 
-LED = Pin(13, Pin.OUT)
-LED.value(0)
+# temperature/ humidity/ atmosperic pressure, BME280
+bme = bme280_float.BME280(i2c=i2c)
+
+
 
 def r():
     machine.reset()
 
 
-# =====TEMPORARY DISPLAY========
+# ===== DISPLAY ========
 from machine import Pin, SPI
 #import epaper2in9b_mod as epaper2in9b
 import epaper2in9
+
 spi = SPI(2, baudrate=2000000, polarity=1, phase=0, sck=Pin(25), mosi=Pin(15), miso=Pin(0))
+BTN1 = Pin(0, Pin.IN, Pin.PULL_UP)
 
 dc=Pin(32)
-rst=Pin(12)
+rst=Pin(14)
 busy=Pin(34)
 cs=Pin(33)
 
@@ -115,10 +129,10 @@ x = 0
 y = 0
 
 import framebuf
-buf = bytearray(128 * 296 // 8)
-fb = framebuf.FrameBuffer(buf, 128, 296, framebuf.MONO_HLSB)
-#bufy = bytearray(128 * 296 // 8)
-#fby = framebuf.FrameBuffer(bufy, 128, 296, framebuf.MONO_HLSB)
+buf = bytearray(w * h // 8)
+fb = framebuf.FrameBuffer(buf, w, h, framebuf.MONO_HLSB)
+#bufy = bytearray(w * h // 8)
+#fby = framebuf.FrameBuffer(bufy, w, h, framebuf.MONO_HLSB)
 #fby.fill(white)
 fb.fill(white)
 #fb.text('Hello World',30,0,black)
@@ -127,39 +141,6 @@ fb.fill(white)
 e=epaper2in9.EPD(spi, cs, dc, rst, busy)
 e.init()
 
-"""
-128x160 RGB TFT Touch Display with ST7735 Controller
-import display
-d = display.TFT()
-d.init(d.ST7735B, mosi=12, miso=34, clk=25, cs=33, dc=32, width=130, height=161, speed=10000000, splash=False)
-d.set_bg(d.BLACK)
-d.clear()
-d.font(d.FONT_Tooney)
-d.text(d.CENTER, 0, "BikOTA", d.GREEN, transparent=False)
-d.font(d.FONT_DefaultSmall)
-d.text(2, 32, "ID: {}".format(machine.nvs_getint('hardwareID')), d.WHITE)
-
-def draw_qr(m, xs=20, ys=71):
-    for y in range(len(m)*2):                   
-        for x in range(len(m[0])*2):            
-            value = m[y//2][x//2]   
-            if value == 0:
-                value=0xFFFFFF
-            else:
-                value=0x000000
-            d.pixel(xs+x, ys+y, value)
-
-def make_qr(address=m_address):
-    d.font(d.FONT_DefaultSmall)
-    d.text(d.CENTER, 80, "Generating Address...", d.WHITE)
-    from uQR import QRCode
-    qr=QRCode(border=2)
-    qr.clear()
-    qr.add_data(address)
-    m_address_matrix = qr.get_matrix()
-    d.text(d.CENTER, 80, "Generating Address...", d.BLACK)
-    draw_qr(m_address_matrix)
-"""
 
 def make_qr(address=m_address):
     print("Making QR code...")
@@ -168,9 +149,10 @@ def make_qr(address=m_address):
     #qr.clear()
     qr.add_data(address)
     m_address_matrix = qr.get_matrix()
+    print("QR code created.")
     return m_address_matrix
 
-def draw_qr(m=None, address=None, xs=0, ys=166, scale=1):
+def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
     if m == None:
         if address == None:
             address = m_address
@@ -185,26 +167,30 @@ def draw_qr(m=None, address=None, xs=0, ys=166, scale=1):
             fb.pixel(xs+x, ys+y, value)
 
 def draw_title():
-    fb.text("B I K O T A", 20, 1, 0)
+    fb.fill_rect(0,0,w,10, black)
+    fb.text("B I K O T A", 20, 3, white)
     #e.draw_filled_rectangle(buf, 0,10,127,11, True)
     #e.draw_filled_rectangle(bufy, 0,15,127,168, True)
-    fb.fill_rect(0,10,127,3, black)
-    fb.fill_rect(0,25,127,3, black)
+    fb.fill_rect(0,10,w,3, black)
+    fb.fill_rect(0,35,w,3, black)
 
-def draw_status(stat="SLEEPING"):
+def draw_status(stat="SLEEPING", xs=30, ys=20):
     fb.fill_rect(0,14,127,11, 1)
-    fb.text(str(stat), 30, 15, 0)
+    fb.text(str(stat), xs, ys, 0)
 
 def draw_balance(iota=100):
     fb.text("Balance:".format(iota), 0, 45, 0)
     fb.fill_rect(0,53,127,11, 1)
     fb.text("{} i".format(iota),0,  55, 0)
     
-
 def update_display():
     #e.display_frame(buf,bufy)
     e.set_frame_memory(buf, x, y, w, h)
     e.display_frame()
+
+def clear_buf(color = 1):
+    fb.fill_rect(0, 0, w, h, color)
+
 #===============================
 
 
@@ -248,13 +234,21 @@ def get_co2():
     return ppm, av_mv
 
 
+def get_bme():
+  try:
+    temp, hpa = bme.value
+    #temp, hpa, hum = bme.values
+    #if (isinstance(temp, float) and isinstance(hum, float)) or (isinstance(temp, int) and isinstance(hum, int)):
+    #  msg = (b'{0:3.1f},{1:3.1f}'.format(temp, hum))
+    #  hum = round(hum, 2)
+    #return temp, hum, hpa
+    return temp, hpa
+    #else:
+    #  return None #('Invalid sensor readings.')
+  except OSError as e:
+    print('Failed to read sensor: ', e)
+    return None
 
-def get_dht():
-    res, tmp, hum = dht.read()
-    if res:
-        return (tmp, hum)
-    else:
-        return False
     
 
 def gps_location():
@@ -373,14 +367,13 @@ def hibernate():
     #d.text(d.CENTER, 45, "SLEEPING", d.YELLOW)
     deepsleep()
 
+
 print("\n\n",machine.wake_description())
 #if machine.reset_cause() == machine.DEEPSLEEP_RESET:
 #        print('reset_cause: deepsleep')
 #else:
 #    print("reset_cause:", machine.reset_cause())
 
-
-#"""
 
 
 def draw_status_updating():
@@ -416,6 +409,7 @@ counter = 0
 if BTN1.value() == 0:
     pass
 else:
+    adc.collect(1, len=10, readmv=True)
     while True:
         if True: #BTN1.value() == 0:
             #break
@@ -447,6 +441,4 @@ else:
         #while True:
         #    
         #    sleep_ms(30)
-    #"""
-    #d.text(d.CENTER, 50, "   !!! TERMINATED !!!   ", d.RED)
 LED.value(0)
