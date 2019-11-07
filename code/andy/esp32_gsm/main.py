@@ -15,6 +15,7 @@ HARDWARE_ID = 1
 API_KEY = "2ed617ed018c0b13f209fc0bbe75ab8ab1a1d303"
 PHONE_NUMBER = '+491745851814'
 SERVER_URL = "https://req.dev.iota.pw/"
+NODE_URL2 = "https://nodes.iotadev.org/"
 NODE_URL = "https://nodes.thetangle.org/"
 
 # dev-strings
@@ -30,16 +31,21 @@ m_states = {"offline": 0, "parked":1, "rented":2, "broken":3, "stolen":4}
 # ===================
 
 
+UPDATE_INV = 1000
+
+
 import machine, sys 
 from machine import Pin, ADC, UART, I2C, GPS, DHT, RTC, deepsleep
 import gsm
-import sds011
 import socket
 import urequests as requests
 import json
-from time import sleep
-from time import sleep_ms
-from time import ticks_ms
+from time import sleep, sleep_ms, ticks_ms, ticks_diff
+
+import mpu6050 as mpu
+import bme280_no_hum as bme280_float
+import sds011
+
 rtc = RTC()
 
 """
@@ -66,43 +72,53 @@ GSM_MODEM_PWR = Pin(23, Pin.OUT)
 #LED.value(1)
 
 BTN1 = Pin(0, Pin.IN, Pin.PULL_UP)
+LED = Pin(13, Pin.OUT, value=0)
 
+# wake-up source for deepsleep
 rtc.wake_on_ext0(pin=BTN1, level=0)
 
+# alarm buzzer
+BUZ = Pin(2, Pin.OUT, value=1)
+
+# CO2 sensor, MH-Z14
 adc=ADC(Pin(36))
 
+# GPS
 # RX is not used
 gps = GPS(UART(2, rx=35, tx=33, baudrate=9600, bits=8, parity=None, stop=1, timeout=1500, buffer_size=1024, lineend='\r\n'))
 gps.startservice()
 
 
-#pm = sds011.SDS011(UART(1, baudrate=9600, tx=12, rx=34))
-#pm.sleep()
+# PM sensor, SSD011
 PM10_PIN = Pin(19, Pin.IN)
 PM25_PIN = Pin(18, Pin.IN)
 
-dht = DHT(Pin(2), DHT.DHT2X)
 
-#i2c = I2C(scl=Pin(22), sda=Pin(21))
+# I2C
 i2c = I2C(0, I2C.MASTER, scl=Pin(22), sda=Pin(21), freq=400000)
-import mpu6050 as mpu
+
+# accelerometer/ gyroscope, MPU6050
 mpu.init_sensor(i2c)
 
-LED = Pin(13, Pin.OUT)
-LED.value(0)
+# temperature/ humidity/ atmosperic pressure, BME280
+bme = bme280_float.BME280(i2c=i2c)
+
+
 
 def r():
     machine.reset()
 
 
-# =====TEMPORARY DISPLAY========
+# ===== DISPLAY ========
 from machine import Pin, SPI
 #import epaper2in9b_mod as epaper2in9b
 import epaper2in9
+
 spi = SPI(2, baudrate=2000000, polarity=1, phase=0, sck=Pin(25), mosi=Pin(15), miso=Pin(0))
+BTN1 = Pin(0, Pin.IN, Pin.PULL_UP)
 
 dc=Pin(32)
-rst=Pin(12)
+rst=Pin(14)
 busy=Pin(34)
 cs=Pin(33)
 
@@ -115,10 +131,10 @@ x = 0
 y = 0
 
 import framebuf
-buf = bytearray(128 * 296 // 8)
-fb = framebuf.FrameBuffer(buf, 128, 296, framebuf.MONO_HLSB)
-#bufy = bytearray(128 * 296 // 8)
-#fby = framebuf.FrameBuffer(bufy, 128, 296, framebuf.MONO_HLSB)
+buf = bytearray(w * h // 8)
+fb = framebuf.FrameBuffer(buf, w, h, framebuf.MONO_HLSB)
+#bufy = bytearray(w * h // 8)
+#fby = framebuf.FrameBuffer(bufy, w, h, framebuf.MONO_HLSB)
 #fby.fill(white)
 fb.fill(white)
 #fb.text('Hello World',30,0,black)
@@ -127,39 +143,6 @@ fb.fill(white)
 e=epaper2in9.EPD(spi, cs, dc, rst, busy)
 e.init()
 
-"""
-128x160 RGB TFT Touch Display with ST7735 Controller
-import display
-d = display.TFT()
-d.init(d.ST7735B, mosi=12, miso=34, clk=25, cs=33, dc=32, width=130, height=161, speed=10000000, splash=False)
-d.set_bg(d.BLACK)
-d.clear()
-d.font(d.FONT_Tooney)
-d.text(d.CENTER, 0, "BikOTA", d.GREEN, transparent=False)
-d.font(d.FONT_DefaultSmall)
-d.text(2, 32, "ID: {}".format(machine.nvs_getint('hardwareID')), d.WHITE)
-
-def draw_qr(m, xs=20, ys=71):
-    for y in range(len(m)*2):                   
-        for x in range(len(m[0])*2):            
-            value = m[y//2][x//2]   
-            if value == 0:
-                value=0xFFFFFF
-            else:
-                value=0x000000
-            d.pixel(xs+x, ys+y, value)
-
-def make_qr(address=m_address):
-    d.font(d.FONT_DefaultSmall)
-    d.text(d.CENTER, 80, "Generating Address...", d.WHITE)
-    from uQR import QRCode
-    qr=QRCode(border=2)
-    qr.clear()
-    qr.add_data(address)
-    m_address_matrix = qr.get_matrix()
-    d.text(d.CENTER, 80, "Generating Address...", d.BLACK)
-    draw_qr(m_address_matrix)
-"""
 
 def make_qr(address=m_address):
     print("Making QR code...")
@@ -168,12 +151,13 @@ def make_qr(address=m_address):
     #qr.clear()
     qr.add_data(address)
     m_address_matrix = qr.get_matrix()
+    print("QR code created.")
     return m_address_matrix
 
-def draw_qr(m=None, address=None, xs=0, ys=166, scale=1):
+def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
     if m == None:
         if address == None:
-            address = m_address
+            address = m_address_chsum
         m = make_qr(address) 
     for y in range(len(m)*scale):
         for x in range(len(m[0])*scale):
@@ -185,26 +169,37 @@ def draw_qr(m=None, address=None, xs=0, ys=166, scale=1):
             fb.pixel(xs+x, ys+y, value)
 
 def draw_title():
-    fb.text("B I K O T A", 20, 1, 0)
+    fb.fill_rect(0,0,w,10, black)
+    fb.text("B I K O T A", 20, 3, white)
     #e.draw_filled_rectangle(buf, 0,10,127,11, True)
     #e.draw_filled_rectangle(bufy, 0,15,127,168, True)
-    fb.fill_rect(0,10,127,3, black)
-    fb.fill_rect(0,25,127,3, black)
+    fb.fill_rect(0,10,w,3, black)
+    fb.fill_rect(0,35,w,3, black)
 
-def draw_status(stat="SLEEPING"):
-    fb.fill_rect(0,14,127,11, 1)
-    fb.text(str(stat), 30, 15, 0)
+def draw_status(stat="SLEEPING", xs=30, ys=20):
+    fb.fill_rect(0,14,127,21, 1)
+    fb.text(str(stat), xs, ys, 0)
 
-def draw_balance(iota=100):
-    fb.text("Balance:".format(iota), 0, 45, 0)
-    fb.fill_rect(0,53,127,11, 1)
-    fb.text("{} i".format(iota),0,  55, 0)
+def draw_date():
+    if rtc.now()[0] != 1970:
+        dt=rtc.now()[:6]
+        fb.fill_rect(0,45,127,11, 1)
+        fb.text("{}.{}.{} {}:{}:{}".format(dt[2], dt[1], dt[0]-2000, dt[3], dt[4], dt[5]), 0, 45, 0)
+
+def draw_balance(iota=0, xs=0, ys=160):
+    fb.fill_rect(0,ys,127,8, 1)
+    fb.text("Balance: {}i".format(iota), 0, ys, 0)
+    #fb.fill_rect(0,ys+8,127,11, 1)
+    #fb.text("{} i".format(iota),0,  ys+10, 0)
     
-
 def update_display():
     #e.display_frame(buf,bufy)
     e.set_frame_memory(buf, x, y, w, h)
     e.display_frame()
+
+def clear_buf(color = 1):
+    fb.fill_rect(0, 0, w, h, color)
+
 #===============================
 
 
@@ -248,13 +243,21 @@ def get_co2():
     return ppm, av_mv
 
 
+def get_bme():
+  try:
+    temp, hpa = bme.value
+    #temp, hpa, hum = bme.values
+    #if (isinstance(temp, float) and isinstance(hum, float)) or (isinstance(temp, int) and isinstance(hum, int)):
+    #  msg = (b'{0:3.1f},{1:3.1f}'.format(temp, hum))
+    #  hum = round(hum, 2)
+    #return temp, hum, hpa
+    return temp, hpa
+    #else:
+    #  return None #('Invalid sensor readings.')
+  except OSError as e:
+    print('Failed to read sensor: ', e)
+    return None
 
-def get_dht():
-    res, tmp, hum = dht.read()
-    if res:
-        return (tmp, hum)
-    else:
-        return False
     
 
 def gps_location():
@@ -269,15 +272,16 @@ def gsm_connect():
     global gsm
     if gsm.status()[0] is 98 : # 98-not started; 89-idle; 0-disconnected
         print("Power up GSM modem...")
+        gsm.debug(True)
         #freq(240000000)
         GSM_PWR.value(1)
         sleep(0.1)
         GSM_PWR.value(0)
         GSM_RST.value(1)
         GSM_MODEM_PWR.value(1)
-        sleep(1.5)
+        sleep(1.1)
         GSM_PWR.value(1)
-        #gsm.debug(True)
+        sleep(0.3)
     if gsm.status()[0] is 98 or 89 or 0:
         gsm.start(tx=27, rx=26, apn=GSM_APN, user=GSM_USER, password=GSM_PASS)
         sys.stdout.write('Waiting for AT command response...')
@@ -309,6 +313,7 @@ def gsm_online_check(connect=False):
     else:
         if connect:
             gsm_connect()
+            return True
         else:
             return False
 
@@ -360,7 +365,7 @@ def get_balance(url=NODE_URL, address=m_address, threshold=100):
         'X-IOTA-API-Version': '1'
     }
     try:
-        response = http_request("GET", url, json=command, headers=headers)
+        response = http_request("POST", url, json=command, headers=headers)
         balance = int(response.json()['balances'][0])
         return balance
     except Exception as e:
@@ -373,14 +378,13 @@ def hibernate():
     #d.text(d.CENTER, 45, "SLEEPING", d.YELLOW)
     deepsleep()
 
+
 print("\n\n",machine.wake_description())
 #if machine.reset_cause() == machine.DEEPSLEEP_RESET:
 #        print('reset_cause: deepsleep')
 #else:
 #    print("reset_cause:", machine.reset_cause())
 
-
-#"""
 
 
 def draw_status_updating():
@@ -416,25 +420,43 @@ counter = 0
 if BTN1.value() == 0:
     pass
 else:
+    adc.collect(1, len=10, readmv=True)
     while True:
         if True: #BTN1.value() == 0:
             #break
             LED.value(1)
-            draw_qr(address=adr, scale=3)
+            draw_qr(address=m_address_chsum, scale=3)
             draw_title()
             draw_status()
-            draw_balance()
+            draw_balance(iota=0)
             update_display()
-            #d.text(d.CENTER, 50, "Balance: 0 i", d.WHITE)
+            e.set_lut(e.LUT_PARTIAL_UPDATE)
+            gsm_online_check(connect=True)
+            print("gsm_online_check")
+            
+            draw_status("Updating Balance", xs=0)
+            sleep_ms(500)
+            update_old_ticks = 0
+            update_new_ticks = 0
+            
             while BTN1.value() != 0:
-                e.set_lut(e.LUT_PARTIAL_UPDATE)
-                draw_status("Checking Balance")
-                balance = get_balance(address=adr[:81])
-                draw_balance(balance)
-                update_display()
-            #    d.text(d.CENTER, 50, "Balance: xxxxxxxxx i", d.BLACK)
-            #    d.text(d.CENTER, 50, "Balance: {} i".format(balance), d.WHITE)
-                #sleep(5)
+                update_new_ticks = ticks_ms()
+                diff = ticks_diff(update_new_ticks, update_old_ticks)
+                if diff >= UPDATE_INV or diff < 0:
+                    print("update")
+                    update_old_ticks = update_new_ticks
+                    #balance = get_balance(url=NODE_URL2, address=m_address_chsum[:81])
+                    #draw_balance(balance)
+                    draw_balance(iota=counter)
+                    draw_date()
+                    update_display()
+                    counter+=1
+                print("counter", counter)
+                print("update_old_ticks", update_old_ticks)
+                print("update_new_ticks", update_new_ticks)
+                print("diff", ticks_diff(update_new_ticks, update_old_ticks))
+                print("\n")
+                sleep_ms(300)
             break
         print(counter)
         #if gps_location() == (0.0, 0.0):
@@ -447,6 +469,4 @@ else:
         #while True:
         #    
         #    sleep_ms(30)
-    #"""
-    #d.text(d.CENTER, 50, "   !!! TERMINATED !!!   ", d.RED)
 LED.value(0)
