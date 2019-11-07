@@ -32,3 +32,4 @@ from app import views, models
 
 db.create_all()   #create all tables if not exists
 
+
