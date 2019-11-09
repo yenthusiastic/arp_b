@@ -21,10 +21,8 @@ NODE_URL = "https://nodes.thetangle.org/"
 # dev-strings
 json_data = [{"hardwareID": 1}, {"vbat": 3850}]
 
-adr="LVYDWAFMEZRAQKPYOXYBJZXDKJCHGFTPPEQN9LIODWOMPVYJ9WRRNOBL9STKHUINQJZQ9RTZFQKEQWYHABJBATFLVX"
-adr2="LMXVMOYJRWECKHVPADXIBYZDW9HETZQVPJIJSZQPWBHIYGALPUAGKIVETNYJVEWFD9AQKGPTTAGWUYPLZBFBTXVBFX"
-m_address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9"
-m_address_chsum = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9UCQYMMMXX"
+
+m_address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9UCQYMMMXX"
 m_status = None
 m_states = {"offline": 0, "parked":1, "rented":2, "broken":3, "stolen":4}
 
@@ -32,6 +30,13 @@ m_states = {"offline": 0, "parked":1, "rented":2, "broken":3, "stolen":4}
 
 
 UPDATE_INV = 1000
+
+
+
+status = 0
+status_old = 0
+qr_display = 0
+session_address = ""
 
 
 import machine, sys 
@@ -48,16 +53,21 @@ import sds011
 
 rtc = RTC()
 
-"""
-Pins used
-LED: 13 (build in)
-PM: 12, 14
-BTN: 15
-GSM: 4, 5, 23, 26, 27
-DHT22: 25
+
+status_def = {
+    0:"Undefined",
+    1:"Sleeping",
+    2:"Updating Balance",
+    3:"Session running",
+    4:"BROKEN",
+    5:"ALARM",
+    6:"Offline"
+}
 
 
-"""
+
+
+
 
 # Setup GSM Module Pins
 GSM_PWR = Pin(4, Pin.OUT)
@@ -77,8 +87,11 @@ LED = Pin(13, Pin.OUT, value=0)
 # wake-up source for deepsleep
 rtc.wake_on_ext0(pin=BTN1, level=0)
 
-# alarm buzzer
-BUZ = Pin(2, Pin.OUT, value=1)
+# MOSFET for 5V AUX
+mos = Pin(12, Pin.OUT, value=0)
+
+# Alarm Buzzer
+buz = Pin(2, Pin.OUT, value=1)
 
 # CO2 sensor, MH-Z14
 adc=ADC(Pin(36))
@@ -105,9 +118,6 @@ bme = bme280_float.BME280(i2c=i2c)
 
 
 
-def r():
-    machine.reset()
-
 
 # ===== DISPLAY ========
 from machine import Pin, SPI
@@ -133,16 +143,10 @@ y = 0
 import framebuf
 buf = bytearray(w * h // 8)
 fb = framebuf.FrameBuffer(buf, w, h, framebuf.MONO_HLSB)
-#bufy = bytearray(w * h // 8)
-#fby = framebuf.FrameBuffer(bufy, w, h, framebuf.MONO_HLSB)
-#fby.fill(white)
 fb.fill(white)
-#fb.text('Hello World',30,0,black)
 
-#e.display_frame(buf,bufy)
 e=epaper2in9.EPD(spi, cs, dc, rst, busy)
 e.init()
-
 
 def make_qr(address=m_address):
     print("Making QR code...")
@@ -155,6 +159,7 @@ def make_qr(address=m_address):
     return m_address_matrix
 
 def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
+    fb.fill_rect(xs, ys, w, h-ys, white)   # clear QR area with white fill
     if m == None:
         if address == None:
             address = m_address_chsum
@@ -176,19 +181,22 @@ def draw_title():
     fb.fill_rect(0,10,w,3, black)
     fb.fill_rect(0,35,w,3, black)
 
-def draw_status(stat="SLEEPING", xs=30, ys=20):
-    fb.fill_rect(0,14,127,21, 1)
-    fb.text(str(stat), xs, ys, 0)
+def draw_status(stat="Undefined", xs=0, ys=20):
+    if xs == 0:
+        xs = int((w - (len(stat) * 8)) / 2) 
+    fb.fill_rect(0, 14, w, 21, white)
+    fb.text(str(stat), xs, ys, black)
 
 def draw_date():
     if rtc.now()[0] != 1970:
         dt=rtc.now()[:6]
-        fb.fill_rect(0,45,127,11, 1)
-        fb.text("{}.{}.{} {}:{}:{}".format(dt[2], dt[1], dt[0]-2000, dt[3], dt[4], dt[5]), 0, 45, 0)
+        fb.fill_rect(0, 45, w, 11, white)
+        fb.text("{}.{}.{}   {}:{}".format(dt[2], dt[1], dt[0]-2000, dt[3], dt[4]), 0, 45, black)
 
 def draw_balance(iota=0, xs=0, ys=160):
-    fb.fill_rect(0,ys,127,8, 1)
-    fb.text("Balance: {}i".format(iota), 0, ys, 0)
+    fb.fill_rect(0, ys, w, 8, white)
+    if iota >= 0:
+        fb.text("Balance: {}i".format(iota), 0, ys, black)
     #fb.fill_rect(0,ys+8,127,11, 1)
     #fb.text("{} i".format(iota),0,  ys+10, 0)
     
@@ -197,7 +205,7 @@ def update_display():
     e.set_frame_memory(buf, x, y, w, h)
     e.display_frame()
 
-def clear_buf(color = 1):
+def clear_buf(color = white):
     fb.fill_rect(0, 0, w, h, color)
 
 #===============================
@@ -245,7 +253,7 @@ def get_co2():
 
 def get_bme():
   try:
-    temp, hpa = bme.value
+    temp, hpa, _ = bme.values
     #temp, hpa, hum = bme.values
     #if (isinstance(temp, float) and isinstance(hum, float)) or (isinstance(temp, int) and isinstance(hum, int)):
     #  msg = (b'{0:3.1f},{1:3.1f}'.format(temp, hum))
@@ -373,47 +381,65 @@ def get_balance(url=NODE_URL, address=m_address, threshold=100):
         return False
 
 
+# TODO: request address from server
+def get_address():
+    return True, m_address
+
+
+def startup_sound():
+    buz.value(0)
+    sleep_ms(30)
+    buz.value(1)
+    sleep_ms(200)
+    buz.value(0)
+    sleep_ms(30)
+    buz.value(1)
+
+
 def hibernate():
-    #d.font(d.FONT_DejaVu24)
-    #d.text(d.CENTER, 45, "SLEEPING", d.YELLOW)
+    e.set_lut(e.LUT_FULL_UPDATE)
+    draw_status(status_def[1])
+    rtc.write(1, 1)
+    rtc.write_string(session_address)
+    draw_qr(address=session_address, scale=3)
+    draw_balance(-1)
+    update_display()
+    mos.value(0) # turn off 5V AUX
+    print("Going into deepsleep...")
     deepsleep()
 
 
-print("\n\n",machine.wake_description())
+def r():
+    machine.reset()
+
+
+
+
+# RTC memory status registers:
+"""
+    0: status_old
+    1: status
+    3: address saved
+    5: QR on display
+
+    string: IOTA address
+"""
+
+status_old = rtc.read(0)
+if rtc.read(3):
+    session_address = rtc.read_string()
+else:
+    check, s_adr = get_address()
+    if check is True:
+        session_address = s_adr
+
+
+
+print("\n\nReset cause:",machine.wake_description())
 #if machine.reset_cause() == machine.DEEPSLEEP_RESET:
 #        print('reset_cause: deepsleep')
 #else:
 #    print("reset_cause:", machine.reset_cause())
-
-
-
-def draw_status_updating():
-    draw_status("Updating")
-    update_display()
-    sleep(0.5)
-    draw_status("Updating.")
-    update_display()
-    sleep(0.5)
-    draw_status("Updating..")
-    update_display()
-    sleep(0.5)
-    draw_status("Updating...")
-    update_display()
-    sleep(0.5)
-
-def draw_qr_updating():
-    fb.fill_rect(0,166,127,296, white)
-    draw_qr(m=m_qr, scale=1)
-    update_display()
-    #sleep(0.5)
-    fb.fill_rect(0,166,127,296, white)
-    draw_qr(m=m_qr, scale=2)
-    update_display()
-    #sleep(0.5)
-    fb.fill_rect(0,166,127,296, white)
-    draw_qr(m=m_qr, scale=3)
-    update_display()
-    #sleep(0.5)
 
 
 counter = 0
@@ -425,17 +451,21 @@ else:
         if True: #BTN1.value() == 0:
             #break
             LED.value(1)
-            draw_qr(address=m_address_chsum, scale=3)
+            startup_sound()
             draw_title()
-            draw_status()
+            draw_status(status_def[2], xs=0)
             draw_balance(iota=0)
             update_display()
+            draw_qr(address=session_address, scale=3)
+            update_display()
             e.set_lut(e.LUT_PARTIAL_UPDATE)
-            gsm_online_check(connect=True)
-            print("gsm_online_check")
             
+            if rtc.now()[0] == 1970:  # if RTC is not set up via NTP
+                print("RTC not set up, calling gsm_online_check()")
+                gsm_online_check(connect=True)
+                
             draw_status("Updating Balance", xs=0)
-            sleep_ms(500)
+            sleep_ms(50)
             update_old_ticks = 0
             update_new_ticks = 0
             
@@ -443,7 +473,7 @@ else:
                 update_new_ticks = ticks_ms()
                 diff = ticks_diff(update_new_ticks, update_old_ticks)
                 if diff >= UPDATE_INV or diff < 0:
-                    print("update")
+                    #print("update")
                     update_old_ticks = update_new_ticks
                     #balance = get_balance(url=NODE_URL2, address=m_address_chsum[:81])
                     #draw_balance(balance)
@@ -452,9 +482,9 @@ else:
                     update_display()
                     counter+=1
                 print("counter", counter)
-                print("update_old_ticks", update_old_ticks)
-                print("update_new_ticks", update_new_ticks)
-                print("diff", ticks_diff(update_new_ticks, update_old_ticks))
+                #print("update_old_ticks", update_old_ticks)
+                #rint("update_new_ticks", update_new_ticks)
+                #print("diff", ticks_diff(update_new_ticks, update_old_ticks))
                 print("\n")
                 sleep_ms(300)
             break
