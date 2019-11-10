@@ -1,9 +1,9 @@
 '''
-  Based on:
-  https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm
+  MicroPython fork by loboris:
+  https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/
 '''
 
-# =====CONFIG========
+# ===== CONFIG ========
 
 # APN Credentials
 GSM_APN  = 'web.vodafone.de'
@@ -18,25 +18,27 @@ SERVER_URL = "https://req.dev.iota.pw/"
 NODE_URL2 = "https://nodes.iotadev.org/"
 NODE_URL = "https://nodes.thetangle.org/"
 
+UPDATE_INV = 1000
+
+RENT_TIME_FACTOR = 1
+
 # dev-strings
 json_data = [{"hardwareID": 1}, {"vbat": 3850}]
 
-
 m_address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9UCQYMMMXX"
-m_status = None
 m_states = {"offline": 0, "parked":1, "rented":2, "broken":3, "stolen":4}
 
+DEBUG = True
 # ===================
-
-
-UPDATE_INV = 1000
-
 
 
 status = 0
 status_old = 0
 qr_display = 0
 session_address = ""
+session_balance = 0
+session_start = 0
+session_rent_time = 0
 
 
 import machine, sys 
@@ -45,7 +47,7 @@ import gsm
 import socket
 import urequests as requests
 import json
-from time import sleep, sleep_ms, ticks_ms, ticks_diff
+from time import sleep, sleep_ms, ticks_ms, ticks_diff, time
 
 import mpu6050 as mpu
 import bme280_no_hum as bme280_float
@@ -59,14 +61,11 @@ status_def = {
     1:"Sleeping",
     2:"Updating Balance",
     3:"Session running",
-    4:"BROKEN",
-    5:"ALARM",
-    6:"Offline"
+    4:"Session over!",
+    5:"BROKEN",
+    6:"ALARM",
+    7:"Offline"
 }
-
-
-
-
 
 
 # Setup GSM Module Pins
@@ -148,15 +147,68 @@ fb.fill(white)
 e=epaper2in9.EPD(spi, cs, dc, rst, busy)
 e.init()
 
-def make_qr(address=m_address):
-    print("Making QR code...")
-    from uQR import QRCode
-    qr=QRCode(border=0)
-    #qr.clear()
-    qr.add_data(address)
-    m_address_matrix = qr.get_matrix()
-    print("QR code created.")
-    return m_address_matrix
+def draw_title():
+    fb.fill_rect(0,0,w,10, black)
+    fb.text("B I K O T A", 20, 3, white)
+    #e.draw_filled_rectangle(buf, 0,10,127,11, True)
+    #e.draw_filled_rectangle(bufy, 0,15,127,168, True)
+    fb.fill_rect(0,10,w,3, black)
+    fb.fill_rect(0,35,w,3, black)
+
+def draw_status(stat="Undefined", xs=0, ys=20):
+    fb.fill_rect(0, ys-6, w, 21, white)
+    if xs >= 0:
+        if xs == 0:
+            xs = int((w - (len(stat) * 8)) / 2) 
+        fb.text(str(stat), xs, ys, black)
+
+def draw_date(xs=0, ys=45):
+    if rtc.now()[0] != 1970:
+        fb.fill_rect(0, ys, xs+64, 11, white)
+        if xs>=0:
+            dt=rtc.now()[:6]
+            fb.text("{}.{}.{}".format(dt[2], dt[1], dt[0]-2000), 0, ys, black)
+
+
+
+def draw_balance(iota=session_balance, xs=0, ys=100):
+    fb.fill_rect(0, ys, w, 8, white)
+    if iota >= 0:
+        fb.text("Balance: {}i".format(iota), 0, ys, black)
+    #fb.fill_rect(0,ys+8,127,11, 1)
+    #fb.text("{} i".format(iota),0,  ys+10, 0)
+
+def draw_rent_time(xs=0, ys=120):
+    global status, status_old, session_rent_time, session_balance, session_start
+    status = status
+    status_old = status_old
+    session_rent_time= session_rent_time
+    session_balance = session_balance
+    session_start = session_start
+    fb.fill_rect(0, ys, w, 8, white)
+    if xs >= 0:
+        if session_start > 0:
+            session_rent_time = session_balance * RENT_TIME_FACTOR * 60
+            delta = int(time()) - session_start
+            if delta > session_rent_time and status == 3:
+                status_old = status
+                status = 4
+                end_of_session_sound()
+            if status == 3:
+                s_delta = session_rent_time - delta
+                dmin = int(s_delta // 60)
+                dsec = int(s_delta % 60)
+                fb.text("Session: {}:{}".format(dmin, dsec), 0, ys, black)
+            elif status == 4:
+                fb.text("Session over!", 0, ys, black)
+                
+
+def update_display():
+    e.set_frame_memory(buf, x, y, w, h)
+    e.display_frame()
+
+def clear_buf(color = white):
+    fb.fill_rect(0, 0, w, h, color)
 
 def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
     fb.fill_rect(xs, ys, w, h-ys, white)   # clear QR area with white fill
@@ -173,44 +225,17 @@ def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
                 value=0x00
             fb.pixel(xs+x, ys+y, value)
 
-def draw_title():
-    fb.fill_rect(0,0,w,10, black)
-    fb.text("B I K O T A", 20, 3, white)
-    #e.draw_filled_rectangle(buf, 0,10,127,11, True)
-    #e.draw_filled_rectangle(bufy, 0,15,127,168, True)
-    fb.fill_rect(0,10,w,3, black)
-    fb.fill_rect(0,35,w,3, black)
-
-def draw_status(stat="Undefined", xs=0, ys=20):
-    if xs == 0:
-        xs = int((w - (len(stat) * 8)) / 2) 
-    fb.fill_rect(0, 14, w, 21, white)
-    fb.text(str(stat), xs, ys, black)
-
-def draw_date():
-    if rtc.now()[0] != 1970:
-        dt=rtc.now()[:6]
-        fb.fill_rect(0, 45, w, 11, white)
-        fb.text("{}.{}.{}   {}:{}".format(dt[2], dt[1], dt[0]-2000, dt[3], dt[4]), 0, 45, black)
-
-def draw_balance(iota=0, xs=0, ys=160):
-    fb.fill_rect(0, ys, w, 8, white)
-    if iota >= 0:
-        fb.text("Balance: {}i".format(iota), 0, ys, black)
-    #fb.fill_rect(0,ys+8,127,11, 1)
-    #fb.text("{} i".format(iota),0,  ys+10, 0)
-    
-def update_display():
-    #e.display_frame(buf,bufy)
-    e.set_frame_memory(buf, x, y, w, h)
-    e.display_frame()
-
-def clear_buf(color = white):
-    fb.fill_rect(0, 0, w, h, color)
-
-#===============================
+#========== /DISPLAY =================
 
 
+def make_qr(address=m_address):
+    if DEBUG: print("Making QR code...")
+    from uQR import QRCode
+    qr=QRCode(border=0)
+    qr.add_data(address)
+    m_address_matrix = qr.get_matrix()
+    if DEBUG: print("QR code created.")
+    return m_address_matrix
 
 
 def checkms(t):
@@ -218,7 +243,7 @@ def checkms(t):
         start=ticks_ms()
     while t.value()==1:
         stop=ticks_ms()
-    print("Pulse:", (stop-start)-2)
+    if DEBUG: print("Pulse:", (stop-start)-2)
 
 
 def get_pm(p10=PM10_PIN, p25=PM25_PIN):
@@ -234,8 +259,8 @@ def get_pm(p10=PM10_PIN, p25=PM25_PIN):
         st_25=ticks_ms()
     while p25.value() == 1:
         sp_25=ticks_ms()
-    print("PM10:", (sp_10-st_10)-2)
-    print("PM25:", (sp_25-st_25)-2)
+    if DEBUG: print("PM10:", (sp_10-st_10)-2)
+    if DEBUG: print("PM25:", (sp_25-st_25)-2)
 
 
 
@@ -279,7 +304,7 @@ def gps_location():
 def gsm_connect():
     global gsm
     if gsm.status()[0] is 98 : # 98-not started; 89-idle; 0-disconnected
-        print("Power up GSM modem...")
+        if DEBUG: print("Power up GSM modem...")
         gsm.debug(True)
         #freq(240000000)
         GSM_PWR.value(1)
@@ -292,17 +317,17 @@ def gsm_connect():
         sleep(0.3)
     if gsm.status()[0] is 98 or 89 or 0:
         gsm.start(tx=27, rx=26, apn=GSM_APN, user=GSM_USER, password=GSM_PASS)
-        sys.stdout.write('Waiting for AT command response...')
+        if DEBUG: sys.stdout.write('Waiting for AT command response...')
         for retry in range(50):
             if gsm.atcmd('AT'):
                 break
             else:
-                sys.stdout.write('.')
+                if DEBUG: sys.stdout.write('.')
                 sleep_ms(500)
         else:
             raise Exception("Modem not responding!")
-        print()
-        print("Connecting to GSM...")
+        if DEBUG: print()
+        if DEBUG: print("Connecting to GSM...")
         gsm.connect()
         while gsm.status()[0] != 1:
             sys.stdout.write('.')
@@ -310,9 +335,9 @@ def gsm_connect():
             #pass
         print('IP:', gsm.ifconfig()[0])
         if rtc.now()[0] == 1970:
-            print("Update RTC from NTP server...")
+            if DEBUG: print("Update RTC from NTP server...")
             rtc.ntp_sync(server="hr.pool.ntp.org", tz="CET-1CEST")
-            print("RTC updated.")
+            if DEBUG: print("RTC updated.")
 
 
 def gsm_online_check(connect=False):
@@ -348,7 +373,7 @@ def http_request(method="GET", url=SERVER_URL, headers={}, data=None, json=None)
     try:
         gsm_online_check(True)
         req_status = None
-        print("Sending {} request...".format(method))
+        if DEBUG: print("Sending {} request...".format(method))
         req = requests.request(method=method, url=url, headers=headers, data=data, json=json)
         req_status = [req.status_code, req.reason]
         if req_status is not None:
@@ -361,7 +386,7 @@ def http_request(method="GET", url=SERVER_URL, headers={}, data=None, json=None)
 
 
 def get_balance(url=NODE_URL, address=m_address, threshold=100):
-    print("Requesting balance...")
+    if DEBUG: print("Requesting balance...")
     command = {
       "command": "getBalances",
       "addresses": [address[:81]],
@@ -395,11 +420,25 @@ def startup_sound():
     sleep_ms(30)
     buz.value(1)
 
+def end_of_session_sound():
+    buz.value(0)
+    sleep_ms(200)
+    buz.value(1)
+    sleep_ms(400)
+    buz.value(0)
+    sleep_ms(200)
+    buz.value(1)
+    sleep_ms(400)
+    buz.value(0)
+    sleep_ms(200)
+    buz.value(1)
+
 
 def hibernate():
     e.set_lut(e.LUT_FULL_UPDATE)
     draw_status(status_def[1])
-    rtc.write(1, 1) # flag: address in RTC memory
+    rtc.write(2, 1) # write status "sleeping" in RTC
+    rtc.write(3, 1) # flag: address in RTC memory
     hst = session_address
     hma = make_qr(session_address)
     for i in range(len(hma)):
@@ -413,6 +452,7 @@ def hibernate():
     rtc.write(5, 1) # flag: qr-code in RTC memory
     draw_qr(m=hma, scale=3)
     draw_balance(-1)
+    draw_rent_time(xs=-1)
     update_display()
     mos.value(0) # turn off 5V AUX
     print("Going into deepsleep...")
@@ -427,24 +467,41 @@ def r():
 
 # RTC memory status registers:
 """
-    0: status_old
-    1: status
+    1: status_old
+    2: status
     3: address saved
     5: QR on display
 
     string: IOTA address
 """
 
+
+
+
 e.set_lut(e.LUT_FULL_UPDATE)
 sma = None
 status_old = rtc.read(0)
+if DEBUG: print("status_old from memory: ", status_old)
+
+
+
+
+# TODO: CHECK WAKE UP REASON
+print("\n\nReset cause:",machine.wake_description())
+status = 2 # Updating balance
+
+
+
+
 if rtc.read(3):
+    if DEBUG: print("Reading session_address from memory...")
     session_address = rtc.read_string().split(',')[0]
 else:
     check, s_adr = get_address()
     if check is True:
         session_address = s_adr
 if rtc.read(5):
+    if DEBUG: print("Reading QR-Code from memory...")
     sst = rtc.read_string().split(',')[1:]
     sma = []
     for i in range(len(sst)):
@@ -454,15 +511,13 @@ if rtc.read(5):
                 sma[i].append(1)
             else:
                 sma[i].append(0)
+    if DEBUG: print("QR-Code read.")
 
 
 
-print("\n\nReset cause:",machine.wake_description())
-#if machine.reset_cause() == machine.DEEPSLEEP_RESET:
-#        print('reset_cause: deepsleep')
-#else:
-#    print("reset_cause:", machine.reset_cause())
 
+
+session_balance = 2
 
 counter = 0
 if BTN1.value() == 0:
@@ -475,8 +530,8 @@ else:
             LED.value(1)
             startup_sound()
             draw_title()
-            draw_status(status_def[2], xs=0)
-            draw_balance(iota=0)
+            draw_status(status_def[status], xs=0)
+            draw_balance(session_balance)
             update_display()
             if sma is not None:
                 draw_qr(m=sma, scale=3)
@@ -486,11 +541,11 @@ else:
             e.set_lut(e.LUT_PARTIAL_UPDATE)
             
             if rtc.now()[0] == 1970:  # if RTC is not set up via NTP
-                print("RTC not set up, calling gsm_online_check()")
+                if DEBUG: print("RTC not set up, calling gsm_online_check()")
                 gsm_online_check(connect=True)
-                
-            draw_status("Updating Balance", xs=0)
-            sleep_ms(50)
+                print("time()", time())
+                sleep(1)
+            sleep_ms(1)
             update_old_ticks = 0
             update_new_ticks = 0
             
@@ -500,10 +555,20 @@ else:
                 if diff >= UPDATE_INV or diff < 0:
                     #print("update")
                     update_old_ticks = update_new_ticks
-                    #balance = get_balance(url=NODE_URL2, address=m_address_chsum[:81])
-                    #draw_balance(balance)
-                    draw_balance(iota=counter)
+                    
+                    if session_balance > 0:
+                        if status == 2:
+                            status_old = status
+                            status = 3
+                            print("ss",int(time()))
+                            session_start = int(time())
+                            print("session_start", session_start)
+                    draw_status(status_def[status], xs=0)
                     draw_date()
+                    #session_balance = get_balance(url=NODE_URL2, address=m_address_chsum[:81])
+                    #session_balance = counter
+                    draw_balance(session_balance, ys=100)
+                    draw_rent_time()
                     update_display()
                     counter+=1
                 print("counter", counter)
