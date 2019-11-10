@@ -399,9 +399,19 @@ def startup_sound():
 def hibernate():
     e.set_lut(e.LUT_FULL_UPDATE)
     draw_status(status_def[1])
-    rtc.write(1, 1)
-    rtc.write_string(session_address)
-    draw_qr(address=session_address, scale=3)
+    rtc.write(1, 1) # flag: address in RTC memory
+    hst = session_address
+    hma = make_qr(session_address)
+    for i in range(len(hma)):
+        hst += ","
+        for j in range(len(hma[i])):
+            if hma[i][j]:
+                hst += "1"
+            else:
+                hst += "0"
+    rtc.write_string(hst) # write address and QR-Code into RTC memory
+    rtc.write(5, 1) # flag: qr-code in RTC memory
+    draw_qr(m=hma, scale=3)
     draw_balance(-1)
     update_display()
     mos.value(0) # turn off 5V AUX
@@ -425,13 +435,25 @@ def r():
     string: IOTA address
 """
 
+e.set_lut(e.LUT_FULL_UPDATE)
+sma = None
 status_old = rtc.read(0)
 if rtc.read(3):
-    session_address = rtc.read_string()
+    session_address = rtc.read_string().split(',')[0]
 else:
     check, s_adr = get_address()
     if check is True:
         session_address = s_adr
+if rtc.read(5):
+    sst = rtc.read_string().split(',')[1:]
+    sma = []
+    for i in range(len(sst)):
+        sma.append([])
+        for j in range(len(sst[i])):
+            if sst[i][j] == '1':
+                sma[i].append(1)
+            else:
+                sma[i].append(0)
 
 
 
@@ -456,7 +478,10 @@ else:
             draw_status(status_def[2], xs=0)
             draw_balance(iota=0)
             update_display()
-            draw_qr(address=session_address, scale=3)
+            if sma is not None:
+                draw_qr(m=sma, scale=3)
+            else:
+                draw_qr(address=session_address, scale=3)
             update_display()
             e.set_lut(e.LUT_PARTIAL_UPDATE)
             
