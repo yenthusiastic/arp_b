@@ -1,395 +1,413 @@
 
             <div class="content">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="card-title">Customize Charts</h4>
-                                </div>
-                                <div class="card-body">
-                                    <form method=post name="input_form" onsubmit="return validateForm()">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    
-
-                                                    <label> Hardware ID </label>
-                                                    <div style="display:flex; flex-direction:row;">
-                                                        <div class="btn-group bootstrap-select">
-                                                            <select multiple class="selectpicker" name="hw_label" id="hw_label" data-actions-box="true" data-title="Select Hardware ID" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" tabindex="-98" data-live-search="true" >
-                                                                    {% if addresses %}
-                                                                    {% for key in addresses%}
-                                                                    <option name ="check_{{key}}">{{key}}</option>
-                                                                    {% endfor %}
-                                                                    {%endif%}
-                                                            </select>
-                                                        </div>
-                                                    <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('hardware')">
-                                                        <i class="fa fa-times"></i>
-                                                    </button>
-                                                    </div>
-                                                    
-                                                </div>   
-                                            </div> 
-                                            <div class="col-md-6">
-                                                <div class="form-group">                                                        
-                                                    <label> Sensor Type </label>
-                                                    <div style="display:flex; flex-direction:row;">
-                                                        <div class="btn-group bootstrap-select">
-                                                            <select multiple class="selectpicker" name="sensor_label" id="sensor_label" data-actions-box="true" data-title="Select Sensor Type" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" tabindex="-98" data-live-search="true" >
-                                                                    {% if sensors %}
-                                                                    {% for sensor in sensors%}
-                                                                    <option>{{sensor}}</option>
-                                                                    {% endfor %}
-                                                                    {%endif%}
-                                                            </select>
-                                                        </div>
-                                                    <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('sensor')">
-                                                        <i class="fa fa-times"></i>
-                                                    </button>
-                                                    </div>
-                                                    
-                                                    
-                                                </div>  
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div >
-                                                    <label>
-                                                        Time Range
-                                                    </label>
-                                                    <div style="display:flex; flex-direction:row;">
-                                                    <div class='input-group date'>
-                                                        <input type="text" id="dtp" name="datetime_label" class="form-control" value = "{%if datetime_str %}{{datetime_str}}{%endif%}" placeholder="Select Date Time Range">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Customize Charts</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <form method=post name="input_form" onsubmit="return validateForm()">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
                                                         
-                                                        <span class="input-group-addon">
-                                                           
-                                                            <span class="fa fa-calendar" onclick="updateConfig()">
-                                                            </span>
-                                                        </span>
 
-                                                    </div>
-                                                    <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('dtp')">
-                                                        <i class="fa fa-times"></i>
-                                                    </button>
-                                                    </div>
+                                                        <label> Hardware ID </label>
+                                                        <div style="display:flex; flex-direction:row;">
+                                                            <div class="btn-group bootstrap-select">
+                                                                <select multiple class="selectpicker" name="hw_select" id="hw_select" data-actions-box="true" data-title="Select Hardware ID" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" tabindex="-98" data-live-search="true" >
+                                                                        {% if addresses %}
+                                                                        {% for key in addresses%}
+                                                                        <option name ="check_{{key}}">{{key}}</option>
+                                                                        {% endfor %}
+                                                                        {%endif%}
+                                                                </select>
+                                                            </div>
+                                                        <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('hardware')">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                        </div>
+                                                        
+                                                    </div>   
+                                                </div> 
+                                                <div class="col-md-6">
+                                                    <div class="form-group">                                                        
+                                                        <label> Sensor Type </label>
+                                                        <div style="display:flex; flex-direction:row;">
+                                                            <div class="btn-group bootstrap-select">
+                                                                <select multiple class="selectpicker" name="sensor_select" id="sensor_select" data-actions-box="true" data-title="Select Sensor Type" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" tabindex="-98" data-live-search="true" >
+                                                                        {% if sensors %}
+                                                                        {% for sensor in sensors%}
+                                                                        <option>{{sensor}}</option>
+                                                                        {% endfor %}
+                                                                        {%endif%}
+                                                                </select>
+                                                            </div>
+                                                        <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('sensor')">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                        </div>
+                                                        
+                                                        
+                                                    </div>  
                                                 </div>
                                             </div>
-                                           
-                                            <div class="col-md-3"> 
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>
-                                                        Session Address 
-                                                    </label>
-                                                    
-                                                    <div style="display:flex; flex-direction:row;">
-                                                        <div class="btn-group bootstrap-select">
-                                                            <select class="selectpicker" name="addr_select" id="addr_select" data-title="Select Session Address" data-style="btn-info btn-outline"  data-live-search="true" data-menu-style="dropdown-blue" tabindex="-98">
-                                                                
-                                                            </select>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div >
+                                                        <label>
+                                                            Time Range
+                                                        </label>
+                                                        <div style="display:flex; flex-direction:row;">
+                                                        <div class='input-group date'>
+                                                            <input type="text" id="dtp" name="datetime_label" class="form-control" value = "{%if datetime_str %}{{datetime_str}}{%endif%}" placeholder="Select Date Time Range">
+                                                            
+                                                            <span class="input-group-addon">
+                                                               
+                                                                <span class="fa fa-calendar" onclick="updateConfig()">
+                                                                </span>
+                                                            </span>
+    
                                                         </div>
-                                                    <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('address')">
-                                                        <i class="fa fa-times"></i>
-                                                    </button>
+                                                        <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('dtp')">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                        </div>
                                                     </div>
-                                                </div> 
+                                                </div>
+                                               
+                                                <div class="col-md-3"> 
+                                                </div>
                                             </div>
-                                        </div>
-                                        <button type="submit" name="btn" value="update_charts" class="btn btn-info btn-fill pull-left">Update Charts</button> 
-                                        <div class="clearfix"></div>   
-                                        
-                                        
-                                    </form>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>
+                                                            Session Address 
+                                                        </label>
+                                                        
+                                                        <div style="display:flex; flex-direction:row;">
+                                                            <div class="btn-group bootstrap-select">
+                                                                <select class="selectpicker" name="addr_select" id="addr_select" data-title="Select Session Address" data-style="btn-info btn-outline"  data-live-search="true" data-menu-style="dropdown-blue" tabindex="-98">
+                                                                    
+                                                                </select>
+                                                            </div>
+                                                        <button type="button" rel="tooltip" title="Clear" class="btn btn-danger btn-simple btn-link" onclick="clear_fields('address')">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                        </div>
+                                                    </div> 
+                                                </div>
+                                            </div>
+                                            <button type="submit" name="btn" value="update_charts" class="btn btn-info btn-fill pull-left">Update Charts</button> 
+                                            <div class="clearfix"></div>   
+                                            
+                                            
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-               
-                    <div class="row">
-                        {% if chart_data %}
-                            {% for data in chart_data%}
-                                <div class="col-md-6">
-                                    <div class="card ">
-                                        <div class="card-header ">
-                                            <h4 class="card-title">{{data.chart_title}}</h4>
-                                        </div>
-                                        <div class="card-body ">
-                                            <canvas id="{{data.chart_id}}"></canvas>
-                                        </div>
-                                        <div class="card-footer ">
-                                            <hr>
-                                            <div class="stats">
-                                                <i class="fa fa-history"></i> Updated {{minutes}} minutes ago
+                   
+                        <div class="row">
+                            {% if chart_data %}
+                                {% for data in chart_data%}
+                                    <div class="col-md-6">
+                                        <div class="card ">
+                                            <div class="card-header ">
+                                                <h4 class="card-title">{{data.chart_title}}</h4>
+                                            </div>
+                                            <div class="card-body ">
+                                                <canvas id="{{data.chart_id}}"></canvas>
+                                            </div>
+                                            <div class="card-footer ">
+                                                <hr>
+                                                <div class="stats">
+                                                    <i class="fa fa-history"></i> Updated {{minutes}} minutes ago
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-
-
-<script>
-    function validateForm() {
-        if (document.forms["input_form"]["hw_label"].value == ""){
-            demo.showNotification(from="top", align="center", msg="Please select at least one hardware to show graph", color="warning");
-            return false;
+    
+    
+    <script>
+        function validateForm() {
+            if (document.forms["input_form"]["hw_select"].value == ""){
+                demo.showNotification(from="top", align="center", msg="Please select at least one hardware to show graph", color="warning");
+                return false;
+            }
+            if (document.forms["input_form"]["sensor_select"].value == ""){
+                demo.showNotification(from="top", align="center", msg="Please select at least one sensor type to show graph", color="warning");
+                return false;
+            }
+            
+            if (document.forms["input_form"]["addr_select"].value != ""){
+                document.forms["input_form"]["dtp"].value = "";
+            } else {
+                if (document.forms["input_form"]["dtp"].value == ""){
+                    document.forms["input_form"]["dtp"].value = moment().format('DD.MM.YYYY HH:mm:ss');
+                }
+            }
+            
         }
-        if (document.forms["input_form"]["sensor_label"].value == ""){
-            demo.showNotification(from="top", align="center", msg="Please select at least one sensor type to show graph", color="warning");
-            return false;
-        }
+    
         
-        if (document.forms["input_form"]["addr_select"].value != ""){
-            document.forms["input_form"]["dtp"].value = "";
-        } else {
-            if (document.forms["input_form"]["dtp"].value == ""){
-                document.forms["input_form"]["dtp"].value = moment().format('DD.MM.YYYY HH:mm:ss');
+        function disable_calendar(state){
+            document.getElementById('dtp').disabled = state;
+            document.getElementsByClassName('fa-calendar')[0].disabled = state;
+            if ( document.getElementById('dtp').disabled) {
+                clear_fields("dtp");
             }
         }
+    
+    
+    
+        function clear_fields(type){
+            var chk_boxes = []
+            switch(type){
+                case "address":
+                    document.getElementsByName("addr_select")[0].value = "";
+                    $('#addr_select').selectpicker('refresh');
+                    disable_calendar(false);
+                    break;
+                case "sensor":
+                     document.getElementsByName("sensor_select")[0].value = "";
+                    $('#sensor_select').selectpicker('refresh');
+                    break;
+                case "hardware":
+                     document.getElementsByName("hw_select")[0].value = "";
+                    $('#hw_select').selectpicker('refresh');
+                    break;
+                case "dtp":
+                    document.getElementsByName("datetime_label")[0].value = "";
+                    break
+    
+            }
+            
+        };
         
-    }
-
-    function toggle_all_ids(){
-        $('#hw_label').selectpicker('selectAll');
-
-    }
-
     
-    
-    function toggle_calendar(){
-        document.getElementById('dtp').disabled = !document.getElementById('dtp').disabled;
-        document.getElementsByClassName('fa-calendar')[0].disabled = !document.getElementsByClassName('fa-calendar')[0].disabled;
-        if ( document.getElementById('dtp').disabled) {
-            clear_fields("dtp");
-        }
-    }
-
-
-    function clear_fields(type){
-        var chk_boxes = []
-        switch(type){
-            case "address":
-                document.getElementsByName("addr_select")[0].value = "";
-                $('#addr_select').selectpicker('refresh');
-                break;
-            case "sensor":
-                 document.getElementsByName("sensor_label")[0].value = "";
-                $('#sensor_label').selectpicker('refresh');
-                break;
-            case "hardware":
-                 document.getElementsByName("hw_label")[0].value = "";
-                $('#hw_label').selectpicker('refresh');
-                break;
-            case "dtp":
-                document.getElementsByName("datetime_label")[0].value = "";
-                break
-
-        }
-        
-    };
-    
-
-    chart_loader = {                      
-        initDashboardPageCharts: function() {
-            {% if chart_data %}
-                {% for ch_dat in chart_data %}
-                    
-                        var chartData = {
-                        labels : [{% for item in ch_dat.labels %}
-                                    "{{item}}",
-                                    {% endfor %}],
+        chart_loader = {                      
+            initDashboardPageCharts: function() {
+                {% if chart_data %}
+                    {% for ch_dat in chart_data %}
                         
-                        datasets : [
-                            {%for lg in ch_dat.legend%}  
-                            {
-                                label:  "{{lg}}",
-                                fill: true,
-                                lineTension: 0.1,
-                                backgroundColor: "rgba({{chart_colors[loop.index0]}},0.4)",
-                                borderColor: "rgba({{chart_colors[loop.index0]}},1.0)",
-                                borderCapStyle: 'butt',
-                                borderDash: [],
-                                borderDashOffset: 0.0,
-                                borderJoinStyle: 'miter',
-                                pointBorderColor: "rgba({{chart_colors[loop.index0]}},1.0)",
-                                pointBackgroundColor: "#fff",
-                                pointRadius: 3,
-                                pointBorderWidth: 1,
-                                pointHoverRadius: 5,
-                                pointHoverBackgroundColor: "rgba({{chart_colors[loop.index0]}},1.0)",
-                                pointHoverBorderColor: "rgba(220,220,220,1)",
-                                pointHoverBorderWidth: 2,
-                                pointHitRadius: 7,
-                                {% if ch_dat.series[loop.index0] %} data : {{ch_dat.series[loop.index0]}}, {%endif%}
-                                spanGaps: false
-                            },
-                            {%endfor%}
-                        ]
-                        
-                    };
-                        var ctx = document.getElementById('{{ch_dat.chart_id}}').getContext('2d');
-                        window.myChart = new Chart(ctx, {
-                            type: 'line',
-                            data: chartData,
-                            options: {
-                                scales: {
-                                    xAxes: [{
-                                        scaleLabel: {
+                            var chartData = {
+                            labels : [{% for item in ch_dat.labels %}
+                                        "{{item}}",
+                                        {% endfor %}],
+                            
+                            datasets : [
+                                {%for lg in ch_dat.legend%}  
+                                {
+                                    label:  "{{lg}}",
+                                    fill: true,
+                                    lineTension: 0.1,
+                                    backgroundColor: "rgba({{chart_colors[loop.index0]}},0.4)",
+                                    borderColor: "rgba({{chart_colors[loop.index0]}},1.0)",
+                                    borderCapStyle: 'butt',
+                                    borderDash: [],
+                                    borderDashOffset: 0.0,
+                                    borderJoinStyle: 'miter',
+                                    pointBorderColor: "rgba({{chart_colors[loop.index0]}},1.0)",
+                                    pointBackgroundColor: "#fff",
+                                    pointRadius: 3,
+                                    pointBorderWidth: 1,
+                                    pointHoverRadius: 5,
+                                    pointHoverBackgroundColor: "rgba({{chart_colors[loop.index0]}},1.0)",
+                                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                                    pointHoverBorderWidth: 2,
+                                    pointHitRadius: 7,
+                                    {% if ch_dat.series[loop.index0] %} data : {{ch_dat.series[loop.index0]}}, {%endif%}
+                                    spanGaps: false
+                                },
+                                {%endfor%}
+                            ]
+                            
+                        };
+                            var ctx = document.getElementById('{{ch_dat.chart_id}}').getContext('2d');
+                            window.myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: chartData,
+                                options: {
+                                    scales: {
+                                        xAxes: [{
+                                            scaleLabel: {
+                                                display: true,
+                                                labelString: '{{x_axis}}'
+                                            },
+                                            type: 'time',
+                                            distribution: 'series',
+                                            time: {
+                                                unit: "{{time_unit}}",
+                                                displayFormats: {
+                                                    'second' : 'HH:mm:ss',
+                                                    'minute' : 'HH:mm',
+                                                    'hour' : 'HH:mm',
+                                                    'day' : 'DD.MM HH:mm',
+                                                    'week' : 'DD.MM',
+                                                    'month' : "MM.YY",
+                                                    'year' : "YYYY"
+                                                }
+                                            }
+                                        }],
+                                        yAxes: [{
+                                            type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
                                             display: true,
-                                            labelString: '{{x_axis}}'
-                                        },
-                                        type: 'time',
-                                        distribution: 'series',
-                                        time: {
-                                            unit: "{{time_unit}}",
-                                            displayFormats: {
-                                                'second' : 'HH:mm:ss',
-                                                'minute' : 'HH:mm',
-                                                'hour' : 'HH:mm',
-                                                'day' : 'DD.MM HH:mm',
-                                                'week' : 'DD.MM',
-                                                'month' : "MM.YY",
-                                                'year' : "YYYY"
+                                            position: 'left',
+                                            id: 'y-axis-1',
+                                            scaleLabel: {
+                                                display: true,
+                                                labelString: '{{ch_dat.y_axis}}'
                                             }
                                         }
-                                    }],
-                                    yAxes: [{
-                                        type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
-                                        display: true,
-                                        position: 'left',
-                                        id: 'y-axis-1',
-                                        scaleLabel: {
-                                            display: true,
-                                            labelString: '{{ch_dat.y_axis}}'
-                                        }
+                                        ],
                                     }
-                                    ],
                                 }
-                            }
-                        });
-                {%endfor%}
-            {%endif%}
-        }
-    };
-    function updateConfig() {
-        $('#rtl-wrap').show();
-        $('#addr_select').selectpicker('val', '');
-        $('#addr_select').find('option').remove();
-        $('#addr_select').prop("disabled", true);
-        $('#addr_select').selectpicker('refresh');
-        var options = {};
-        options.timePicker = true;
-        options.timePicker24Hour = true;
-        options.timePickerIncrement = 5;
-        options.showCustomRangeLabel = true;
-        options.ranges = {
-            'Today': [moment(), moment()],
-            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-            'This Month': [moment().startOf('month'), moment().endOf('month')],
-            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-            };
-        options.locale = {
-            direction: $('#rtl').is(':checked') ? 'rtl' : 'ltr',
-            format: 'DD.MM.YYYY HH:mm:ss',
-            separator: ' - ',
-            applyLabel: 'Apply',
-            cancelLabel: 'Cancel',
-            fromLabel: 'From',
-            toLabel: 'To',
-            customRangeLabel: 'Custom',
-            daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
-            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-            firstDay: 2
-        };
-        options.autoApply = true;
-        options.autoUpdateInput = true;
-        options.alwaysShowCalendars = false;
-
-        
-        $('#dtp').daterangepicker(options, function(start, end, label) { console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')'); }).click();;
-        
-    }
-
-
-    $(document).ready(function() {
-        chart_loader.initDashboardPageCharts();
-        $('#rtl-wrap').hide();
-        $('#startDate').daterangepicker({
-          startDate: moment().subtract(6, 'days')
-        });
-
-        $('#endDate').daterangepicker({
-          startDate: moment()
-        });
-
-        {%if addresses %}
-        var all_addresses = [
-            {% for key in addresses%}
-                [
-                {% for value in addresses[key]%}
-                "{{value}}",
-                {%endfor%} 
-                ],
-            {% endfor %}
-        ]
-
-        {%endif%}
-        
-        
-        $("#hw_label").on("changed.bs.select", 
-            function(e, clickedIndex, newValue, oldValue) {
-            var selected_count = $('#hw_label :selected').length
-            var index;
-            if (selected_count == 1){
-                if (newValue){
-                    index = clickedIndex;
-                } else {
-                    index = $('#hw_label :selected')[0].label;
-                }
-                $('#addr_select').selectpicker('val', '');
-                $('#addr_select').find('option').remove();
-                $('#addr_select').prop("disabled", false);
-                var ul = document.getElementsByName("addr_select")[0];
-                for (i = 0; i < all_addresses[index].length; i++){
-                    var li = document.createElement("option");
-                    var linkText = document.createTextNode(all_addresses[index][i]);
-                    li.appendChild(linkText);
-                    ul.appendChild(li);
-                    
-                }
-            } else {
-                $('#addr_select').selectpicker('val', '');
-                $('#addr_select').find('option').remove();
-                $('#addr_select').prop("disabled", true);
+                            });
+                    {%endfor%}
+                {%endif%}
             }
+        };
+        function updateConfig() {
+            $('#rtl-wrap').show();
+            $('#addr_select').selectpicker('val', '');
+            $('#addr_select').find('option').remove();
+            $('#addr_select').prop("disabled", true);
             $('#addr_select').selectpicker('refresh');
-                       
-               
+            var options = {};
+            options.timePicker = true;
+            options.timePicker24Hour = true;
+            options.timePickerIncrement = 5;
+            options.showCustomRangeLabel = true;
+            options.ranges = {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                };
+            options.locale = {
+                direction: $('#rtl').is(':checked') ? 'rtl' : 'ltr',
+                format: 'DD.MM.YYYY HH:mm:ss',
+                separator: ' - ',
+                applyLabel: 'Apply',
+                cancelLabel: 'Cancel',
+                fromLabel: 'From',
+                toLabel: 'To',
+                customRangeLabel: 'Custom',
+                daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
+                monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                firstDay: 2
+            };
+            options.autoApply = true;
+            options.autoUpdateInput = true;
+            options.alwaysShowCalendars = false;
+    
+            
+            $('#dtp').daterangepicker(options, function(start, end, label) { console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')'); }).click();;
+            
+        }
+
+
+        $(document).ready(function() {
+            chart_loader.initDashboardPageCharts();
+            $('#rtl-wrap').hide();
+            $('#startDate').daterangepicker({
+              startDate: moment().subtract(6, 'days')
+            });
+    
+            $('#endDate').daterangepicker({
+              startDate: moment()
             });
 
-         $("#haddr_label").on("changed.bs.select", 
-            function() {
-             toggle_calendar();
-         });
+            {%if addresses %}
+            var all_addresses = [
+                {% for key in addresses%}
+                    [
+                    {% for value in addresses[key]%}
+                    "{{value}}",
+                    {%endfor%} 
+                    ],
+                {% endfor %}
+            ]
+
+            {%endif%}
          
-         
-        
-    });
+            
+            $("#hw_select").on("changed.bs.select", 
+                function(e, clickedIndex, newValue, oldValue) {
+                var selected_count =  $('#hw_select :selected').length
+                var index;
+                if (selected_count == 1){
+                    if (newValue){
+                        index = clickedIndex;
+                    } else {
+                        index = $('#hw_select :selected')[0].label;
+                    }
+                    $('#addr_select').selectpicker('val', '');
+                    $('#addr_select').find('option').remove();
+                    $('#addr_select').prop("disabled", false);
+                    var ul = document.getElementsByName("addr_select")[0];
+                    for (i = 0; i < all_addresses[index].length; i++){
+                        var li = document.createElement("option");
+                        var linkText = document.createTextNode(all_addresses[index][i]);
+                        li.appendChild(linkText);
+                        ul.appendChild(li);
+                        
+                    }
+                } else {
+                    $('#addr_select').selectpicker('val', '');
+                    $('#addr_select').find('option').remove();
+                    $('#addr_select').prop("disabled", true);
+                }
+                $('#addr_select').selectpicker('refresh');
+                           
+                   
+                });
 
-</script>
+                $("#addr_select").on("changed.bs.select", 
+                function(e, clickedIndex, newValue, oldValue) {
+                  if (newValue){
+                      disable_calendar(true);
+                  }
+                 
+            });
+             
+            {%if selected_hw_ids%}
+            var selected_hw_ids = [{%for hw_id in selected_hw_ids%} "{{hw_id}}", {%endfor%}]
+            $('#hw_select').selectpicker('val', selected_hw_ids);
+            {%endif%}
 
+            {%if selected_sensors%}
+            var selected_sensors = [{%for sensor in selected_sensors%} "{{sensor}}", {%endfor%}]
+            $('#sensor_select').selectpicker('val', selected_sensors);
+            {%endif%}
 
+            {%if selected_addr%}
+            var selected_addr = [{%for addr in selected_addr%} "{{addr}}", {%endfor%}]
+            $('#addr_select').selectpicker('val', selected_addr);
+            {%endif%}
 
-
-
+            $('#addr_select').selectpicker('refresh');
+            $('#sensor_select').selectpicker('refresh');
+            $('#addr_select').selectpicker('refresh');
+             
+            
+        });
+    
+    </script>
+    
+    
+    
+    
+    
+    

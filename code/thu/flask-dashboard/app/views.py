@@ -135,12 +135,10 @@ def query_data_addr(table, selector, hw_id, addr):
     return exec_query(query, 2)
 
 
-
 def get_hw_ids():
     print("""Getting all hardware IDs...""")
     msg = """SELECT DISTINCT "hardwareID" FROM public."SENSOR_DATA" WHERE "hardwareID" is NOT NULL ORDER BY "hardwareID" """
     return exec_query(msg,1)
-
 
 # provide login manager with load_user callback
 @lm.user_loader
@@ -350,6 +348,18 @@ def table():
                             content=render_template( 'pages/table.html') )
 
 
+# Render the hardware page
+@app.route('/hardware.html', methods=['GET', 'POST'])
+def hardware():
+    all_sensors = [sensor for sensor in units]
+    hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.sensors, Hardware.latitude, Hardware.longitude, Hardware.session_address).all()
+    print(hardware_data)
+    return render_template('layouts/default.html',
+                                    content=render_template( 'pages/hardware.html',
+                                    sensors=all_sensors,
+                                    hardware_data = hardware_data),
+                                )
+
 
 # Render the charts page
 @app.route('/charts.html', methods=['GET', 'POST'])
@@ -357,9 +367,12 @@ def charts():
     if current_user.is_authenticated:
         session_addresses = dict()
         hw_ids = get_hw_ids()
+        all_sensors = [sensor for sensor in units]
         time_unit = "second"
         global unit, chart_colors
-        all_sensors = [sensor for sensor in units]
+        selected_hw_ids = []
+        sensors = []
+        
         for hw_id in hw_ids:
             hw_id = "{}".format(hw_id)
             addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct().all() if hardware.address != ""]
@@ -370,22 +383,20 @@ def charts():
         if request.method == "POST":
             chart_data = []
             date_range = None
-            hw_ids_str = ""
-            sensors_str = ""
             addr_str = ""
             datetime_str = ""
             x_axis = "Time"
             minutes = 5
             try:
-                hw_ids_str = str(request.form.getlist("hw_label"))
-                selected_hw_ids = request.form.getlist("hw_label")
+                #hw_ids_str = str(request.form.getlist("hw_select"))
+                selected_hw_ids = request.form.getlist("hw_select")
             except:
-                selected_hw_ids = [hw_ids_str]
+                selected_hw_ids = []
             try:
-                sensors_str = str(request.form.getlist("sensor_label"))
-                sensors = request.form.getlist("sensor_label")
+                #sensors_str = str(request.form.getlist("sensor_select"))
+                sensors = request.form.getlist("sensor_select")
             except:
-                sensors = [sensors_str]        
+                sensors = []        
             try:
                 datetime_str =  request.form["datetime_label"]
             except:
@@ -399,7 +410,6 @@ def charts():
             except:
                 addr_str = ""
                     
-            print(hw_ids_str)
             
             for sensor in sensors:
                 data = {}
@@ -444,9 +454,9 @@ def charts():
                                         chart_data = chart_data,
                                         sensors=all_sensors,
                                         addresses = session_addresses,
-                                        hw_ids_str=hw_ids_str,
-                                        sensors_str=sensors_str,
-                                        addr_str=addr_str,
+                                        selected_hw_ids = selected_hw_ids,
+                                        selected_sensors = sensors,
+                                        selected_addr = [addr_str],
                                         time_unit=time_unit,
                                         chart_colors = chart_colors,
                                         datetime_str=datetime_str),

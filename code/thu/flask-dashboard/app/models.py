@@ -10,6 +10,8 @@ Support : https://appseed.us/support
 
 from app         import db
 from flask_login import UserMixin
+from sqlalchemy.dialects.postgresql import ARRAY, array
+
 
 class User(UserMixin, db.Model):
     __tablename__ = 'USERS'
@@ -78,15 +80,17 @@ class Hardware(db.Model):
     status = db.Column(db.String(10))
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    sensors = db.Column(ARRAY(db.Text))
    
     
-    def __init__(self, hardwareID, address_index, session_address, status, latitude, longitude):
+    def __init__(self, hardwareID, address_index, session_address, status, latitude, longitude, sensor):
         self.hardwareID = hardwareID
         self.address_index = address_index
         self.session_address = session_address
         self.status = status
         self.latitude = latitude
         self.longitude = longitude
+        self.sensors = sensors
     
     def __repr__(self):
         return '<Hardware ID: {}, address index: {}>'.format(self.hardwareID, self.address_index)
