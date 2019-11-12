@@ -83,7 +83,7 @@ class Hardware(db.Model):
     sensors = db.Column(ARRAY(db.Text))
    
     
-    def __init__(self, hardwareID, address_index, session_address, status, latitude, longitude, sensor):
+    def __init__(self, hardwareID, address_index, session_address, status, latitude, longitude, sensors):
         self.hardwareID = hardwareID
         self.address_index = address_index
         self.session_address = session_address
@@ -91,6 +91,15 @@ class Hardware(db.Model):
         self.latitude = latitude
         self.longitude = longitude
         self.sensors = sensors
+
+    def save(self):
+
+        # inject self into db session    
+        db.session.add ( self )
+
+        # commit change and save the object
+        db.session.commit( )
+        return self 
     
     def __repr__(self):
         return '<Hardware ID: {}, address index: {}>'.format(self.hardwareID, self.address_index)

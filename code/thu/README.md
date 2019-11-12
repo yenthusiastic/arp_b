@@ -34,7 +34,7 @@ For communication with bike hardware module
         - [X] Show user profile
         - [X] Update profile
         - [X] Update password 
-        - [X] Delete account
+        - [X] Delete account with confirmation dialog
     - [ ] Bike visualization (Main dashboard)
         - [ ] Visualize all bikes as markers on a map with details including
             - Hardware ID
@@ -46,9 +46,14 @@ For communication with bike hardware module
             - [ ] Status
             - [ ] Location & radius
     - [ ] Hardware management
-        - [ ] Create new hardware with required details
-        - [ ] Update hardware details
-        - [ ] Delete hardware
+        - [X] Create new hardware with required details
+            - Hardware ID
+            - Attached sensor(s)
+            - Address
+            - Status
+            - Place/ City of location
+        - [X] Update hardware details
+        - [X] Delete hardware with confirmation dialog
     - [X] Visualize sensor data of hardware(s) as charts, filter by
         - [X] Hardware ID
         - [X] Sensor type

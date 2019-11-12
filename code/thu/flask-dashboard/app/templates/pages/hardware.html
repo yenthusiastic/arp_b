@@ -3,8 +3,16 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card strpied-tabled-with-hover">
-                        <div class="card-header ">
-                            <h4 class="card-title">Hardware Details</h4>
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h4 class="card-title">Hardware Details</h4>
+                                </div>
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4 pull-right">
+                                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#create"><span class="fa fa-plus"></span>Add New Hardware</button>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body table-full-width table-responsive">
                             <table class="table table-hover table-striped">
@@ -12,7 +20,7 @@
                                     <th>ID</th>
                                     <th>Status</th>
                                     <th>Attached Sensors</th>
-                                    <th>Location (Latitude, Longitude)</th>
+                                    <th>Location</th>
                                     <th>Actions</th>
                                 </thead>
                                 <tbody>
@@ -21,10 +29,12 @@
                                     <tr>
                                         <td>{{hw_data[0]}}</td>
                                         <td>
-                                            {%if hw_data[1] == "rented"%}
+                                            {%if hw_data[1] == "rented" or hw_data[1] == "Rented"%}
                                             <span class="badge badge-warning">
-                                            {%elif hw_data[1] == "parked"%}
+                                            {%elif hw_data[1] == "parked" or hw_data[1] == "Parked"%}
                                             <span class="badge badge-success">
+                                            {%elif hw_data[1] == "defect" or hw_data[1] == "Defect"%}
+                                            <span class="badge badge-danger">
                                             {%else%}
                                             <span class="badge badge-info">
                                             {%endif%}
@@ -45,14 +55,16 @@
                                             {%endfor%}
                                             
                                         </td>
-                                        <td>({{hw_data[3]}}, {{hw_data[4]}})</td>
+                                        <!-- <td>({{hw_data[3]}}, {{hw_data[4]}})</td> -->
+                                        <td>{%if location_arr%}{{location_arr[loop.index0]}}{%endif%}</td>
                                         <td class="td-actions">
-                                            <button type="button" rel="tooltip" title="Edit Hardware" class="btn btn-primary btn-link btn-simple" name="edit_btn" id="edit_btn_{{hw_data[0]}}">
+                                            <button type="button" rel="tooltip" title="Edit Hardware" onclick="getSelectedID({{hw_data[0]}})"  data-toggle="modal" data-target="#edit" class="btn btn-primary btn-link btn-simple" name="edit_btn" id="edit_btn_{{hw_data[0]}}">
                                                 <i class="fa fa-edit"></i>
                                             </button>
-                                            <button type="button" rel="tooltip" title="Delete Hardware" class="btn btn-danger btn-simple btn-link">
+                                            <button type="submit" rel="tooltip" title="Delete Hardware" onclick="getSelectedID({{hw_data[0]}})" data-toggle="modal" data-target="#delete" class="btn btn-danger btn-simple btn-link">
                                                 <i class="fa fa-times"></i>
                                             </button>
+                                            </form>
                                         </td>
                                     </tr>
                                     {%endfor%}
@@ -62,188 +74,183 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">Manage Hardware</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <ul role="tablist" class="nav nav-tabs">
-                                    <li class="nav-item">
-                                        <a class="nav-link active" id="create_tab" href="#create_info" data-toggle="tab" ><i class="fa fa-plus-square"></i> Create Hardware</a>
-                                    </li>
-                                    <li role="presentation" class="nav-item" >
-                                        <a class="nav-link " id="edit_tab" href="#edit_info" data-toggle="tab"><i class="fa fa-edit"></i> Edit Hardware</a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="tab-content">
-                                    <div id="create_info" class="tab-pane fade active show" role="tabpanel" aria-labelledby="create_tab">
-                                        <form method=post name="create_form">
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group" >
-                                                        <label>Hardware ID</label>
-                                                        <input type="text" class="form-control"  placeholder="Enter Hardware ID" name ="new_hw_id" value="">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Status</label>
-                                                        <input type="text" class="form-control"  placeholder="Enter Status" name="new_status" value="">
-                                                    </div>
-                                                </div>
-                                                    <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Location</label>
-                                                        <input type="text" class="form-control"  placeholder="Enter values (Lattitude, Longitude)" name="new_location" value="">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label>Attached Sensors</label>
-                                                        <br>
-                                                        <!-- <div class="btn-group bootstrap-select">
-                                                            <select multiple class="selectpicker" name="new_sensor_select" id="new_sensor_create" data-actions-box="true" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" data-live-search="true" >
-                                                            
-                                                            {% if sensors %}
-                                                            {% for sensor in sensors%}
-                                                                <option>{{sensor}}</option>
-                                                                
-                                                            {% endfor %}
-                                                            {%endif%}
-                                                                
-                                                            </select>
-                                                        </div> -->
-
-                                                        <input type="text" class="form-control" id="new_sensor_tags" name="new_sensor_tags" value="" data-role="tagsinput" placeholder="Add sensors" />
-                                                    </div>
-                                                </div>
-                                                
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group" >
-                                                        <label>Initial session address</label>
-                                                        <input type="text" class="form-control"  placeholder="Enter Session Address" value="" >
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button type="submit" name="create_btn" value="create_hardware" class="btn btn-info btn-fill pull-right">Create Hardware</button>
-                                            <div class="clearfix"></div>
-                                        </form>
-                                    </div>
-                                
-                                    <div id="edit_info" class="tab-pane fade " role="tabpanel" aria-labelledby="edit_tab">
-                                        <form method=post name="edit_form">
-                                            <br>
-                                                <p class="card-category">Click on the Edit icon on the table to activate editing</p>
-                                            <br>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group" >
-                                                        <label>Hardware ID</label>
-                                                        <input type="text" class="form-control"  placeholder="Hardware ID" name ="hw_id" value="">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Status</label>
-                                                        <input type="text" class="form-control"  placeholder="Status" name="status" value="">
-                                                    </div>
-                                                </div>
-                                                    <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Location</label>
-                                                        <input type="text" class="form-control"  placeholder="Location" name="location" value="">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label>Attached Sensors</label>
-                                                        <br>
-                                                        <div class="btn-group bootstrap-select">
-                                                            <select multiple class="selectpicker" name="sensor_select" id="sensor_select" data-actions-box="true" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" data-live-search="true" >
-                                                            
-                                                            {% if sensors %}
-                                                            {% for sensor in sensors%}
-                                                                <option>{{sensor}}</option>
-                                                                
-                                                            {% endfor %}
-                                                            {%endif%}
-                                                                
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group" >
-                                                        <label>Current session address</label>
-                                                        <input type="text" class="form-control"  placeholder="Current Session Address" name="addr" disabled>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button type="submit" name="update_btn" value="update_hardware" class="btn btn-info btn-fill pull-right">Update Hardware</button>
-                                            <div class="clearfix"></div>
-                                        </form>
-                                    </div>
-                                
-                            </div>
-
-
-                            
-                        </div>
-                    </div>
-                </div>
-                
-                </div>
         </div>
+
+
+        <div class="modal fade" id="create" name="create_modal" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="fa fa-remove" aria-hidden="true"></span></button>
+                        <h4 class="modal-title custom_align" id="Heading">Create Hardware</h4>
+                    </div>
+                    <form method="post" name="create_form" onsubmit="return validateCreateForm()">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Hardware ID</label>
+                                <input class="form-control" type="text" name="new_hw_id" placeholder="Hardware ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control" name="new_status">
+                                    <option>Parked</option>
+                                    <option>Rented</option>
+                                    <option>Defect</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Attached Sensors</label>
+                                <select id="new_sensor_select" name="new_sensors" class="form-control" style="width:100%" multiple="multiple">
+                                    {% if sensors %}
+                                    {% for sensor in sensors%}
+                                        <option>{{sensor}}</option>
+                                    {% endfor %}
+                                    {%endif%}
+                                </select>
+                                
+                            </div>
+                            <div class="form-group">  
+                                <label>Location (Latitude, Longitude)</label>           
+                                <input class="form-control " type="text" name="new_location" placeholder="Location (Latitude, Longitude)">
+                            </div>
+                            <div class="form-group">  
+                                <label>Initial Address</label>           
+                                <input class="form-control " type="text" name="new_addr" placeholder="Initial Address">
+                            </div>
+                        </div>
+                        <div class="modal-footer ">
+                            <button type="submit" name="btn" value="create_hardware" class="btn btn-success" ><span class="fa fa-check"></span> Submit</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="fa fa-remove"></span> Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.modal-content --> 
+            </div>
+                <!-- /.modal-dialog --> 
+        </div>
+
+        <div class="modal fade" id="edit" name="edit_modal" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="fa fa-remove" aria-hidden="true"></span></button>
+                        <h4 class="modal-title custom_align" id="Heading">Edit Hardware Details</h4>
+                    </div>
+                    <form method="post" name="edit_form" onsubmit="return validateEditForm()">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Hardware ID</label>
+                                <input class="form-control" type="text" name="hw_id" placeholder="Hardware ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control" name="status">
+                                    <option id="option_parked">Parked</option>
+                                    <option id="option_rented">Rented</option>
+                                    <option id="option_defect">Defect</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Attached Sensors</label>
+                                <select id="sensor_select" name="sensors" class="form-control" style="width:100%" multiple="multiple">
+                                    {% if sensors %}
+                                    {% for sensor in sensors%}
+                                        <option>{{sensor}}</option>
+                                    {% endfor %}
+                                    {%endif%}
+                                </select>
+                                
+                            </div>
+                            <div class="form-group">  
+                                <label>Location (Latitude, Longitude)</label>           
+                                <input class="form-control " type="text" name="location" placeholder="Location (Latitude, Longitude)">
+                            </div>
+                            <div class="form-group">  
+                                <label>Session Address</label>           
+                                <input class="form-control " type="text" name="addr" disabled>
+                            </div>
+                        </div>
+                        <div class="modal-footer ">
+                            <button type="submit" name="btn" value="update_hardware" class="btn btn-success" ><span class="fa fa-check"></span>Update Hardware</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="fa fa-remove"></span> Cancel</button>
+                        </div>
+                    </form>
+                </div>
+              <!-- /.modal-content --> 
+            </div>
+                <!-- /.modal-dialog --> 
+        </div>
+              
+        <div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="fa fa-remove" aria-hidden="true"></span></button>
+                        <h4 class="modal-title custom_align" id="Heading">Delete Hardware</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger"><span class="fa fa-warning"></span>Are you sure you want to permanently delete this hardware?</div> 
+                    </div>
+                    <form method="post">
+                        <div class="modal-footer ">
+                            <button type="submit" name="btn" id="delete_hardware" value="delete_hardware" class="btn btn-success" ><span class="fa fa-check"></span> Yes</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="fa fa-remove"></span> No</button>
+                        </div>
+                    </form>
+                </div>
+              <!-- /.modal-content --> 
+            </div>
+                <!-- /.modal-dialog --> 
+        </div>
+
     </div>
     
     
-    <script>
-    $(document).ready(function() {
-        els = document.getElementsByName("edit_form")[0].elements;
-        for (i = 0; i < els.length; i++) {
-            els[i].disabled = true;
+<script>
+    
+    function validateCreateForm() {
+        var hw_id = document.forms["create_form"]["new_hw_id"].value;
+        var hw_ids = [
+        {%for hw_id in hardware_data%}
+        "{{hw_id[0]}}",
+        {%endfor%}
+        ];
+        if (hw_id == ""){
+            demo.showNotification(from="top", align="center", msg="Please enter valid hardware ID", color="warning");
+            return false;
+        } 
+        
+        else if (hw_ids.includes(hw_id)) {
+            demo.showNotification(from="top", align="center", msg="Hardware " + hw_id + " already exists!", color="warning");
+            return false;
         }
-        $('#sensor_select').selectpicker({
-            dropupAuto: false
-        });
-        $('#new_sensor_select').selectpicker({
-            dropupAuto: false
-        });
+    };
 
-        $("#new_sensor_tags").tagsinput('items')
-                
-    });
+    function validateEditForm() {
+        if (document.forms["edit_form"]["hw_id"].value == ""){
+            demo.showNotification(from="top", align="center", msg="Please enter valid hardware ID", color="warning");
+            return false;
+        } 
+        if (document.forms["edit_form"]["location"].value == "None, None"){
+            document.forms["edit_form"]["location"].value = "";
+        }
+    };
 
-    //When the Edit icons are clicked, enable the Edit Form
+    var selected_id;
+    function getSelectedID(id){
+        document.getElementById("delete_hardware").value = "delete_hardware_" + id;
+        selected_id = id;
+    }
+
+    //When the Edit icons are clicked, fill the Edit Form with values
     $("button[name='edit_btn']").click(function() {
-        var clicked_id = parseInt($(this).attr("id").split("_")[2]);
-
-        //Simulate mouse click on Edit Tab button
-        document.getElementById("edit_tab").click();
-
-        //enable all fields of Edit Form
-        els = document.getElementsByName("edit_form")[0].elements;
-        for (i = 0; i < els.length; i++) {
-            els[i].disabled = false;
-        };
-        document.getElementsByName("hw_id")[0].value = clicked_id;
         var sensors;
+        var status;
+        document.getElementsByName("hw_id")[0].value = selected_id;
         {%for hw_data in hardware_data%}
-        if ({{loop.index}} == clicked_id){
-            document.getElementsByName("status")[0].value = "{{hw_data[1]}}";
-            document.getElementsByName("location")[0].value = "({{hw_data[3]}}, {{hw_data[4]}})";
+        if ({{loop.index}} == selected_id){
+            status = "{{hw_data[1]|lower}}";
+            document.getElementsByName("location")[0].value = "{{hw_data[3]}}, {{hw_data[4]}}";
             document.getElementsByName("addr")[0].value = "{{hw_data[5]}}";
 
             sensors = [
@@ -254,14 +261,29 @@
                 "{{sensor[0]|upper}}{{sensor[1:]}}", 
                 {%endif%}
                 {%endfor%}
-            ];;
+            ];
         }
         {%endfor%}
         
-        document.getElementsByName("addr")[0].disabled = true;
-        $('#sensor_select').selectpicker('val', sensors);       
-        $('#sensor_select').selectpicker('refresh');
+        $('#sensor_select').val(sensors);
+        $('#sensor_select').select2({
+        });
+
+        document.getElementById("option_" + status).selected = true;
+        
+    });
+
+    $(document).ready(function() {
+
+        $('#new_sensor_select').select2({
+            placeholder: 'Select sensor(s)'
+        });
+
+        $('#sensor_select').select2({
+            placeholder: 'Select sensor(s)'
+        });
+        
+                
     });
     
-    
-    </script>
+</script>

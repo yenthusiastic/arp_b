@@ -19,7 +19,10 @@ from app.models import User, SensorData, Hardware
 from app.forms  import LoginForm, RegisterForm
 import psycopg2 
 from datetime import datetime
+from geopy.geocoders import Nominatim
 
+
+geolocator = Nominatim(user_agent="Bikota")
 
 units = {
     "Temperature" : "°C",
@@ -284,9 +287,13 @@ def user():
                             "country": country,
                             "bio": bio}
                 #update database
-                db.session.commit()
-                current_user.user = username
-                flash("Successfully updated profile for user {}".format(username), "success")
+                try:
+                    db.session.commit()
+                    current_user.user = username
+                    flash("Successfully updated profile for user {}".format(username), "success")
+                except Exception as e:
+                    print("Error updateing profile for user: ", e)
+                    flash("Unable to update profile for user {}. Please make sure inputs are valid".format(username), "danger")
             else:
                 #both username and email do not exist, show error
                 flash("Invalid username or email", "danger")
@@ -299,8 +306,12 @@ def user():
             if request.form["new_pwd_conf"] == new_pwd:
                 if check_password_hash(user.password, password):
                     user.password = generate_password_hash(new_pwd)
-                    db.session.commit()
-                    flash("Successfully updated password for user {}".format(username), "success")
+                    try:
+                        db.session.commit()
+                        flash("Successfully updated password for user {}".format(username), "success")
+                    except Exception as e:
+                        print("Error changing password for user: ", e)
+                        flash("Unable to change password for user {}. Please make sure inputs are valid".format(username), "danger")
                 else:
                     flash("Current password is invalid", "danger")
             else:
@@ -310,9 +321,13 @@ def user():
             user = User.query.filter_by(user=username).first()  #find user by username
             password = request.form["pwd_del"]
             if check_password_hash(user.password, password):
-                db.session.delete(user)
-                db.session.commit()
-                flash("Successfully deleted user account {}".format(username), "success")
+                try:
+                    db.session.delete(user)
+                    db.session.commit()
+                    flash("Successfully deleted user account {}".format(username), "success")
+                except Exception as e:
+                    print("Error deleting user: ", e)
+                    flash("Unable to delete user {}. Please make sure inputs are valid".format(username), "danger")
                 return redirect(url_for('index'))
             else:
                 flash("Password is invalid", "danger")
@@ -351,21 +366,120 @@ def table():
 # Render the hardware page
 @app.route('/hardware.html', methods=['GET', 'POST'])
 def hardware():
-    all_sensors = [sensor for sensor in units]
-    hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.sensors, Hardware.latitude, Hardware.longitude, Hardware.session_address).all()
-    print(hardware_data)
-    return render_template('layouts/default.html',
-                                    content=render_template( 'pages/hardware.html',
-                                    sensors=all_sensors,
-                                    hardware_data = hardware_data),
-                                )
+    if current_user.is_authenticated:
+        location_arr = []
+        all_sensors = [sensor for sensor in units]    
+        hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.sensors, Hardware.latitude, Hardware.longitude, Hardware.session_address).order_by(Hardware.hardwareID).all()
+        for hardware in hardware_data:
+            if hardware[3] is not None and hardware[4] is not None:
+                try:
+                    location_str = geolocator.reverse("{}, {}".format(hardware[3], hardware[4]))
+                    location_arr.append(location_str.raw["address"]["city"])
+                except:
+                    try: 
+                        location_str = geolocator.reverse("{}, {}".format(hardware[3], hardware[4]))
+                        location_arr.append(location_str.raw["address"]["town"])
+                    except:
+                        try:
+                            location_str = geolocator.reverse("{}, {}".format(hardware[3], hardware[4]))
+                            location_arr.append(location_str.raw["address"]["state"])
+                        except Exception as e:
+                            location_arr.append("{}, {}".format(hardware[3], hardware[4]))
+                            print("Error getting reverse location from latitude and longitude {}, {}: {}".format(hardware[3], hardware[4], e))
+            else:
+                location_arr.append("No data available")
+                        
+        if request.method == "POST":
+            if request.form["btn"] == "create_hardware":
+                hw_id = request.form["new_hw_id"]
+                status = request.form["new_status"]
+                try:
+                    location = request.form["new_location"].split(",")
+                    print("location: ", location)
+                    latitude = location[0]
+                    longitude = location[1]
+                except:
+                    latitude = None
+                    longitude = None
+                try:
+                    sensors = request.form.getlist("new_sensors")
+                except:
+                    sensors = None
+                try:
+                    addr = request.form["new_addr"]
+                except:
+                    addr = ""
+
+                # filter Hardware out of database through ID
+                hardware = Hardware.query.filter_by(hardwareID=hw_id).first()
+                if hardware:
+                    msg = 'Error: Hardware ID {} already exists!'.format(hw_id)
+                    flash(msg, "warning")
+                else:
+                    try:
+                        new_hw = Hardware(hw_id, 0, addr, status, latitude, longitude, sensors)
+                        new_hw.save()
+                        flash("Successfully created hardware {}".format(hw_id), "success")
+                    except Exception as e:
+                        print("Error creating hardware: ", e)
+                        flash("Unable to create hardware {}. Please make sure inputs are valid".format(hw_id), "danger")
+            elif request.form["btn"] == "update_hardware":
+                hw_id = request.form["hw_id"]
+                hardware = Hardware.query.filter_by(hardwareID=hw_id).first()  
+                status = request.form["status"]
+                hardware.status = status
+                sensors = request.form.getlist("sensors")
+                hardware.sensors = sensors
+                try:
+                    location = request.form["location"].split(",")
+                    latitude = location[0]
+                    longitude = location[1]
+                    if latitude == "None" or longitude == "None":
+                        latitude = None
+                        longitude = None
+                except:
+                    latitude = None
+                    longitude = None
+                hardware.latitude = latitude
+                hardware.longitude = longitude
+                try:
+                    db.session.commit()
+                    flash("Successfully updated hardware {}".format(hw_id), "success")
+                except Exception as e:
+                    print("Error updating hardware: ", e)
+                    flash("Unable to update hardware {}. Please make sure inputs are valid".format(hw_id), "danger")
+            else:
+                if "delete_hardware" in request.form["btn"]:
+                    print("button: ", request.form["btn"])
+                    hw_id = request.form["btn"].split("_")[-1]
+                    print("Deleting hardware {}".format(hw_id))
+                    try:
+                        hardware = Hardware.query.filter_by(hardwareID=hw_id).first() 
+                        db.session.delete(hardware)
+                        db.session.commit()
+                        flash("Successfully deleted hardware {}".format(hw_id), "success")
+                    except Exception as e:
+                        print("Error deleting hardware: ", e)
+                        flash("Unable to delete hardware {}".format(hw_id), "danger")
+
+            return redirect('/hardware.html')
+        else:
+            return render_template('layouts/default.html',
+                                        content=render_template( 'pages/hardware.html',
+                                        sensors=all_sensors,
+                                        hardware_data = hardware_data,
+                                        location_arr = location_arr),
+                                    )
+    else:
+        flash("Please log in or register to manage hardwares", "warning")
+        return redirect('/login.html')
 
 
 # Render the charts page
 @app.route('/charts.html', methods=['GET', 'POST'])
 def charts():
     if current_user.is_authenticated:
-        session_addresses = dict()
+        hw_sensor_addr = dict()
         hw_ids = get_hw_ids()
         all_sensors = [sensor for sensor in units]
         time_unit = "second"
@@ -374,11 +488,14 @@ def charts():
         sensors = []
         
         for hw_id in hw_ids:
+            hw_data = dict()
             hw_id = "{}".format(hw_id)
-            addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct().all() if hardware.address != ""]
-            session_addresses[hw_id] = addresses
-        
-        
+            addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct().order_by(SensorData.address).all() if hardware.address != ""]
+            sensors = db.session.query(Hardware.sensors).filter(Hardware.hardwareID==hw_id).all()[0][0]
+            hw_data["addresses"] = addresses
+            hw_data["sensors"] = sensors
+            print(hw_data)
+            hw_sensor_addr[hw_id] = hw_data
         
         if request.method == "POST":
             chart_data = []
@@ -388,12 +505,10 @@ def charts():
             x_axis = "Time"
             minutes = 5
             try:
-                #hw_ids_str = str(request.form.getlist("hw_select"))
                 selected_hw_ids = request.form.getlist("hw_select")
             except:
                 selected_hw_ids = []
             try:
-                #sensors_str = str(request.form.getlist("sensor_select"))
                 sensors = request.form.getlist("sensor_select")
             except:
                 sensors = []        
@@ -453,7 +568,7 @@ def charts():
                                         minutes=minutes,
                                         chart_data = chart_data,
                                         sensors=all_sensors,
-                                        addresses = session_addresses,
+                                        hw_sensor_addr = hw_sensor_addr,
                                         selected_hw_ids = selected_hw_ids,
                                         selected_sensors = sensors,
                                         selected_addr = [addr_str],
@@ -466,7 +581,7 @@ def charts():
             return render_template('layouts/default.html',
                                     content=render_template( 'pages/charts.html',
                                     sensors=all_sensors,
-                                    addresses = session_addresses,
+                                    hw_sensor_addr = hw_sensor_addr,
                                     time_unit=time_unit),
                                 )
     else:

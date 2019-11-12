@@ -18,8 +18,8 @@
                                                         <div style="display:flex; flex-direction:row;">
                                                             <div class="btn-group bootstrap-select">
                                                                 <select multiple class="selectpicker" name="hw_select" id="hw_select" data-actions-box="true" data-title="Select Hardware ID" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" tabindex="-98" data-live-search="true" >
-                                                                        {% if addresses %}
-                                                                        {% for key in addresses%}
+                                                                        {% if hw_sensor_addr %}
+                                                                        {% for key in hw_sensor_addr%}
                                                                         <option name ="check_{{key}}">{{key}}</option>
                                                                         {% endfor %}
                                                                         {%endif%}
@@ -329,47 +329,94 @@
               startDate: moment()
             });
 
-            {%if addresses %}
-            var all_addresses = [
-                {% for key in addresses%}
+
+            var hw_addresses;
+            var hw_sensors;
+
+            {%if hw_sensor_addr %}
+            hw_addresses = [
+                {% for hw in hw_sensor_addr%}
                     [
-                    {% for value in addresses[key]%}
-                    "{{value}}",
+                    {% for addr in hw_sensor_addr[hw]["addresses"]%}
+                    "{{addr}}",
                     {%endfor%} 
                     ],
                 {% endfor %}
-            ]
+            ];            
+            
+            hw_sensors = [
+                {% for hw in hw_sensor_addr%}
+                    [
+                    {% for sensor in hw_sensor_addr[hw]["sensors"]%}
+                        {% if sensor|length < 5%}
+                        "{{sensor|upper}}",
+                        {%else%}
+                        "{{sensor[0]|upper}}{{sensor[1:]}}",
+                        {%endif%}
+                    {% endfor %}
+                    ],
+                {% endfor %}
+            ];
 
             {%endif%}
+
+            var all_sensors = [
+                {% for sensor in sensors%}
+                    
+                    "{{sensor}}",
+                    
+                {% endfor %}
+            ];
          
             
             $("#hw_select").on("changed.bs.select", 
                 function(e, clickedIndex, newValue, oldValue) {
                 var selected_count =  $('#hw_select :selected').length
                 var index;
+                var ul_sensor = document.getElementsByName("sensor_select")[0];
                 if (selected_count == 1){
                     if (newValue){
                         index = clickedIndex;
                     } else {
-                        index = $('#hw_select :selected')[0].label;
+                        index = parseInt($('#hw_select :selected')[0].label) - 1;
                     }
+                    console.log(index);
                     $('#addr_select').selectpicker('val', '');
                     $('#addr_select').find('option').remove();
                     $('#addr_select').prop("disabled", false);
-                    var ul = document.getElementsByName("addr_select")[0];
-                    for (i = 0; i < all_addresses[index].length; i++){
-                        var li = document.createElement("option");
-                        var linkText = document.createTextNode(all_addresses[index][i]);
-                        li.appendChild(linkText);
-                        ul.appendChild(li);
-                        
+                    $('#sensor_select').selectpicker('val', '');
+                    $('#sensor_select').find('option').remove();
+                    var ul_addr = document.getElementsByName("addr_select")[0];
+                    
+                    for (i = 0; i < hw_addresses[index].length; i++){
+                        var li1 = document.createElement("option");
+                        var linkText1 = document.createTextNode(hw_addresses[index][i]);
+                        li1.appendChild(linkText1);
+                        ul_addr.appendChild(li1);
+                    }
+                    for (i = 0; i < hw_sensors[index].length; i++){
+                        var li2 = document.createElement("option");
+                        var linkText2 = document.createTextNode(hw_sensors[index][i]);
+                        li2.appendChild(linkText2);
+                        ul_sensor.appendChild(li2);
                     }
                 } else {
+                    
                     $('#addr_select').selectpicker('val', '');
                     $('#addr_select').find('option').remove();
                     $('#addr_select').prop("disabled", true);
+                    $('#sensor_select').selectpicker('val', '');
+                    $('#sensor_select').find('option').remove()
+                    for (i = 0; i < all_sensors.length; i++){
+                        var li = document.createElement("option");
+                        var linkText = document.createTextNode(all_sensors[i]);
+                        li.appendChild(linkText);
+                        ul_sensor.appendChild(li);
+                    }
                 }
+                
                 $('#addr_select').selectpicker('refresh');
+                $('#sensor_select').selectpicker('refresh');
                            
                    
                 });

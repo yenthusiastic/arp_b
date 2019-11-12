@@ -513,8 +513,6 @@ demo = {
                 align: align
             }
         });
-    }
-
-
+    },
 
 }
