@@ -28,19 +28,23 @@ http://be.dev.iota.pw
 
 * Hardware data
 
-Method | URL | Body Parameters |Description
+Method | Target | Body Parameters |Description
 ---------|----------|---------|---------
- GET | url/address/<Hardware_id> | N/A | Retrieve a new session address for the hardware
- POST | url/data | hardwareID,address,latitude,longitude,temperature,humidity,timestamp|Add new sensor data
- PUT | url/status | hardwareID,status,latitude,longitude |Update the hardware (bike)'s status
+ GET | address/<Hardware_id> | N/A | Retrieve a new session address for the hardware
+ POST | data | hardwareID,address,latitude,longitude,temperature,humidity,timestamp|Add new sensor data
+ PUT | status | hardwareID,status,latitude,longitude |Update the hardware (bike)'s status
 
 * Users data
 
-Method | URL | Body Parameters| Description
+Method | Target | Body Parameters| Description
 ---------|----------|---------|---------
- GET | url//no_production_users_view | N/A |Retrieve list of users registered
- POST | url/register' | user, email, password |Add new user
- PUT | url/login | email, password |Verify user on the database
+ GET | no_production_users_view | N/A |Retrieve list of users registered
+ POST | register | user, email, password |Add new user
+ PUT | login | email, password |Verify user on the database
+
+#### Status code
+
+<Insert table here>
 
 #### Examples
 
