@@ -102,8 +102,4 @@ resp = req.post("https://be.dev.iota.pw/data", json={
 	"timestamp":"2019-10-15 13:37:05.749277+02"
 },headers = header)
 print(resp.text)
-<<<<<<< HEAD
 ```
-=======
-```
->>>>>>> e3b7d755c44025a8d51749edf28e6f6917b6ae03
