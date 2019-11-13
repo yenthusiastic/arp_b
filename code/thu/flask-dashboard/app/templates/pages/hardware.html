@@ -1,0 +1,289 @@
+<div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card strpied-tabled-with-hover">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h4 class="card-title">Hardware Details</h4>
+                                </div>
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4 pull-right">
+                                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#create"><span class="fa fa-plus"></span>Add New Hardware</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body table-full-width table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <th>ID</th>
+                                    <th>Status</th>
+                                    <th>Attached Sensors</th>
+                                    <th>Location</th>
+                                    <th>Actions</th>
+                                </thead>
+                                <tbody>
+                                    {%if hardware_data%}
+                                    {%for hw_data in hardware_data%}
+                                    <tr>
+                                        <td>{{hw_data[0]}}</td>
+                                        <td>
+                                            {%if hw_data[1] == "rented" or hw_data[1] == "Rented"%}
+                                            <span class="badge badge-warning">
+                                            {%elif hw_data[1] == "parked" or hw_data[1] == "Parked"%}
+                                            <span class="badge badge-success">
+                                            {%elif hw_data[1] == "defect" or hw_data[1] == "Defect"%}
+                                            <span class="badge badge-danger">
+                                            {%else%}
+                                            <span class="badge badge-info">
+                                            {%endif%}
+                                                {{hw_data[1][0]|upper}}{{hw_data[1][1:]}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            
+                                            {%for sensor in hw_data[2]%}
+                                            <span class="badge badge-info">
+                                            {% if sensor|length < 5%}
+                                            {{sensor|upper}}
+                                            {%else%}
+                                            {{sensor[0]|upper}}{{sensor[1:]}} 
+                                            {%endif%}
+                                            {%if loop.index < hw_data[2]|length %}<br>{%endif%}
+                                            </span>
+                                            {%endfor%}
+                                            
+                                        </td>
+                                        <!-- <td>({{hw_data[3]}}, {{hw_data[4]}})</td> -->
+                                        <td>{%if location_arr%}{{location_arr[loop.index0]}}{%endif%}</td>
+                                        <td class="td-actions">
+                                            <button type="button" rel="tooltip" title="Edit Hardware" onclick="getSelectedID({{hw_data[0]}})"  data-toggle="modal" data-target="#edit" class="btn btn-primary btn-link btn-simple" name="edit_btn" id="edit_btn_{{hw_data[0]}}">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                            <button type="submit" rel="tooltip" title="Delete Hardware" onclick="getSelectedID({{hw_data[0]}})" data-toggle="modal" data-target="#delete" class="btn btn-danger btn-simple btn-link">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {%endfor%}
+                                    {%endif%}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+
+        <div class="modal fade" id="create" name="create_modal" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="fa fa-remove" aria-hidden="true"></span></button>
+                        <h4 class="modal-title custom_align" id="Heading">Create Hardware</h4>
+                    </div>
+                    <form method="post" name="create_form" onsubmit="return validateCreateForm()">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Hardware ID</label>
+                                <input class="form-control" type="text" name="new_hw_id" placeholder="Hardware ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control" name="new_status">
+                                    <option>Parked</option>
+                                    <option>Rented</option>
+                                    <option>Defect</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Attached Sensors</label>
+                                <select id="new_sensor_select" name="new_sensors" class="form-control" style="width:100%" multiple="multiple">
+                                    {% if sensors %}
+                                    {% for sensor in sensors%}
+                                        <option>{{sensor}}</option>
+                                    {% endfor %}
+                                    {%endif%}
+                                </select>
+                                
+                            </div>
+                            <div class="form-group">  
+                                <label>Location (Latitude, Longitude)</label>           
+                                <input class="form-control " type="text" name="new_location" placeholder="Location (Latitude, Longitude)">
+                            </div>
+                            <div class="form-group">  
+                                <label>Initial Address</label>           
+                                <input class="form-control " type="text" name="new_addr" placeholder="Initial Address">
+                            </div>
+                        </div>
+                        <div class="modal-footer ">
+                            <button type="submit" name="btn" value="create_hardware" class="btn btn-success" ><span class="fa fa-check"></span> Submit</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="fa fa-remove"></span> Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.modal-content --> 
+            </div>
+                <!-- /.modal-dialog --> 
+        </div>
+
+        <div class="modal fade" id="edit" name="edit_modal" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="fa fa-remove" aria-hidden="true"></span></button>
+                        <h4 class="modal-title custom_align" id="Heading">Edit Hardware Details</h4>
+                    </div>
+                    <form method="post" name="edit_form" onsubmit="return validateEditForm()">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Hardware ID</label>
+                                <input class="form-control" type="text" name="hw_id" placeholder="Hardware ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control" name="status">
+                                    <option id="option_parked">Parked</option>
+                                    <option id="option_rented">Rented</option>
+                                    <option id="option_defect">Defect</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Attached Sensors</label>
+                                <select id="sensor_select" name="sensors" class="form-control" style="width:100%" multiple="multiple">
+                                    {% if sensors %}
+                                    {% for sensor in sensors%}
+                                        <option>{{sensor}}</option>
+                                    {% endfor %}
+                                    {%endif%}
+                                </select>
+                                
+                            </div>
+                            <div class="form-group">  
+                                <label>Location (Latitude, Longitude)</label>           
+                                <input class="form-control " type="text" name="location" placeholder="Location (Latitude, Longitude)">
+                            </div>
+                            <div class="form-group">  
+                                <label>Session Address</label>           
+                                <input class="form-control " type="text" name="addr" disabled>
+                            </div>
+                        </div>
+                        <div class="modal-footer ">
+                            <button type="submit" name="btn" value="update_hardware" class="btn btn-success" ><span class="fa fa-check"></span>Update Hardware</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="fa fa-remove"></span> Cancel</button>
+                        </div>
+                    </form>
+                </div>
+              <!-- /.modal-content --> 
+            </div>
+                <!-- /.modal-dialog --> 
+        </div>
+              
+        <div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="fa fa-remove" aria-hidden="true"></span></button>
+                        <h4 class="modal-title custom_align" id="Heading">Delete Hardware</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger"><span class="fa fa-warning"></span>Are you sure you want to permanently delete this hardware?</div> 
+                    </div>
+                    <form method="post">
+                        <div class="modal-footer ">
+                            <button type="submit" name="btn" id="delete_hardware" value="delete_hardware" class="btn btn-success" ><span class="fa fa-check"></span> Yes</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="fa fa-remove"></span> No</button>
+                        </div>
+                    </form>
+                </div>
+              <!-- /.modal-content --> 
+            </div>
+                <!-- /.modal-dialog --> 
+        </div>
+
+    </div>
+    
+    
+<script>
+    
+    function validateCreateForm() {
+        var hw_id = document.forms["create_form"]["new_hw_id"].value;
+        var hw_ids = [
+        {%for hw_id in hardware_data%}
+        "{{hw_id[0]}}",
+        {%endfor%}
+        ];
+        if (hw_id == ""){
+            demo.showNotification(from="top", align="center", msg="Please enter valid hardware ID", color="warning");
+            return false;
+        } 
+        
+        else if (hw_ids.includes(hw_id)) {
+            demo.showNotification(from="top", align="center", msg="Hardware " + hw_id + " already exists!", color="warning");
+            return false;
+        }
+    };
+
+    function validateEditForm() {
+        if (document.forms["edit_form"]["hw_id"].value == ""){
+            demo.showNotification(from="top", align="center", msg="Please enter valid hardware ID", color="warning");
+            return false;
+        } 
+        if (document.forms["edit_form"]["location"].value == "None, None"){
+            document.forms["edit_form"]["location"].value = "";
+        }
+    };
+
+    var selected_id;
+    function getSelectedID(id){
+        document.getElementById("delete_hardware").value = "delete_hardware_" + id;
+        selected_id = id;
+    }
+
+    //When the Edit icons are clicked, fill the Edit Form with values
+    $("button[name='edit_btn']").click(function() {
+        var sensors;
+        var status;
+        document.getElementsByName("hw_id")[0].value = selected_id;
+        {%for hw_data in hardware_data%}
+        if ({{loop.index}} == selected_id){
+            status = "{{hw_data[1]|lower}}";
+            document.getElementsByName("location")[0].value = "{{hw_data[3]}}, {{hw_data[4]}}";
+            document.getElementsByName("addr")[0].value = "{{hw_data[5]}}";
+
+            sensors = [
+                {% for sensor in hw_data[2] %} 
+                {% if sensor|length < 5%}
+                "{{sensor|upper}}",
+                {%else%}
+                "{{sensor[0]|upper}}{{sensor[1:]}}", 
+                {%endif%}
+                {%endfor%}
+            ];
+        }
+        {%endfor%}
+        
+        $('#sensor_select').val(sensors);
+        $('#sensor_select').select2({
+        });
+
+        document.getElementById("option_" + status).selected = true;
+        
+    });
+
+    $(document).ready(function() {
+
+        $('#new_sensor_select').select2({
+            placeholder: 'Select sensor(s)'
+        });
+
+        $('#sensor_select').select2({
+            placeholder: 'Select sensor(s)'
+        });
+        
+                
+    });
+    
+</script>

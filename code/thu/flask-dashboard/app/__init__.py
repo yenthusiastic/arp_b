@@ -29,3 +29,7 @@ lm = LoginManager(   ) # flask-loginmanager
 lm.init_app(app) # init the login manager
 
 from app import views, models
+
+db.create_all()   #create all tables if not exists
+
+

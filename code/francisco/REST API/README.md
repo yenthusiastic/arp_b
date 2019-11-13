@@ -28,6 +28,7 @@ http://be.dev.iota.pw
 
 * Hardware data
 
+<<<<<<< HEAD
 Method | Target | Body Parameters |Description
 ---------|----------|---------|---------
  GET | address/<Hardware_id> | N/A | Retrieve a new session address for the hardware
@@ -41,6 +42,21 @@ Method | Target | Body Parameters| Description
  GET | no_production_users_view | N/A |Retrieve list of users registered
  POST | register | user, email, password |Add new user
  PUT | login | email, password |Verify user on the database
+=======
+Method | URL | Body Parameters |Description
+---------|----------|---------|---------
+ GET | url/address/<Hardware_id> | N/A | Retrieve a new session address for the hardware
+ POST | url/data | hardwareID,address,latitude,longitude,temperature,humidity,timestamp|Add new sensor data
+ PUT | url/status | hardwareID,status,latitude,longitude |Update the hardware (bike)'s status
+
+* Users data
+
+Method | URL | Body Parameters| Description
+---------|----------|---------|---------
+ GET | url//no_production_users_view | N/A |Retrieve list of users registered
+ POST | url/register | user, email, password |Add new user
+ PUT | url/login | email, password |Verify user on the database
+>>>>>>> e3b7d755c44025a8d51749edf28e6f6917b6ae03
 
 #### Status code
 
@@ -102,4 +118,8 @@ resp = req.post("https://be.dev.iota.pw/data", json={
 	"timestamp":"2019-10-15 13:37:05.749277+02"
 },headers = header)
 print(resp.text)
+<<<<<<< HEAD
 ```
+=======
+```
+>>>>>>> e3b7d755c44025a8d51749edf28e6f6917b6ae03

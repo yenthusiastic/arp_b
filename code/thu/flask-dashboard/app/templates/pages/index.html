@@ -1,4 +1,10 @@
-
+<script type="text/javascript">
+    {% if current_user.is_authenticated %}
+    window.onload = function() {
+        demo.showNotification(from="top", align="center", msg="Welcome {{current_user.username}} to Bikota Dashboard!", color="primary");
+    };
+    {% endif %}
+</script>
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">
