@@ -4,7 +4,8 @@
   "description": "Web API for ARP-B  project",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start":"node app.js",
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",

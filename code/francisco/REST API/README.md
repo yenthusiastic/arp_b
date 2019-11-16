@@ -1,30 +1,36 @@
-BIKOTA REST API
-----------
+# BIKOTA REST API Server
+
 
 Restful API appliction to store and retrieve information from the BIKOTA hardware to the PostgreSQL database.
 
-#### Version
+## Prerequisites
 
-V1.3
+Ensure that you have met the following requirements:
 
-#### Pending
+* You have a `<Windows/Mac/Linux>` machine.
+* You have Node.js installed in your machine. Otherwise, click [here](https://nodejs.org/en/) to download it.
 
-- [x] Develop Nodejs server.
-- [x] Program to execute HTTP request.
-- [x] Connecto to the remote PostgreSQL database.
-- [x] Program to execute CRUD operations on the database.
-- [x] Enable password hashing for user authentification.
-- [ ] Update the 'address_index' and generate a new 'session_address'.
-- [ ] Update 'latitude' and 'longitude' fields of the given 'hardware ID' in the 'HARDWARE_STATUS' table.
-- [ ] Send response with status code.
-- [ ] Add hardware authentication.
-- [ ] Confirm HTTPS support.
+## Installation
 
-#### URL
+To install the REST API, follow these steps:
+
+* Press the "Clone or download" button of this repository, and then click on "Download ZIP".
+* Open the console from the folder where you download the REST API, and run the following commands:
+	* Install the dependencies.
+	`npm install`
+	* To start the server.
+	`run run dev`
+
+## Using the server
+
+Once the server is up and running, you can start sending http request to the endpoints below.
+
+
+**URL**
 
 http://be.dev.iota.pw
 
-#### Endpoints
+**Endpoints**
 
 * Hardware data
 
@@ -42,13 +48,18 @@ Method | Target | Body Parameters| Description
  POST | register | user, email, password |Add new user
  PUT | login | email, password |Verify user on the database
 
-#### Status code
+**Status code**
 
-<Insert table here>
+Status Code | Message | Information
+---------|----------|----------
+200 | OK | Request success, data successfully inserted into database
+400 | Bad Request | Invalid JSON data in request body 
+500 | Internal Server Error | Data successfully accepted but cannot be inserted into database 
+999 | Hardware Defect | The bike/ hardware is defective
 
-#### Examples
+## Examples
 
-* Postman
+* Using [Postman](https://www.getpostman.com/downloads/)
 
 Testing the post method:
 
@@ -57,7 +68,7 @@ Testing the post method:
 1.2 Paste the following URL: http://be.dev.iota.pw:5100/data
 2. Header: 
 2.1 Click on "Headers"
-2.2 Insert the following data in the Headers table:
+2.2 Insert the following fields in the Headers table:
 
 Key | Value | Description
 ---------|----------|---------
@@ -79,7 +90,7 @@ Key | Value | Description
 	"timestamp":"2019-10-13 02:19:05.749277+02"
 }
 ```
-* Python's request library
+* Using [Python](https://www.python.org/downloads/)
 
 1. Import the libraries:
 
@@ -103,3 +114,8 @@ resp = req.post("https://be.dev.iota.pw/data", json={
 },headers = header)
 print(resp.text)
 ```
+**Note**: Do not use json.dumps() in the POST and PUT request, otherwise the request will be received as a string instead of an object.
+
+## Contact
+
+If you want to contact me you can reach me at franciscosusana2292@gmail.com.
