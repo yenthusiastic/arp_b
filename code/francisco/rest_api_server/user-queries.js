@@ -13,7 +13,7 @@ const conString = {
 }
 let pool = new pg.Pool(conString)
 
-// DB Connection
+// Connect to the database
 pool.connect(error => {
     if (error) {
         console.log("Problems when connecting to the database.")
@@ -21,7 +21,6 @@ pool.connect(error => {
     }
 })
 
-// User queries
 const getUsers = (request, response) => {
     pool.query('SELECT * FROM "USERS";', (error,result) => {
         if(error) throw error

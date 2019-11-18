@@ -13,7 +13,7 @@ const conString = {
 }
 let pool = new pg.Pool(conString)
 
-// DB Connection
+// Connect to the database
 pool.connect(error => {
     if (error) {
         console.log("Problems when connecting to the database.")
@@ -21,7 +21,7 @@ pool.connect(error => {
     }
 })
 
-// Hardware queries
+// Retrieve a new session address for the hardware
 const getSessionAddress = (request, response) => {
     let hardwareID = request.params.hardwareID
     pool.query('SELECT * from "HARDWARE_STATUS" WHERE "hardwareID" = $1;',[hardwareID],(error,results) => {
@@ -30,9 +30,9 @@ const getSessionAddress = (request, response) => {
             throw error
         }
         response.status(200).json(results.rows)
-        // response.render(results.rows)
     })
 }
+// Add new sensor data
 const saveSensorData = (request, response) => {
     let {hardwareID, address, latitude, longitude, temperature, humidity, timestamp} = request.body
     if(!hardwareID || !address || !latitude || !longitude || !temperature || !humidity || !timestamp){
@@ -48,6 +48,7 @@ const saveSensorData = (request, response) => {
     }
     // Create another conditional to avoid hardware duplication
 }
+// Update the hardware (bike)'s status
 const updateHardware = (request, response) => {
     let { status, latitude, longitude, hardwareID } = request.body
     if(!status || !latitude || !longitude || !hardwareID){

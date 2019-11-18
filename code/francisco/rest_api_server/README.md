@@ -19,7 +19,7 @@ To install the REST API, follow these steps:
 	* Install the dependencies.
 	`npm install`
 	* To start the server.
-	`run run dev`
+	`run run start`
 
 ## Using the server
 
