@@ -24,12 +24,21 @@ pool.connect(error => {
 // Retrieve a new session address for the hardware
 const getSessionAddress = (request, response) => {
     let hardwareID = request.params.hardwareID
+
+    // Request IOTA address and return it in the http response 
+    let iotaAddress = 'QCWAVASCPCXAXAYABBRCXASCCBRCCBBBUAUCABQCSCVAYARAXAYAZAXAYARCRCQCTCCBXATCABCBABX'
+    
     pool.query('SELECT * from "HARDWARE_STATUS" WHERE "hardwareID" = $1;',[hardwareID],(error,results) => {
         if (error) {
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
         }
-        response.status(200).json(results.rows)
+        // response.status(200).json(results.rows[0].session_address)
+        response.status(200).send({"HttpStatusCode": 200, "HttpMessage": "OK", "NewSessionAddress": results.rows[0].session_address})
+        // console.log(typeof(results.rows))
+        // console.log(results.rows.length)
+
+        // , "NewSessionAddress": iotaAddress
     })
 }
 // Add new sensor data
