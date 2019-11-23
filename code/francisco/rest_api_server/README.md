@@ -52,7 +52,8 @@ Method | Target | Body Parameters| Description
 
 Status Code | Message | Information
 ---------|----------|----------
-200 | OK | Request success, data successfully inserted into database
+200 | OK | Request success, data fetched successfully
+201 | OK | Request success, data successfully inserted or updated into database
 400 | Bad Request | Invalid JSON data in request body 
 500 | Internal Server Error | Data successfully accepted but cannot be inserted into database 
 999 | Hardware Defect | The bike/ hardware is defective
