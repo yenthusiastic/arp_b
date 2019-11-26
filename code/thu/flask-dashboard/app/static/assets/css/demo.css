@@ -604,13 +604,13 @@
     width: 100%;
 }
 
-.lightbox .modal-content {
+/* .lightbox .modal-content {
     overflow: hidden;
 }
 
 .lightbox .modal-body {
     padding: 0;
-}
+} */
 
 @media screen and (min-width: 991px) {
     .lightbox .modal-dialog {
