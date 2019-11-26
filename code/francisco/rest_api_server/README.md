@@ -1,6 +1,5 @@
 # BIKOTA REST API Server
 
-
 Restful API appliction to store and retrieve information from the BIKOTA hardware to the PostgreSQL database.
 
 ## Prerequisites
@@ -24,7 +23,6 @@ To install the REST API, follow these steps:
 ## Using the server
 
 Once the server is up and running, you can start sending http request to the endpoints below.
-
 
 **URL**
 
