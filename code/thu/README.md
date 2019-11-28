@@ -1,13 +1,17 @@
 ### Plans/ TODOs
-#### API Endpoints 
+#### API Endpoints (deactivated)
 For communication with bike hardware module
 - [x] Simple API endpoint for handling GET/PUT/POST requests at https://req.dev.iota.pw. Check [Python API documentation for details](../../documentation/API_python.md).
 - [x] Define JSON data structure for API request body
 - [x] Send transaction with sensor data to Tangle through connection with IOTA node
 - [ ] Advanced API with multiple endpoints using additional frameworks and authentication
-- Postgres database
+
+#### Postgres database
     - [x] Define database schemas and structure
     - [x] Run Postgres and PgAdmin servers from Docker images. Check [Database Server documentation for details](../../documentation/database_server.md).
+
+#### Sensor data aggregation policy
+Currently sensor data is being saved into the database every second, which means a lot of data points will be fetched when a large time interval is requested in the SQL query. This reults in poor performance while generating the sensor charts on the Admin Panel Dashboard. To prevent this, the SQL query should fetch aggregated data instead of all raw data points. The extent of aggregation can vary depending on the total amount of data points recorded within the requested time range. 
 
 #### Web Application
 - Database connection
@@ -45,7 +49,7 @@ For communication with bike hardware module
         - [ ] Filter map by 
             - [ ] Status
             - [ ] Location & radius
-    - [ ] Hardware management
+    - [X] Hardware management
         - [X] Create new hardware with required details
             - Hardware ID
             - Attached sensor(s)
@@ -59,6 +63,7 @@ For communication with bike hardware module
         - [X] Sensor type
         - [X] Session address
         - [X] Time range
+    - [ ] Visualize aggregated instead of raw sensor data when the queried time period returns too many data points (checked Sensor data aggregation policy section for details)
 
 
 
