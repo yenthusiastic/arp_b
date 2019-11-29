@@ -49,7 +49,11 @@ flask run -p <custom-port-number>
 ```
 
 When no port number is given explicitly, the default port number 5000 will be used to host the website content. 
-Access the web server at `127.0.0.1:<custom-port-number>`.
+For local machine, access the web server at `127.0.0.1:<custom-port-number>`.
+
+#### Access web server
+- The Flask server for User Interface will be running on port 5021 and accessible at bikota.dev.iota.pw
+- The Flask server for Admin Panel will be running on port 5020 and accessible at web.dev.iota.pw
 
 
 ### Plans/ TODOs
