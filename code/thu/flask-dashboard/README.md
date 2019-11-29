@@ -1,6 +1,7 @@
 ### Uasage Manual - Admin Dashboard Panel for Bikota Renting System
 
 Version: v0.1 (26.11.2019)
+
 Author: Thu Nguyen
 
 #### Description
@@ -20,6 +21,7 @@ This section describes the various pages available on the Admin Dashboard Panel 
     - Distribution of bike and bike usage by location stacked bar chart
 
 Preview: 
+
 <img src="../../../media/admin_dashboard.PNG" width=70%>
 
 ##### Charts
@@ -39,6 +41,7 @@ Preview:
 - Sensor data corresponding to the selected filters will be displayed as line chart(s) with proper title, legend and labels. Each chart shows the data for only a single sensor type but for one or more hardwares or session addresses.
 
 Preview: 
+
 <img src="../../../media/admin_charts.PNG" width=70%>
 
 #### Hardware Manager
@@ -68,6 +71,7 @@ Preview:
 - A success message will pop up to notify if the selected hardware has been sucessfully edited in/ added to/ removed from the system.
 
 Preview: 
+
 <img src="../../../media/admin_hardware.PNG" width=70%>
 
 #### User Profile
@@ -78,11 +82,22 @@ Preview:
 
 
 Preview: 
+
 <img src="../../../media/admin_user1.PNG" width=70%>
 <img src="../../../media/admin_user2.PNG" width=51%>
 
 
+#### Login/ Register Account
+- On this page the system admin can log in with an existing account using a username and password or register a new account using an email, username and password. 
+- The username has to contain a minimum of 4 characters and a maximum of 20 characters. 
+- The password has to contain a minimum of 6 characters and a maximum of 50 characters. 
+- The email has to contain a minimum of 6 characters and a maximum of 50 characters. 
 
+
+Preview: 
+
+<img src="../../../media/admin_login.PNG" width=70%>
+<img src="../../../media/admin_register.PNG" width=70%>
 
 -------
 Based on [Flask Dashboard Light](https://appseed.us/admin-dashboards/flask-dashboard-light-bootstrap) provided by **AppSeed**

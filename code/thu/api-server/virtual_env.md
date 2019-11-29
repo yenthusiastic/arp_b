@@ -33,14 +33,14 @@ conda deactivate
 - Routing of the pages are configured in a Python script, usually named `views.py` and saved in the app root folder. 
 - In summary, the project structure can look like follows:
 ```
-. / #app root folder
----- static/
----- ---- styles.css
----- ---- script.js
----- templates/
----- ---- index.html
----- app.py
----- views.py
+.                           
++-- static/
+|    +-- styles.css
+|    +-- script.js
++-- templates/
+|    +-- index.html
++-- app.py
++-- views.py
 ```
 - To deploy the app on a specific port, say port 5001, in the app root folder run the command:
 ```

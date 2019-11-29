@@ -1,3 +1,57 @@
+### Notes
+#### Create a virtual environment in Python
+In Terminal/ Command Prompt, type in:
+```
+python -m venv <name-of-env>
+```
+To activate the environment:
+```
+cd <dir-of-env>
+source name-of-env/bin/activate
+```
+To deactivate:
+```
+deactivate
+```
+
+#### Create a virtual environment in Anaconda
+In Anaconda Prompt, type in: 
+```
+conda create --name <name-of-env>
+```
+To activate the environment:
+```
+conda activate <name-of-env>
+```
+To deactivate:
+```
+conda deactivate
+```
+
+#### Organize and execute Flask application 
+- In Flask, all `HTML` pages have to be stored under a folder named `templates`. This folder is usually placed directly under the app root folder where the main program e.g. `app.py` or `run.py` are.  
+- All styling sheets, e.g. `CSS` and all `JS` scripts have to be stored under (directly under or in other sub-folders of) a folder named `static`. The `static` folder is directly under the app root folder. 
+- Routing of the pages are configured in a Python script, usually named `views.py` and saved in the app root folder. 
+- In summary, the project structure can look like follows:
+```
+.                           
++-- static/
+|    +-- styles.css
+|    +-- script.js
++-- templates/
+|    +-- index.html
++-- app.py
++-- views.py
+```
+- To deploy the app on a specific port, say port 5001, in the app root folder run the command:
+```
+flask run -p <custom-port-number>
+```
+
+When no port number is given explicitly, the default port number 5000 will be used to host the website content. 
+Access the web server at `127.0.0.1:<custom-port-number>`.
+
+
 ### Plans/ TODOs
 #### API Endpoints (deactivated)
 For communication with bike hardware module
@@ -21,14 +75,6 @@ Currently sensor data is being saved into the database every second, which means
         - Querying current location and/or status of all hardwares
         - Quering large amount of sensor data 
         - Filtering data by user's selections
-
-- User interface: 
-    - [ ] Visualize **parked** bikes available for rent as markers on a map
-    - [ ] Filter map by location and radius
-    - [ ] Click on bike to get exact location
-    - [ ] Input form for entering IOTA address
-    - [ ] Show data collected in the session on a chart
-    - [ ] Bikota renting service manual
 - Administration dashboard: 
     - [X] User authentication
         - [X] Login 
@@ -64,6 +110,7 @@ Currently sensor data is being saved into the database every second, which means
         - [X] Session address
         - [X] Time range
     - [ ] Visualize aggregated instead of raw sensor data when the queried time period returns too many data points (checked Sensor data aggregation policy section for details)
+    - [ ] Constant refresh rate of 5 seconds
 
 
 
