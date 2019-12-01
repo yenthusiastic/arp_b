@@ -613,7 +613,39 @@ def charts():
     else:
         flash("Please log in or register to access dashboard", "warning")
         return redirect('/login.html')
-        
+
+
+# Render the map page
+@app.route('/map.html', methods=['GET', 'POST'])
+def map():
+    if current_user.is_authenticated:
+        map_points = {
+            "Parked": [],
+            "Rented": [],
+            "Defect": [],
+            "Offline": []
+        }
+        hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.latitude, Hardware.longitude).order_by(Hardware.hardwareID).all()
+        for hardware in hardware_data:
+            if hardware[2] is not None and hardware[3] is not None:
+                status = hardware.status[0].upper() + hardware.status[1:]
+                map_points[status].append(
+                    {
+                        "name" : hardware[0],
+                        "status" : hardware[1],
+                        "lat" : hardware[2],
+                        "lon" : hardware[3],
+                        "loc" : geolocator.reverse("{}, {}".format(hardware[2], hardware[3])).raw["address"]
+                    }
+                )
+        return render_template('layouts/default.html',
+                                    content=render_template( 'pages/map.html',
+                                    map_points=map_points),
+                                )
+    else:
+        flash("Please log in or register to access dashboard", "warning")
+        return redirect('/login.html')
+      
 
 def get_location_dist():
     query = """ SELECT "place", COUNT("hardwareID") FROM public."HARDWARE_STATUS" GROUP BY "place" """
@@ -725,7 +757,8 @@ def index(path):
                                     content=render_template( 'pages/'+path) )
         except:
 
-            return  render_template('pages/404.html')
+            return  render_template('layouts/default.html',
+                                    content=render_template('pages/404.html'))
     else:
         
         return redirect('/login.html')

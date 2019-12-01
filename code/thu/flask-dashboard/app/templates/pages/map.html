@@ -1,0 +1,168 @@
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Bikota Hardware Distribution Map</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="map"></div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.highcharts.com/mapdata/countries/de/de-all.js"></script>
+<script>
+    var states, cities;
+    // Prepare the geojson
+    Highcharts.getJSON('https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/germany.geo.json', function (geojson) {
+
+    // Prepare the geojson
+    states = Highcharts.geojson(geojson, 'map'),
+    cities = Highcharts.geojson(geojson, 'mappoint')
+    });
+
+    // Initiate the chart
+    map_div = document.getElementById("map");
+    Highcharts.mapChart(map_div, {
+
+    chart: {
+        map: 'countries/de/de-all',
+        height: "700px",
+    },
+
+    title: {
+        text: ''
+    },
+
+    mapNavigation: {
+        enabled: true
+    },
+
+    tooltip: {
+        useHTML: true,
+        style: {
+            pointerEvents: 'auto'
+        },
+        headerFormat: '',
+        pointFormat: '<b>Hardware {point.name}: {point.status}</b><br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">{point.lat}, {point.lon}</a>'
+    },
+
+    series: [
+        {
+            // Use the de-all map with no data as a basemap
+            name: 'Basemap',
+            borderColor: '#A0A0A0',
+            showInLegend: false
+        }, {
+            name: 'Separators',
+            type: 'mapline',
+            showInLegend: false,
+            enableMouseTracking: false
+        }, 
+        {
+            name: "States",
+            type: 'map',
+            data: states,
+            color: "#f2adec",
+            states: {
+                hover: {
+                    color: "dark-grey"
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                format: '{point.name}',
+                style: {
+                    width: '80px' // force line-wrap
+                }
+            },
+            showInLegend: false
+        },  
+        {
+            // Parked bikes
+            type: 'mappoint',
+            marker: {
+                radius: 5
+            },
+            name: 'Parked',
+            data: [{%for map_point in map_points['Parked']%} 
+                {
+                    'name' : "{{map_point['name']}}",
+                    'lat' : {{map_point["lat"]}},
+                    'lon' : {{map_point["lon"]}},
+                    'status' : "{{map_point['status']}}",
+                    'loc' : "{{map_point['loc']}}",
+                    
+                }, 
+            {%endfor%}],
+            color: "green",
+            
+        },
+        {
+            // Rented bikes
+            type: 'mappoint',
+            marker: {
+                radius: 5
+            },
+            name: 'Rented',
+            data: [{%for map_point in map_points['Rented']%} 
+                {
+                    'name' : "{{map_point['name']}}",
+                    'lat' : {{map_point["lat"]}},
+                    'lon' : {{map_point["lon"]}},
+                    'status' : "{{map_point['status']}}",
+                    'loc' : "{{map_point['loc']}}"
+                }, 
+            {%endfor%}],
+            color: "#17a2b8",
+            
+        },
+        {
+            // Defect hardwares
+            type: 'mappoint',
+            marker: {
+                radius: 5
+            },
+            name: 'Defect',
+            data: [{%for map_point in map_points['Defect']%} 
+                {
+                    'name' : "{{map_point['name']}}",
+                    'lat' : {{map_point["lat"]}},
+                    'lon' : {{map_point["lon"]}},
+                    'status' : "{{map_point['status']}}",
+                    'loc' : "{{map_point['loc']}}"
+                }, 
+            {%endfor%}],
+            color: "red",
+            
+        },
+        {
+            // Offline hardwares
+            type: 'mappoint',
+            marker: {
+                radius: 5
+            },
+            name: 'Offline',
+            data: [{%for map_point in map_points['Offline']%} 
+                {
+                    'name' : "{{map_point['name']}}",
+                    'lat' : {{map_point["lat"]}},
+                    'lon' : {{map_point["lon"]}},
+                    'status' : "{{map_point['status']}}",
+                    'loc' : "{{map_point['loc']}}"
+                }, 
+            {%endfor%}],
+            color: "#ffc107",
+            
+        }
+    ]
+});
+
+
+</script>

@@ -130,7 +130,7 @@
                             <option>Parked</option>
                             <option>Rented</option>
                             <option>Defect</option>
-                            <option id="option_defect">Offline</option>
+                            <option>Offline</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -183,7 +183,7 @@
                             <option id="option_parked">Parked</option>
                             <option id="option_rented">Rented</option>
                             <option id="option_defect">Defect</option>
-                            <option id="option_defect">Offline</option>
+                            <option id="option_offline">Offline</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -284,7 +284,8 @@ $("button[name='edit_btn']").click(function() {
     document.getElementsByName("hw_id")[0].value = selected_id;
     {%for hw_data in hardware_data%}
     if ({{loop.index}} == selected_id){
-        status = "{{hw_data[1]|lower}}";
+        status = "{{hw_data[0]|lower}}";
+        console.log(status);
         document.getElementsByName("location")[0].value = "{{hw_data[3]}}, {{hw_data[4]}}";
         document.getElementsByName("addr")[0].value = "{{hw_data[5]}}";
 
@@ -300,11 +301,12 @@ $("button[name='edit_btn']").click(function() {
     }
     {%endfor%}
     
+    document.getElementById("option_" + status).selected = true;
     $('#sensor_select').val(sensors);
     $('#sensor_select').select2({
     });
 
-    document.getElementById("option_" + status).selected = true;
+    
     
 });
              
