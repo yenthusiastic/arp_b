@@ -1,6 +1,6 @@
 ### Uasage Manual - Admin Dashboard Panel for Bikota Renting System
 
-Version: v0.1 (26.11.2019)
+Version: v0.2 (01.12.2019)
 
 Author: Thu Nguyen
 
@@ -18,7 +18,7 @@ This section describes the various pages available on the Admin Dashboard Panel 
     - Total number of sensors mounted on hardware modules
     - Bike status statistics pie chart
     - Sensor statistics pie chart
-    - Distribution of bike and bike usage by location stacked bar chart
+    - Distribution of bike and bike usage by location bar chart
 
 Preview: 
 
@@ -44,7 +44,24 @@ Preview:
 
 <img src="../../../media/admin_charts.PNG" width=70%>
 
-#### Hardware Manager
+
+##### Map
+- On this page the system admin can view the locations of all hardware modules in the system on a map of Germany. Each marker on the map represents one module.
+- By hovering over the marker, the admin can view the status and detailed location (Longitude, Lattitude) of the specific hardware. The admin can click on the hyperlinked location to locate the hardware using Google Maps.
+- The markers are colored differently depending on the hardware status:
+    - Green for `parked`
+    - Blue for `rented`
+    - Yellow for `offline`
+    - Red for `defect`
+
+
+Preview: 
+
+<img src="../../../media/admin_map.PNG" width=70%>
+<img src="../../../media/admin_map2.PNG" width=50%>
+
+
+##### Hardware Manager
 - On this page the system admin can view a table which shows all details of every hardware module registered in the system. These includes:
     - `ID`, which is the unique ID of the hardware module
     - `Status`, which is the latest status of the hardware. The status property can only be 1 out of 4 values: 
@@ -74,7 +91,7 @@ Preview:
 
 <img src="../../../media/admin_hardware.PNG" width=70%>
 
-#### User Profile
+##### User Profile
 - On this page the system admin can activate any of the 3 following sections to make changes to their account data:
     - `Edit profile` section, where account information can be updated including: Company, Username, Email address, First name, Last name, Address, City, Country, Postal code, Biography. A success message will pop up to notify if the profile is successfully updated in the system.
     - `Change password` section, where the admin can change the account's password by typing in the current and the new passwords. A warning message will pop up if the current password(s) is/are incorrect or do not match.
@@ -87,7 +104,7 @@ Preview:
 <img src="../../../media/admin_user2.PNG" width=51%>
 
 
-#### Login/ Register Account
+##### Login/ Register Account
 - On this page the system admin can log in with an existing account using a username and password or register a new account using an email, username and password. 
 - The username has to contain a minimum of 4 characters and a maximum of 20 characters. 
 - The password has to contain a minimum of 6 characters and a maximum of 50 characters. 

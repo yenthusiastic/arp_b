@@ -263,9 +263,13 @@ function validateCreateForm() {
 };
 
 function validateEditForm() {
-    if (document.forms["edit_form"]["hw_id"].value == ""){
+    var hw_id = document.forms["edit_form"]["hw_id"].value;
+    if (hw_id == ""){
         demo.showNotification(from="top", align="center", msg="Please enter valid hardware ID", color="warning");
         return false;
+    } 
+    else if (hw_ids.includes(hw_id) == false){
+        demo.showNotification(from="top", align="center", msg="Hardware " + hw_id + " does not exist!", color="warning");
     } 
     if (document.forms["edit_form"]["location"].value == "None, None"){
         document.forms["edit_form"]["location"].value = "";

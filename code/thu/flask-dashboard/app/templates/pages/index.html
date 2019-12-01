@@ -64,6 +64,32 @@
                                     <div class="row">
                                         <div class="col-5">
                                             <div class="icon-big text-center">
+                                                <i class="fa fa-map-marker"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-7">
+                                            <div class="numbers">
+                                                <p class="card-category">Total Cities</p>
+                                                <h4 class="card-title">{{total_cities}}</h4>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+<!--                                 <div class="card-footer ">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-refresh"></i> Update Now
+                                    </div>
+                                </div> -->
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-sm-6">
+                            <div class="card card-stats">
+                                <div class="card-body ">
+                                    <div class="row">
+                                        <div class="col-5">
+                                            <div class="icon-big text-center">
                                                 <i class="fa fa-thermometer-quarter"></i>
                                             </div>
                                         </div>
@@ -86,8 +112,8 @@
                     </div>
 
                     <div class="row">
-                        {% if chart_data %}
-                            {% for ch_dat in chart_data%}
+                        {% if pie_charts %}
+                            {% for ch_dat in pie_charts%}
                                 <div class="col-md-6">
                                     <div class="card ">
                                         <div class="card-header ">
@@ -106,6 +132,25 @@
                                 </div>
                             {% endfor %}
                         {% endif %}
+                        {% if bar_chart %}
+                            
+                            <div class="col-md-6">
+                                <div class="card ">
+                                    <div class="card-header ">
+                                        <h4 class="card-title">{{bar_chart.chart_title}}</h4>
+                                    </div>
+                                    <div class="card-body ">
+                                        <canvas id="{{bar_chart.chart_id}}"></canvas>
+                                    </div>
+<!--                                         <div class="card-footer ">
+                                        <hr>
+                                        <div class="stats">
+                                            <i class="fa fa-history"></i> Updated 1 minute ago
+                                        </div>
+                                    </div> -->
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
 
             
@@ -118,8 +163,8 @@
 
 chart_loader = {                      
     initCharts: function() {
-        {% if chart_data %}
-            {% for ch_dat in chart_data %}
+        {% if pie_charts %}
+            {% for ch_dat in pie_charts %}
                 
                     var chartData = {
                     labels : [{% for item in ch_dat.labels %}
@@ -144,6 +189,37 @@ chart_loader = {
                         }
                     });
             {%endfor%}
+        {%endif%}
+        {% if bar_chart %}                
+                var barChartData = {
+                        labels : [{% for item in bar_chart.labels %}
+                                    "{{item}}",
+                                    {% endfor %}],
+                        
+                        datasets : [
+                            {%for lg in bar_chart.legend%} 
+                                {
+                                    label:  "{{lg}}",
+                                    backgroundColor: "rgba({{chart_colors[loop.index0]}},0.4)",
+                                    {% if bar_chart.series[loop.index0] %} data : {{bar_chart.series[loop.index0]}}, {%endif%}
+                                },
+                            {%endfor%}
+                        ]
+                        
+                    };
+                var ctx = document.getElementById('{{bar_chart.chart_id}}').getContext('2d');
+                    window.myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: barChartData,
+                        options: {
+                            responsive: true,
+                            scales: {
+                                xAxes: [{
+                                    stacked: true
+                                }]
+                            }
+                        }
+                    });
         {%endif%}
     }
 };
