@@ -25,8 +25,11 @@ RENT_TIME_FACTOR = 1
 # dev-strings
 json_data = [{"hardwareID": 1}, {"vbat": 3850}]
 
-m_address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9UCQYMMMXX"
-m_states = {"offline": 0, "parked":1, "rented":2, "broken":3, "stolen":4}
+#m_address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9UCQYMMMXX"
+#dev1
+m_address = "CFQFHKJSEJEO9DMNGDCFBROYQIW9WYGSNLYZSIQQQPMUHTEPZGYDOWGLFOWPZKOYFFXSZXEMRECVYHMOZTBULVLBMW"
+m_states = {"offline": 0, "sleeping":1, "parked":2, "rented":3, "broken":4, "stolen":5}
+
 
 DEBUG = True
 # ===================
@@ -47,7 +50,7 @@ import gsm
 import socket
 import urequests as requests
 import json
-from time import sleep, sleep_ms, ticks_ms, ticks_diff, time
+from time import sleep, sleep_ms, ticks_ms, ticks_diff, time, strftime
 
 import mpu6050 as mpu
 import bme280_no_hum as bme280_float
@@ -479,11 +482,9 @@ def r():
 
 
 e.set_lut(e.LUT_FULL_UPDATE)
-sma = None
+session_matrix = None
 status_old = rtc.read(0)
 if DEBUG: print("status_old from memory: ", status_old)
-
-
 
 
 # TODO: CHECK WAKE UP REASON
@@ -503,21 +504,25 @@ else:
 if rtc.read(5):
     if DEBUG: print("Reading QR-Code from memory...")
     sst = rtc.read_string().split(',')[1:]
-    sma = []
+    session_matrix = []
     for i in range(len(sst)):
-        sma.append([])
+        session_matrix.append([])
         for j in range(len(sst[i])):
             if sst[i][j] == '1':
-                sma[i].append(1)
+                session_matrix[i].append(1)
             else:
-                sma[i].append(0)
+                session_matrix[i].append(0)
     if DEBUG: print("QR-Code read.")
 
 
 
+session_balance = 0
+timestamp = strftime("%Y-%m-%d %H:%M:%S")
 
 
-session_balance = 2
+jsn= {"hardwareID":"1","address":"Postman_test","latitude":"61.123","longitude":"7.933","temperature":"5.0","humidity":"30.5", "timestamp":timestamp}
+#r2=http_request(method="POST", url="https://be.dev.iota.pw/data", json=jsn)
+
 
 counter = 0
 if BTN1.value() == 0:
@@ -533,8 +538,8 @@ else:
             draw_status(status_def[status], xs=0)
             draw_balance(session_balance)
             update_display()
-            if sma is not None:
-                draw_qr(m=sma, scale=3)
+            if session_matrix is not None:
+                draw_qr(m=session_matrix, scale=3)
             else:
                 draw_qr(address=session_address, scale=3)
             update_display()
@@ -547,14 +552,19 @@ else:
                 sleep(1)
             sleep_ms(1)
             update_old_ticks = 0
-            update_new_ticks = 0
+            new_ticks = 0
+            balance_old_ticks = 0
+            
             
             while BTN1.value() != 0:
-                update_new_ticks = ticks_ms()
-                diff = ticks_diff(update_new_ticks, update_old_ticks)
-                if diff >= UPDATE_INV or diff < 0:
+                new_ticks = ticks_ms()
+                update_diff = ticks_diff(new_ticks, update_old_ticks)
+                balance_diff = ticks_diff(new_ticks, balance_old_ticks)
+                
+                
+                if update_diff >= UPDATE_INV or update_diff < 0:
                     #print("update")
-                    update_old_ticks = update_new_ticks
+                    update_old_ticks = new_ticks
                     
                     if session_balance > 0:
                         if status == 2:
@@ -565,15 +575,28 @@ else:
                             print("session_start", session_start)
                     draw_status(status_def[status], xs=0)
                     draw_date()
-                    #session_balance = get_balance(url=NODE_URL2, address=m_address_chsum[:81])
-                    #session_balance = counter
+                    
+                    
+                        
                     draw_balance(session_balance, ys=100)
                     draw_rent_time()
                     update_display()
                     counter+=1
+                    
+                # update balance
+                if status == 2:
+                    session_balance = get_balance(url=NODE_URL2, address=m_address[:81])
+                    #session_balance = counter
+                elif status == 3:
+                    if balance_diff > 60000:
+                        balance_old_ticks = new_ticks
+                        session_balance = get_balance(url=NODE_URL2, address=m_address[:81])
+                
+                    
+                    
                 print("counter", counter)
                 #print("update_old_ticks", update_old_ticks)
-                #rint("update_new_ticks", update_new_ticks)
+                #rint("new_ticks", new_ticks)
                 #print("diff", ticks_diff(update_new_ticks, update_old_ticks))
                 print("\n")
                 sleep_ms(300)
