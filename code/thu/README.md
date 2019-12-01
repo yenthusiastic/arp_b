@@ -84,18 +84,23 @@ Currently sensor data is being saved into the database every second, which means
         - [X] Login 
         - [X] Registration
         - [X] Logout
+        - [ ] Form input validation
     - [X] User profile management
         - [X] Show user profile
         - [X] Update profile
         - [X] Update password 
         - [X] Delete account with confirmation dialog
+    - [X] Main Dashboard
+        - [X] System Summarized Statistics: Total number of hardwares, total number of sessions, total number of locations, total number of sensors
+        - [X] System Statistics Visualizations (pie charts/ bar charts, etc.)
     - [ ] Bike visualization (Main dashboard)
-        - [ ] Visualize all bikes as markers on a map with details including
+        - [X] Visualize all bikes as markers on a map with details including
             - Hardware ID
             - Attached sensor(s)
             - Current address
             - Current status
             - Current location 
+        - [ ] Group markers as bubbles by locations
         - [ ] Filter map by 
             - [ ] Status
             - [ ] Location & radius

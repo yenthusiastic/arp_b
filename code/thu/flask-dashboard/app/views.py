@@ -369,6 +369,24 @@ def user():
         flash("Please log in or register to manage user profile", "warning")
         return redirect('/login.html')
 
+
+def get_loc_from_degrees(lat, lon):
+    location_str = ""
+    try:
+        location_str = geolocator.reverse("{}, {}".format(lat, lon)).raw["address"]["city"]
+    except:
+        try: 
+            location_str = geolocator.reverse("{}, {}".format(lat, lon)).raw["address"]["town"]
+        except:
+            try:
+                location_str = geolocator.reverse("{}, {}".format(lat, lon)).raw["address"]["state"]
+            except Exception as e:    
+                print("Error getting reverse location from latitude and longitude {}, {}: {}".format(lat, lon, e))
+                return None
+    return location_str
+    
+
+
 # Render the hardware page
 @app.route('/hardware.html', methods=['GET', 'POST'])
 def hardware():
@@ -377,29 +395,14 @@ def hardware():
         all_sensors = [sensor for sensor in units] 
         location_str = ""
         hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.sensors, Hardware.latitude, Hardware.longitude, Hardware.session_address).order_by(Hardware.hardwareID).all()
+        print("Getting locations from Hardware Status table")
         for hardware in hardware_data:
             if hardware[3] is not None and hardware[4] is not None:
-                try:
-                    location_str = geolocator.reverse("{}, {}".format(hardware[3], hardware[4])).raw["address"]["city"]
+                location_str = get_loc_from_degrees(hardware[3], hardware[4])
+                if location_str is not None:
                     location_arr.append(location_str)
-                except:
-                    try: 
-                        location_str = geolocator.reverse("{}, {}".format(hardware[3], hardware[4])).raw["address"]["town"]
-                        location_arr.append(location_str)
-                    except:
-                        try:
-                            location_str = geolocator.reverse("{}, {}".format(hardware[3], hardware[4])).raw["address"]["state"]
-                            location_arr.append(location_str)
-                        except Exception as e:
-                            location_arr.append("{}, {}".format(hardware[3], hardware[4]))
-                            print("Error getting reverse location from latitude and longitude {}, {}: {}".format(hardware[3], hardware[4], e))
-                try:
-                    print("Updating place column in Hardware Status table")
-                    hw = Hardware.query.filter_by(hardwareID=hardware[0]).first()
-                    hw.place = location_str
-                    db.session.commit()
-                except Exception as e:
-                    print("Unable to update place column in Hardware Status table for hardware {}: ".format(hardware[0]), e)
+                else:
+                    location_arr.append("{}, {}".format(hardware[3], hardware[4]))
             else:
                 location_arr.append("No data available")
                         
@@ -420,7 +423,6 @@ def hardware():
                     except:
                         latitude = None
                         longitude = None
-                print(latitude, longitude)
                 try:
                     sensors = request.form.getlist("new_sensors")
                 except:
@@ -429,51 +431,52 @@ def hardware():
                     addr = request.form["new_addr"]
                 except:
                     addr = ""
-
-                # filter Hardware out of database through ID
-                hardware = Hardware.query.filter_by(hardwareID=hw_id).first()
-                if hardware:
-                    msg = 'Error: Hardware ID {} already exists!'.format(hw_id)
-                    flash(msg, "warning")
+                if latitude is not None and longitude is not None:
+                    place = get_loc_from_degrees(latitude, longitude)
                 else:
-                    try:
-                        new_hw = Hardware(hw_id, 0, addr, status, latitude, longitude, sensors)
-                        new_hw.save()
-                        flash("Successfully created hardware {}".format(hw_id), "success")
-                    except Exception as e:
-                        print("Error creating hardware: ", e)
-                        flash("Unable to create hardware {}. Please make sure inputs are valid".format(hw_id), "danger")
+                    place = ""
+                # filter Hardware out of database through ID
+                try:
+                    new_hw = Hardware(hw_id, 0, addr, status, latitude, longitude, sensors, place)
+                    new_hw.save()
+                    flash("Successfully created hardware {}".format(hw_id), "success")
+                except Exception as e:
+                    print("Error creating hardware: ", e)
+                    flash("Unable to create hardware {}. Please make sure inputs are valid".format(hw_id), "danger")
             elif request.form["btn"] == "update_hardware":
                 hw_id = request.form["hw_id"]
-                hardware = Hardware.query.filter_by(hardwareID=hw_id).first()  
-                status = request.form["status"]
-                hardware.status = status
-                sensors = request.form.getlist("sensors")
-                hardware.sensors = sensors
-                try:
-                    print(request.form["location"])
-                    location = request.form["location"].split(",")
-                    latitude = location[0]
-                    longitude = location[1]
-                except:
+                hardware = Hardware.query.filter_by(hardwareID=hw_id).first() 
+                if hardware is not None: 
+                    status = request.form["status"]
+                    hardware.status = status
+                    sensors = request.form.getlist("sensors")
+                    hardware.sensors = sensors
                     try:
-                        print(request.form["location"])
-                        location = request.form["location"].split(" ")
-                        
+                        location = request.form["location"].split(",")
                         latitude = location[0]
                         longitude = location[1]
                     except:
-                        latitude = None
-                        longitude = None
-                print(latitude, longitude)
-                hardware.latitude = latitude
-                hardware.longitude = longitude
-                try:
-                    db.session.commit()
-                    flash("Successfully updated hardware {}".format(hw_id), "success")
-                except Exception as e:
-                    print("Error updating hardware: ", e)
-                    flash("Unable to update hardware {}. Please make sure inputs are valid".format(hw_id), "danger")
+                        try:
+                            location = request.form["location"].split(" ")
+                            
+                            latitude = location[0]
+                            longitude = location[1]
+                        except:
+                            latitude = None
+                            longitude = None
+                    if latitude is not None and longitude is not None:
+                        place = get_loc_from_degrees(latitude, longitude)
+                    else:
+                        place = ""
+                    hardware.place = place
+                    hardware.latitude = latitude
+                    hardware.longitude = longitude
+                    try:
+                        db.session.commit()
+                        flash("Successfully updated hardware {}".format(hw_id), "success")
+                    except Exception as e:
+                        print("Error updating hardware: ", e)
+                        flash("Unable to update hardware {}. Please make sure inputs are valid".format(hw_id), "danger")
             else:
                 if "delete_hardware" in request.form["btn"]:
                     print("button: ", request.form["btn"])
@@ -487,7 +490,6 @@ def hardware():
                     except Exception as e:
                         print("Error deleting hardware: ", e)
                         flash("Unable to delete hardware {}".format(hw_id), "danger")
-
             return redirect('/hardware.html')
         else:
             return render_template('layouts/default.html',
@@ -648,13 +650,7 @@ def map():
       
 
 def get_location_dist():
-    query = """ SELECT "place", COUNT("hardwareID") FROM public."HARDWARE_STATUS" GROUP BY "place" """
-    print("""Getting info of bike distribution by location...""")
-    return exec_query(query, 2)
-
-def get_location_by_id():
-    query = """ SELECT "hardwareID", "place" FROM public."HARDWARE_STATUS" """
-    print("""Getting info of bike location by ID...""")
+    query = """ SELECT "place", COUNT("hardwareID") FROM public."HARDWARE_STATUS" GROUP BY "place" ORDER BY "place" """
     return exec_query(query, 2)
 
 def get_sensor_dist():
@@ -662,7 +658,6 @@ def get_sensor_dist():
     total_sensors = 0
     for sensor in units:
         query = """ SELECT COUNT("hardwareID") from public."HARDWARE_STATUS" WHERE '{}' = ANY("sensors") """.format(sensor)
-        print("""Getting count of sensor {}...""".format(sensor))
         sens_count = exec_query(query, 1)
         data.append(sens_count)
         total_sensors = total_sensors + sens_count[0]
@@ -672,7 +667,8 @@ def get_sensor_dist():
 @app.route('/', defaults={'path': 'index.html'})
 def dashboard(path):
     if current_user.is_authenticated:
-        chart_data = []
+        pie_charts = [] 
+
         # Data for number cards
         total_rides = 0
         for hw_id in get_hw_ids():
@@ -692,44 +688,45 @@ def dashboard(path):
 
 
         # Data for Distribution by Location Pie Chart
-        location_chart = {}
-        location_chart["chart_id"] = "dist_by_loc_chart"
-        location_chart["chart_title"] = "Bike Distribution By Location"
+        bar_chart = {}
+        bar_chart["chart_id"] = "dist_by_loc_chart"
+        bar_chart["chart_title"] = "Hardware Distribution and Usage By Location"
+        bar_chart["y_axis"] = "Count"
+        bar_chart["legend"] = ["Hardware Count", "Hardware Usage"]
+        bar_chart["series"] = []
+        print("""Getting info of bike distribution by location...""")
         location_counts = get_location_dist()
-        location_chart["labels"] = ["No location data available" if loc == None else loc for loc in location_counts[0]]
-        location_chart["data"] = location_counts[1]
+        bar_chart["labels"] = [loc for loc in location_counts[0] if loc is not None ]
+        #bar_chart["labels"].append("No location data available")
+        bar_chart["series"].append(location_counts[1])
 
         # Data for Usage by Location Pie Chart
-        all_hw_locs = get_location_by_id()
-        num_ride_loc = dict.fromkeys(location_chart["labels"], 0)
-        no_data_count = 0
-        for index, hw_id in enumerate(all_hw_locs[0]):
-            addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct() if hardware.address != ""]
-            place = all_hw_locs[1][index]
-            if place == None:
-                no_data_count +=1
-            else:
-                num_ride_loc[place] = len(addresses)
-        num_ride_loc["No location data available"] = no_data_count
-        usage_chart = {}
-        usage_chart["chart_id"] = "usage_by_loc_chart"
-        usage_chart["chart_title"] = "Bike Usage By Location"
-        usage_chart["labels"] = [key for key in num_ride_loc]
-        usage_chart["data"] = list(dict.values(num_ride_loc))
+        print("""Getting bike usage by location...""")
+        num_ride_loc = []
+        for loc in bar_chart["labels"]:
+            no_addr = 0
+            hw_ids = [hw.hardwareID for hw in Hardware.query.filter_by(place=loc).all()] 
+            for hw_id in hw_ids:
+                addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct() if hardware.address != ""]
+                no_addr = no_addr + len(addresses)
+            num_ride_loc.append(no_addr)
+        bar_chart["series"].append(num_ride_loc)
+
 
         # Data for Distribution of sensors Pie Chart
         sensor_dist_chart = {}
         sensor_dist_chart["chart_id"] = "sensor_dist_chart"
         sensor_dist_chart["chart_title"] = "Sensor Statistics"
         sensor_dist_chart["labels"] = [sensor for sensor in units]
+        print("""Getting count of all sensors """)
         sensor_stats = get_sensor_dist()
         sensor_dist_chart["data"] = sensor_stats[0]
 
         # Add all charts to array
-        chart_data.append(status_chart)
-        chart_data.append(sensor_dist_chart)
-        chart_data.append(location_chart)
-        chart_data.append(usage_chart)
+        pie_charts.append(status_chart)
+        pie_charts.append(sensor_dist_chart)
+        
+      
         
         
         return render_template('layouts/default.html',
@@ -737,7 +734,9 @@ def dashboard(path):
                                     total_bikes=len(get_hw_ids("HARDWARE_STATUS")),
                                     total_rides=total_rides,
                                     total_sensors=sensor_stats[1],
-                                    chart_data=chart_data,
+                                    pie_charts=pie_charts,
+                                    bar_chart=bar_chart,
+                                    total_cities = len(bar_chart["labels"]),
                                     chart_colors=chart_colors) )
 
     else:  
