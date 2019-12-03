@@ -1,5 +1,36 @@
-## Sensors
+## TODOs
+### 3.2.1. Peripherals - Sensor integration
+- [X] Integrate GPS.
+- [X] Integrate BME280E (humidity/temperature/pressure).
+- [X] Integrate SDS011 (particulate matter). 
+- [X] Integrate MPU6050 (accelerometer). 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
 
+- [ ] Implement vibration measurement from accelerometer to detect if bike was parked and is not moving.
+
+### 3.2.1. Peripherals - Human Machine Interface
+- [X] Update Balance on status based intervalls
+- [ ] Add zero padding to all number outputs. 
+
+### 3.3. Hardware implementation - Power System
+- [X] Implement voltage conversion circu
+- [X] Integrate solar charger in power system. 
+- [X] Implement power MOSFET to disable sensors on 5V rail for deepsleep.
+- [ ]
+- [ ]
+ 
+
+### 3.5. Firmware
+- [ ] Implement sleepmode with status 
+- [ ] Request address from server.
+- [ ] Implement session management from sleep to sleep.
+
+
+## Sensors
 
 ### GPS Sensor - [Beitian Dual BN-220 GPS](https://www.banggood.com/Beitian-Dual-BN-220-GPS-GLONASS-Antenna-Module-TTL-Level-RC-Drone-Airplane-p-1208588.html?rmmds=search&cur_warehouse=CN)
 Price: 10€  
