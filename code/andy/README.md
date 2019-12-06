@@ -11,30 +11,28 @@
 - [X] Integrate BME280E (humidity/temperature/pressure).
 - [X] Integrate SDS011 (particulate matter). 
 - [X] Integrate MPU6050 (accelerometer). 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-
+- [X] Integrate MH-Z14A CO2 sensor. 
 - [ ] Implement vibration measurement from accelerometer to detect if bike was parked and is not moving.
+- [ ] 
 
-### 3.2.1. Peripherals - Human Machine Interface
+
+
+### 3.2.2. Peripherals - Human Machine Interface
 - [X] Update Balance on status based intervalls
 - [ ] Add zero padding to all number outputs. 
 
 ### 3.3. Hardware implementation - Power System
-- [X] Implement voltage conversion circu
+- [X] Implement voltage conversion circuit.
 - [X] Integrate solar charger in power system. 
 - [X] Implement power MOSFET to disable sensors on 5V rail for deepsleep.
-- [ ]
 - [ ]
  
 
 ### 3.5. Firmware
-- [ ] Implement sleepmode with status 
-- [ ] Request address from server.
-- [ ] Implement session management from sleep to sleep.
+- [X] Implement sleepmode with status.
+- [X] Implement session management from wake-up to sleep.
+- [ ] Request IOTA address from server.
+- [ ]
 
 
 ## Sensors
@@ -58,7 +56,7 @@ Interface: I2C
 
 
 
-### Temperature/ Humidity/ Atmospheric Pressure Sensor - [BME280](https://www.banggood.com/BME280-Digital-Sensor-Temperature-Humidity-Atmospheric-Pressure-Sensor-Module-p-1354769.html?rmmds=search&cur_warehouse=CN)
+### Temperature/ Humidity/ Atmospheric Pressure Sensor - [BME280E](https://www.banggood.com/BME280-Digital-Sensor-Temperature-Humidity-Atmospheric-Pressure-Sensor-Module-p-1354769.html?rmmds=search&cur_warehouse=CN)
 Price: 4€  
 Interface: I2C  
 Data: temperature, relative humidity, atmosperic pressure (hPa)  
