@@ -31,7 +31,7 @@
 |3V3 	| | epaper, BME280E| | |
 |5V 	| | MPU6050, Buzzer, [GPS, Co2, SDS011]| | |
 |0 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
-|2 |GND |Buzzer |GPIO digital | pull-up at startup |
+|2 |- |Buzzer |GPIO digital | pull-up at startup |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
 |12 | Gate| Mosfet 5V (GPS, Co2, SDS011) |switched off in sleep | pull-down at startup |
