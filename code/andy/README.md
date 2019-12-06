@@ -1,4 +1,11 @@
 ## TODOs
+### 3.1 Mobile connectivity
+- [X] Implement connection to mobile network.
+- [X] HTTP request trough mobile internet connection.
+- [X] Mobile call a phone number (alarm mode).
+- [X] Send SMS to phone number.
+- [X] Read received SMS.
+
 ### 3.2.1. Peripherals - Sensor integration
 - [X] Integrate GPS.
 - [X] Integrate BME280E (humidity/temperature/pressure).
