@@ -20,18 +20,22 @@ NODE_URL = "https://nodes.thetangle.org/"
 
 UPDATE_INV = 1000
 
-RENT_TIME_FACTOR = 1
+RENT_TIME_FACTOR = 0.5
 
 # dev-strings
 json_data = [{"hardwareID": 1}, {"vbat": 3850}]
 
 #m_address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9UCQYMMMXX"
 #dev1
-m_address = "CFQFHKJSEJEO9DMNGDCFBROYQIW9WYGSNLYZSIQQQPMUHTEPZGYDOWGLFOWPZKOYFFXSZXEMRECVYHMOZTBULVLBMW"
+# 0:
+# m_address = "CFQFHKJSEJEO9DMNGDCFBROYQIW9WYGSNLYZSIQQQPMUHTEPZGYDOWGLFOWPZKOYFFXSZXEMRECVYHMOZTBULVLBMW"
+# 1:
+m_address = "9REDAGQZMSRGWMVXNYEAS9ILNWNZFGATYKKHTGXWVUWGPCECWYCD9ZIVZGMZYHYTWVBNJO9I99QXYSYYWNQHQDKMBB"
 m_states = {"offline": 0, "sleeping":1, "parked":2, "rented":3, "broken":4, "stolen":5}
 
 
 DEBUG = True
+DEMO = True
 # ===================
 
 
@@ -119,6 +123,8 @@ mpu.init_sensor(i2c)
 bme = bme280_float.BME280(i2c=i2c)
 
 
+if DEMO:
+    mos.value(1)
 
 
 # ===== DISPLAY ========
@@ -196,14 +202,17 @@ def draw_rent_time(xs=0, ys=120):
             if delta > session_rent_time and status == 3:
                 status_old = status
                 status = 4
+                parking_old_ticks = ticks_ms
                 end_of_session_sound()
             if status == 3:
                 s_delta = session_rent_time - delta
                 dmin = int(s_delta // 60)
                 dsec = int(s_delta % 60)
+                # TODO: add zero padding
                 fb.text("Session: {}:{}".format(dmin, dsec), 0, ys, black)
             elif status == 4:
-                fb.text("Session over!", 0, ys, black)
+                draw_balance(iota = -1)
+                fb.text("Park the bike!", 0, ys, black)
                 
 
 def update_display():
@@ -214,11 +223,14 @@ def clear_buf(color = white):
     fb.fill_rect(0, 0, w, h, color)
 
 def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
+    if DEBUG: print("draw_qr")
     fb.fill_rect(xs, ys, w, h-ys, white)   # clear QR area with white fill
     if m == None:
+        if DEBUG: print("No QR code provided, creating QR code.")
         if address == None:
             address = m_address_chsum
-        m = make_qr(address) 
+        m = make_qr(address)
+    if DEBUG: print("Drawing QR code.")
     for y in range(len(m)*scale):
         for x in range(len(m[0])*scale):
             value = m[y//scale][x//scale]
@@ -232,8 +244,9 @@ def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
 
 
 def make_qr(address=m_address):
-    if DEBUG: print("Making QR code...")
+    if DEBUG: print("Creating QR code...")
     from uQR import QRCode
+    if DEBUG: print("Imported QR library.")
     qr=QRCode(border=0)
     qr.add_data(address)
     m_address_matrix = qr.get_matrix()
@@ -291,7 +304,7 @@ def get_bme():
     #else:
     #  return None #('Invalid sensor readings.')
   except OSError as e:
-    print('Failed to read sensor: ', e)
+    print('Failed to read BME sensor: ', e)
     return None
 
     
@@ -334,7 +347,7 @@ def gsm_connect():
         gsm.connect()
         while gsm.status()[0] != 1:
             sys.stdout.write('.')
-            sleep_ms(10)
+            sleep_ms(200)
             #pass
         print('IP:', gsm.ifconfig()[0])
         if rtc.now()[0] == 1970:
@@ -436,14 +449,30 @@ def end_of_session_sound():
     sleep_ms(200)
     buz.value(1)
 
+def alarm_sound():
+    buz.value(0)
+    sleep_ms(500)
+    buz.value(1)
+    sleep_ms(500)
+    buz.value(0)
+    sleep_ms(500)
+    buz.value(1)
+    sleep_ms(500)
+    buz.value(0)
+    sleep_ms(500)
+    buz.value(1)
+    sleep_ms(500)
+
 
 def hibernate():
+    if DEBUG: print("Preparing for hibernation...")
     e.set_lut(e.LUT_FULL_UPDATE)
     draw_status(status_def[1])
     rtc.write(2, 1) # write status "sleeping" in RTC
     rtc.write(3, 1) # flag: address in RTC memory
     hst = session_address
     hma = make_qr(session_address)
+    if DEBUG: print("Making RTC string.")
     for i in range(len(hma)):
         hst += ","
         for j in range(len(hma[i])):
@@ -451,11 +480,13 @@ def hibernate():
                 hst += "1"
             else:
                 hst += "0"
+    if DEBUG: print("Writing QR and address to RTC memory...")
     rtc.write_string(hst) # write address and QR-Code into RTC memory
     rtc.write(5, 1) # flag: qr-code in RTC memory
-    draw_qr(m=hma, scale=3)
+    if DEBUG: print("Draw 'sleep' frame.")
     draw_balance(-1)
     draw_rent_time(xs=-1)
+    draw_qr(m=hma, scale=3)
     update_display()
     mos.value(0) # turn off 5V AUX
     print("Going into deepsleep...")
@@ -490,13 +521,15 @@ if DEBUG: print("status_old from memory: ", status_old)
 # TODO: CHECK WAKE UP REASON
 print("\n\nReset cause:",machine.wake_description())
 status = 2 # Updating balance
-
+# 'Deepsleep wake-up'
+# reason (3, 1)
 
 
 
 if rtc.read(3):
     if DEBUG: print("Reading session_address from memory...")
     session_address = rtc.read_string().split(',')[0]
+    if DEBUG and session_address is not None: print("session_address read.")
 else:
     check, s_adr = get_address()
     if check is True:
@@ -554,46 +587,55 @@ else:
             update_old_ticks = 0
             new_ticks = 0
             balance_old_ticks = 0
+            parking_old_ticks = 0
             
+            # Hibernate after power reset
+            if machine.wake_reason()[0] != 3:
+                hibernate()
             
             while BTN1.value() != 0:
                 new_ticks = ticks_ms()
                 update_diff = ticks_diff(new_ticks, update_old_ticks)
                 balance_diff = ticks_diff(new_ticks, balance_old_ticks)
-                
+                parking_diff = ticks_diff(new_ticks, parking_old_ticks)
                 
                 if update_diff >= UPDATE_INV or update_diff < 0:
                     #print("update")
                     update_old_ticks = new_ticks
                     
+                    # Start session
                     if session_balance > 0:
                         if status == 2:
                             status_old = status
-                            status = 3
-                            print("ss",int(time()))
+                            status = 3 # Session running
                             session_start = int(time())
-                            print("session_start", session_start)
-                    draw_status(status_def[status], xs=0)
+                            if DEBUG: print("session_start", session_start)
+                            
                     draw_date()
-                    
-                    
-                        
                     draw_balance(session_balance, ys=100)
                     draw_rent_time()
+                    draw_status(status_def[status], xs=0)
                     update_display()
                     counter+=1
                     
-                # update balance
+                # UPDATING BALANCE
                 if status == 2:
                     session_balance = get_balance(url=NODE_URL2, address=m_address[:81])
                     #session_balance = counter
+                    
+                #SESSION RUNNING
                 elif status == 3:
-                    if balance_diff > 60000:
+                    if balance_diff > 80000: # check balance every 80 seconds
                         balance_old_ticks = new_ticks
                         session_balance = get_balance(url=NODE_URL2, address=m_address[:81])
                 
-                    
-                    
+                # SESSION OVER
+                if status == 4:
+                    if parking_diff > 10:
+                        # TODO: check for no vibration = bike is parked
+                        if True:
+                            hibernate()
+                
                 print("counter", counter)
                 #print("update_old_ticks", update_old_ticks)
                 #rint("new_ticks", new_ticks)
