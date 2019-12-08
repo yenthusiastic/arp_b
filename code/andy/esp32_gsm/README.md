@@ -135,7 +135,7 @@ Therefore the to be developed prototype might not be able to suport any low-powe
 
 ## Comiling Modules
 [MicroPython cross compiler](https://github.com/micropython/micropython/tree/master/mpy-cross)
-python3 -m mpy_cross -mcache-lookup-bc epaper2in9.py`
+`python3 -m mpy_cross -v -mno-unicode -mcache-lookup-bc -march=xtensa epaper2in9.py`
 
 Copy *.mpy file to ESP.
 
