@@ -37,10 +37,9 @@ const getAddress = (request, response) => {
         if (error) {
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
-        }
-            
+        } 
         // If Hardware ID exist, request new *address based on the current *address_index
-        if(results.rows[0] != undefined){
+        else if(results.rows[0] != undefined){
             console.log('\nDevice with ID ' + hardwareID + ' found.')
             let privateKey = results.rows[0].seed
             address_index = results.rows[0].address_index + 1

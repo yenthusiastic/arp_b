@@ -4,7 +4,7 @@ const generateSeed = () => {
 
     let length       = 81                               // The length of the seed and int array.
     let chars        = "ABCDEFGHIJKLMNOPQRSTUVWXYZ9"    // The allowed characters in the seed.
-    let randomValues = new Uint8Array(length)          // An empty array to store the random values.
+    let randomValues = new Uint32Array(length)          // An empty array to store the random values.
     let result       = new Array(length)                // An empty array to store the seed characters.
 
     crypto.randomFillSync(randomValues)                 // Generate random values and store them to randomValues.
