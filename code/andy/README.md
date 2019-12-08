@@ -19,6 +19,7 @@
 
 ### 3.2.2. Peripherals - Human Machine Interface
 - [X] Update Balance on status based intervalls
+- [X] Generate and draw QR code.
 - [ ] Add zero padding to all number outputs. 
 
 ### 3.3. Hardware implementation - Power System
@@ -30,7 +31,9 @@
 
 ### 3.5. Firmware
 - [X] Implement sleepmode with status.
-- [X] Implement session management from wake-up to sleep.
+- [X] Save QR code and IOTA address to RTC memory for deepsleep.
+- [X] Read QR code and IOTA address from RTC memory after wakeup
+- [X] Implement session management from wakeup to sleep.
 - [ ] Request IOTA address from server.
 
 
