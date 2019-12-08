@@ -41,14 +41,14 @@ const getAddress = (request, response) => {
             
         // If Hardware ID exist, request new *address based on the current *address_index
         if(results.rows[0] != undefined){
-            console.log('Device with ID ' + hardwareID + ' found.')
+            console.log('\nDevice with ID ' + hardwareID + ' found.')
             let privateKey = results.rows[0].seed
             address_index = results.rows[0].address_index + 1
             updateHardware(hardwareID, privateKey, address_index,response)
         }
          // If Hardware ID does not exist, request new *seed, *address, and *address_index
         else {
-            console.log('Device with ID ' + hardwareID + ' not found.')
+            console.log('\nDevice with ID ' + hardwareID + ' not found.')
             saveNewHardware(hardwareID, response)
         }
     })
@@ -90,7 +90,7 @@ let saveNewHardware = async (hardwareID, response) => {
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
         }
-        console.log("Hardware with ID " + hardwareID + ' added.')
+        console.log("\nHardware with ID " + hardwareID + ' added.')
         response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "MoreInformation": "Private key and session address were added."})
     })
 }
@@ -111,7 +111,7 @@ let updateHardware = async (hardwareID, privateKey, new_address_index, response)
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
         }
-        console.log("Hardware with ID " + hardwareID + ' updated.')
+        console.log("\nHardware with ID " + hardwareID + ' updated.')
         response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "MoreInformation": "Address session and address index were updated."})
     })
 }
