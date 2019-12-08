@@ -729,7 +729,7 @@ body>.navbar-collapse[data-color="purple"]:after {
     -moz-transform: translate3d(0, -5%, 0) !important;
     -o-transform: translate3d(0, -5%, 0) !important;
     -ms-transform: translate3d(0, -5%, 0) !important;
-    transform: translate3d(0, -5%, 0) !important;
+/*     transform: translate3d(0, -5%, 0) !important; */
     border-radius: 10px;
 }
 
@@ -750,7 +750,7 @@ body>.navbar-collapse[data-color="purple"]:after {
     -moz-transform: translate3d(0, 0%, 0) !important;
     -o-transform: translate3d(0, 0%, 0) !important;
     -ms-transform: translate3d(0, 0%, 0) !important;
-    transform: translate3d(0, 0%, 0) !important;
+/*     transform: translate3d(0, 0%, 0) !important; */
     transform-origin: 0 0;
     left: -303px !important;
 }
@@ -760,7 +760,7 @@ body>.navbar-collapse[data-color="purple"]:after {
     -moz-transform: translate3d(0, -5%, 0) !important;
     -o-transform: translate3d(0, -5%, 0) !important;
     -ms-transform: translate3d(0, -5%, 0) !important;
-    transform: translate3d(0, -5%, 0) !important;
+/*     transform: translate3d(0, -5%, 0) !important; */
     top: -40px !important;
     opacity: 0;
     left: -303px !important;
@@ -769,11 +769,11 @@ body>.navbar-collapse[data-color="purple"]:after {
 
 .fixed-plugin .dropdown.show .dropdown-menu {
     opacity: 1;
-    -webkit-transform: translate3d(0, 0%, 0) !important;
+/*     -webkit-transform: translate3d(0, 0%, 0) !important;
     -moz-transform: translate3d(0, 0%, 0) !important;
     -o-transform: translate3d(0, 0%, 0) !important;
-    -ms-transform: translate3d(0, 0%, 0) !important;
-    transform: translate3d(0, 0%, 0) !important;
+    -ms-transform: translate3d(0, 0%, 0) !important; */
+/*     transform: translate3d(0, 0%, 0) !important; */
     transform-origin: 0 0;
     left: -303px !important;
 }
@@ -783,7 +783,7 @@ body>.navbar-collapse[data-color="purple"]:after {
     content: "";
     display: inline-block;
     position: absolute;
-    top: 65px;
+/*     top: 65px; */
     width: 16px;
     transform: translateY(-50%);
     -webkit-transform: translateY(-50%);
@@ -2653,7 +2653,7 @@ Copyright (c) 2015 Daniel Eden
     -moz-transform-origin: 50% -40px;
     -o-transform-origin: 50% -40px;
     -ms-transform-origin: 50% -40px;
-    transform-origin: 50% -40px;
+/*     transform-origin: 50% -40px; */
     -webkit-transform: scale(1);
     -moz-transform: scale(1);
     -o-transform: scale(1);
@@ -4037,12 +4037,12 @@ Copyright (c) 2015 Daniel Eden
         padding-top: 5px;
     }
     .nav-mobile-menu .dropdown .dropdown-menu {
-        position: static !important;
+/*         position: static !important; */
         float: none;
         width: auto;
         color: #FFFFFF;
         margin-top: 0;
-        background-color: transparent;
+        background-color: #FFFFFF;
         border: 0;
         -webkit-box-shadow: none;
         box-shadow: none;
@@ -4053,9 +4053,9 @@ Copyright (c) 2015 Daniel Eden
         transition: all 0.5s cubic-bezier(0.685, 0.0473, 0.346, 1);
     }
     .nav-mobile-menu .dropdown .dropdown-menu .dropdown-item {
-        margin: 5px 15px 0px 40px;
+        margin: 5px 15px 0px 15px;
         border-radius: 4px;
-        color: #FFFFFF;
+        color: primary;
         opacity: .86;
         padding: 8px 50px;
     }
@@ -4114,7 +4114,7 @@ Copyright (c) 2015 Daniel Eden
         -moz-transform: translate3d(260px, 0, 0);
         -o-transform: translate3d(260px, 0, 0);
         -ms-transform: translate3d(260px, 0, 0);
-        transform: translate3d(260px, 0, 0);
+/*         transform: translate3d(260px, 0, 0); */
         -webkit-transition: all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1);
         -moz-transition: all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1);
         -o-transition: all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1);
@@ -4151,7 +4151,7 @@ Copyright (c) 2015 Daniel Eden
         -moz-transform: translate3d(0px, 0, 0);
         -o-transform: translate3d(0px, 0, 0);
         -ms-transform: translate3d(0px, 0, 0);
-        transform: translate3d(0px, 0, 0);
+/*         transform: translate3d(0px, 0, 0); */
     }
     .nav-show .navbar .container {
         left: -250px;
@@ -4162,7 +4162,7 @@ Copyright (c) 2015 Daniel Eden
         -moz-transform: translate3d(-260px, 0, 0);
         -o-transform: translate3d(-260px, 0, 0);
         -ms-transform: translate3d(-260px, 0, 0);
-        transform: translate3d(-260px, 0, 0);
+/*         transform: translate3d(-260px, 0, 0); */
     }
     .navbar-toggle .icon-bar {
         display: block;

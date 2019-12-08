@@ -1,13 +1,75 @@
+### Notes
+#### Create a virtual environment in Python
+In Terminal/ Command Prompt, type in:
+```
+python -m venv <name-of-env>
+```
+To activate the environment:
+```
+cd <dir-of-env>
+source name-of-env/bin/activate
+```
+To deactivate:
+```
+deactivate
+```
+
+#### Create a virtual environment in Anaconda
+In Anaconda Prompt, type in: 
+```
+conda create --name <name-of-env>
+```
+To activate the environment:
+```
+conda activate <name-of-env>
+```
+To deactivate:
+```
+conda deactivate
+```
+
+#### Organize and execute Flask application 
+- In Flask, all `HTML` pages have to be stored under a folder named `templates`. This folder is usually placed directly under the app root folder where the main program e.g. `app.py` or `run.py` are.  
+- All styling sheets, e.g. `CSS` and all `JS` scripts have to be stored under (directly under or in other sub-folders of) a folder named `static`. The `static` folder is directly under the app root folder. 
+- Routing of the pages are configured in a Python script, usually named `views.py` and saved in the app root folder. 
+- In summary, the project structure can look like follows:
+```
+.                           
++-- static/
+|    +-- styles.css
+|    +-- script.js
++-- templates/
+|    +-- index.html
++-- app.py
++-- views.py
+```
+- To deploy the app on a specific port, say port 5001, in the app root folder run the command:
+```
+flask run -p <custom-port-number>
+```
+
+When no port number is given explicitly, the default port number 5000 will be used to host the website content. 
+For local machine, access the web server at `127.0.0.1:<custom-port-number>`.
+
+#### Access web server
+- The Flask server for User Interface will be running on port 5021 and accessible at bikota.dev.iota.pw
+- The Flask server for Admin Panel will be running on port 5020 and accessible at web.dev.iota.pw
+
+
 ### Plans/ TODOs
-#### API Endpoints 
+#### API Endpoints (deactivated)
 For communication with bike hardware module
 - [x] Simple API endpoint for handling GET/PUT/POST requests at https://req.dev.iota.pw. Check [Python API documentation for details](../../documentation/API_python.md).
 - [x] Define JSON data structure for API request body
 - [x] Send transaction with sensor data to Tangle through connection with IOTA node
 - [ ] Advanced API with multiple endpoints using additional frameworks and authentication
-- Postgres database
+
+#### Postgres database
     - [x] Define database schemas and structure
     - [x] Run Postgres and PgAdmin servers from Docker images. Check [Database Server documentation for details](../../documentation/database_server.md).
+
+#### Sensor data aggregation policy
+Currently sensor data is being saved into the database every second, which means a lot of data points will be fetched when a large time interval is requested in the SQL query. This reults in poor performance while generating the sensor charts on the Admin Panel Dashboard. To prevent this, the SQL query should fetch aggregated data instead of all raw data points. The extent of aggregation can vary depending on the total amount of data points recorded within the requested time range. 
 
 #### Web Application
 - Database connection
@@ -17,35 +79,32 @@ For communication with bike hardware module
         - Querying current location and/or status of all hardwares
         - Quering large amount of sensor data 
         - Filtering data by user's selections
-
-- User interface: 
-    - [ ] Visualize **parked** bikes available for rent as markers on a map
-    - [ ] Filter map by location and radius
-    - [ ] Click on bike to get exact location
-    - [ ] Input form for entering IOTA address
-    - [ ] Show data collected in the session on a chart
-    - [ ] Bikota renting service manual
 - Administration dashboard: 
     - [X] User authentication
         - [X] Login 
         - [X] Registration
         - [X] Logout
+        - [ ] Form input validation
     - [X] User profile management
         - [X] Show user profile
         - [X] Update profile
         - [X] Update password 
         - [X] Delete account with confirmation dialog
+    - [X] Main Dashboard
+        - [X] System Summarized Statistics: Total number of hardwares, total number of sessions, total number of locations, total number of sensors
+        - [X] System Statistics Visualizations (pie charts/ bar charts, etc.)
     - [ ] Bike visualization (Main dashboard)
-        - [ ] Visualize all bikes as markers on a map with details including
+        - [X] Visualize all bikes as markers on a map with details including
             - Hardware ID
             - Attached sensor(s)
             - Current address
             - Current status
             - Current location 
+        - [ ] Group markers as bubbles by locations
         - [ ] Filter map by 
             - [ ] Status
             - [ ] Location & radius
-    - [ ] Hardware management
+    - [X] Hardware management
         - [X] Create new hardware with required details
             - Hardware ID
             - Attached sensor(s)
@@ -59,6 +118,8 @@ For communication with bike hardware module
         - [X] Sensor type
         - [X] Session address
         - [X] Time range
+    - [ ] Visualize aggregated instead of raw sensor data when the queried time period returns too many data points (checked Sensor data aggregation policy section for details)
+    - [ ] Constant refresh rate of 5 seconds
 
 
 

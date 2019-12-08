@@ -195,7 +195,7 @@
         
     
         chart_loader = {                      
-            initDashboardPageCharts: function() {
+            initCharts: function() {
                 {% if chart_data %}
                     {% for ch_dat in chart_data %}
                         
@@ -319,7 +319,7 @@
 
 
         $(document).ready(function() {
-            chart_loader.initDashboardPageCharts();
+            chart_loader.initCharts();
             $('#rtl-wrap').hide();
             $('#startDate').daterangepicker({
               startDate: moment().subtract(6, 'days')

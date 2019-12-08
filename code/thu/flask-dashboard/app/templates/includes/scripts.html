@@ -17,9 +17,11 @@
             {% if messages %}
              {% for category, message in messages %}
                 window.onload = function() {
-                    demo.showNotification(from="top", align="center", msg="{{message}}", color="{{category}}");
+                    demo.showNotification(from="bottom", align="center", msg="{{message}}", color="{{category}}");
                 };
               {% endfor %}
             {% endif %}
     {% endwith %}
+
+  
 </script>
