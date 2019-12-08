@@ -3,6 +3,24 @@
   https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/
 '''
 
+# ===== IMPORTS ========
+from sys import stdout 
+from machine import Pin, SPI, ADC, UART, I2C, GPS, DHT, RTC, deepsleep, reset, wake_description, wake_reason
+import gsm
+import socket
+import urequests as requests
+import json
+from time import sleep, sleep_ms, ticks_ms, ticks_diff, time, strftime
+
+import mpu6050 as mpu
+import bme280_no_hum as bme280_float
+import sds011
+
+import epaper2in9
+import framebuf
+# ===== /IMPORTS ========
+
+
 # ===== CONFIG ========
 
 # APN Credentials
@@ -11,14 +29,14 @@ GSM_USER = 'vodafone'
 GSM_PASS = 'vodafone'
 
 # Module Settings
-HARDWARE_ID = 1
+HARDWARE_ID = const(1)
 API_KEY = "2ed617ed018c0b13f209fc0bbe75ab8ab1a1d303"
 PHONE_NUMBER = '+491745851814'
 SERVER_URL = "https://req.dev.iota.pw/"
 NODE_URL2 = "https://nodes.iotadev.org/"
 NODE_URL = "https://nodes.thetangle.org/"
 
-UPDATE_INV = 1000
+UPDATE_INV = const(1000)
 
 RENT_TIME_FACTOR = 0.5
 
@@ -36,32 +54,7 @@ m_states = {"offline": 0, "sleeping":1, "parked":2, "rented":3, "broken":4, "sto
 
 DEBUG = True
 DEMO = True
-# ===================
-
-
-status = 0
-status_old = 0
-qr_display = 0
-session_address = ""
-session_balance = 0
-session_start = 0
-session_rent_time = 0
-
-
-#import machine
-from sys import stdout 
-from machine import Pin, SPI, ADC, UART, I2C, GPS, DHT, RTC, deepsleep, reset, wake_description, wake_reason()
-import gsm
-import socket
-import urequests as requests
-import json
-from time import sleep, sleep_ms, ticks_ms, ticks_diff, time, strftime
-
-import mpu6050 as mpu
-import bme280_no_hum as bme280_float
-import sds011
-
-rtc = RTC()
+# ===== /CONFIG ========
 
 
 status_def = {
@@ -76,6 +69,19 @@ status_def = {
 }
 
 
+status = 0
+status_old = 0
+qr_display = 0
+session_address = ""
+session_balance = 0
+session_start = 0
+session_rent_time = 0
+
+
+
+# Create RTC
+rtc = RTC()
+
 # Setup GSM Module Pins
 GSM_PWR = Pin(4, Pin.OUT)
 GSM_RST = Pin(5, Pin.OUT)
@@ -85,14 +91,11 @@ GSM_MODEM_PWR = Pin(23, Pin.OUT)
 #GSM_MODEM_PWR.value(0)
 
 # Setup User IO Pins
-#LED = Pin(13, Pin.OUT)
-#LED.value(1)
-
-BTN1 = Pin(0, Pin.IN, Pin.PULL_UP)
-LED = Pin(13, Pin.OUT, value=0)
+btn1 = Pin(0, Pin.IN, Pin.PULL_UP)
+led = Pin(13, Pin.OUT, value=0)
 
 # wake-up source for deepsleep
-rtc.wake_on_ext0(pin=BTN1, level=0)
+rtc.wake_on_ext0(pin=btn1, level=0)
 
 # MOSFET for 5V AUX
 mos = Pin(12, Pin.OUT, value=0)
@@ -131,60 +134,58 @@ if DEMO:
 # ===== DISPLAY ========
 #from machine import Pin, SPI
 #import epaper2in9b_mod as epaper2in9b
-import epaper2in9
+#import epaper2in9
 
 spi = SPI(2, baudrate=2000000, polarity=1, phase=0, sck=Pin(25), mosi=Pin(15), miso=Pin(0))
-BTN1 = Pin(0, Pin.IN, Pin.PULL_UP)
+btn1 = Pin(0, Pin.IN, Pin.PULL_UP)
 
 dc=Pin(32)
 rst=Pin(14)
 busy=Pin(34)
 cs=Pin(33)
 
-black = 0
-white = 1
+BLACK = const(0)
+WHITE = const(1)
 
-w = 128
-h = 296
-x = 0
-y = 0
+W = const(128)
+H = const(296)
 
-import framebuf
-buf = bytearray(w * h // 8)
-fb = framebuf.FrameBuffer(buf, w, h, framebuf.MONO_HLSB)
-fb.fill(white)
+
+#import framebuf
+buf = bytearray(W * H // 8)
+fb = framebuf.FrameBuffer(buf, W, H, framebuf.MONO_HLSB)
+fb.fill(WHITE)
 
 e=epaper2in9.EPD(spi, cs, dc, rst, busy)
 e.init()
 
 def draw_title():
-    fb.fill_rect(0,0,w,10, black)
-    fb.text("B I K O T A", 20, 3, white)
+    fb.fill_rect(0,0,W,10, BLACK)
+    fb.text("B I K O T A", 20, 3, WHITE)
     #e.draw_filled_rectangle(buf, 0,10,127,11, True)
     #e.draw_filled_rectangle(bufy, 0,15,127,168, True)
-    fb.fill_rect(0,10,w,3, black)
-    fb.fill_rect(0,35,w,3, black)
+    fb.fill_rect(0,10,W,3, BLACK)
+    fb.fill_rect(0,35,W,3, BLACK)
 
 def draw_status(stat="Undefined", xs=0, ys=20):
-    fb.fill_rect(0, ys-6, w, 21, white)
+    fb.fill_rect(0, ys-6, W, 21, WHITE)
     if xs >= 0:
         if xs == 0:
-            xs = int((w - (len(stat) * 8)) / 2) 
-        fb.text(str(stat), xs, ys, black)
+            xs = int((W - (len(stat) * 8)) / 2) 
+        fb.text(str(stat), xs, ys, BLACK)
 
 def draw_date(xs=0, ys=45):
     if rtc.now()[0] != 1970:
-        fb.fill_rect(0, ys, xs+64, 11, white)
+        fb.fill_rect(0, ys, xs+64, 11, WHITE)
         if xs>=0:
             dt=rtc.now()[:6]
-            fb.text("{}.{}.{}".format(dt[2], dt[1], dt[0]-2000), 0, ys, black)
-
+            fb.text("{}.{}.{}".format(dt[2], dt[1], dt[0]-2000), 0, ys, BLACK)
 
 
 def draw_balance(iota=session_balance, xs=0, ys=100):
-    fb.fill_rect(0, ys, w, 8, white)
+    fb.fill_rect(0, ys, W, 8, WHITE)
     if iota >= 0:
-        fb.text("Balance: {}i".format(iota), 0, ys, black)
+        fb.text("Balance: {}i".format(iota), 0, ys, BLACK)
     #fb.fill_rect(0,ys+8,127,11, 1)
     #fb.text("{} i".format(iota),0,  ys+10, 0)
 
@@ -195,7 +196,7 @@ def draw_rent_time(xs=0, ys=120):
     session_rent_time= session_rent_time
     session_balance = session_balance
     session_start = session_start
-    fb.fill_rect(0, ys, w, 8, white)
+    fb.fill_rect(0, ys, W, 8, WHITE)
     if xs >= 0:
         if session_start > 0:
             session_rent_time = session_balance * RENT_TIME_FACTOR * 60
@@ -210,22 +211,22 @@ def draw_rent_time(xs=0, ys=120):
                 dmin = int(s_delta // 60)
                 dsec = int(s_delta % 60)
                 # TODO: add zero padding
-                fb.text("Session: {}:{}".format(dmin, dsec), 0, ys, black)
+                fb.text("Session: {}:{}".format(dmin, dsec), 0, ys, BLACK)
             elif status == 4:
                 draw_balance(iota = -1)
-                fb.text("Park the bike!", 0, ys, black)
+                fb.text("Park the bike!", 0, ys, BLACK)
                 
 
 def update_display():
-    e.set_frame_memory(buf, x, y, w, h)
+    e.set_frame_memory(buf, x, y, W, H)
     e.display_frame()
 
-def clear_buf(color = white):
-    fb.fill_rect(0, 0, w, h, color)
+def clear_buf(color = WHITE):
+    fb.fill_rect(0, 0, W, H, color)
 
 def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
     if DEBUG: print("draw_qr")
-    fb.fill_rect(xs, ys, w, h-ys, white)   # clear QR area with white fill
+    fb.fill_rect(xs, ys, W, H-ys, WHITE)   # clear QR area with WHITE fill
     if m == None:
         if DEBUG: print("No QR code provided, creating QR code.")
         if address == None:
@@ -530,7 +531,7 @@ def hibernate():
 
 
 def r():
-    machine.reset()
+    reset()
 
 
 
@@ -555,7 +556,7 @@ if DEBUG: print("status_old from memory: ", status_old)
 
 
 # TODO: CHECK WAKE UP REASON
-print("\n\nReset cause:",machine.wake_description())
+print("\n\nReset cause:",wake_description())
 status = 2 # Updating balance
 # 'Deepsleep wake-up'
 # reason (3, 1)
@@ -594,14 +595,14 @@ jsn= {"hardwareID":"1","address":"Postman_test","latitude":"61.123","longitude":
 
 
 counter = 0
-if BTN1.value() == 0:
+if btn1.value() == 0:
     pass
 else:
     adc.collect(1, len=10, readmv=True)
     while True:
-        if True: #BTN1.value() == 0:
+        if True: #btn1.value() == 0:
             #break
-            LED.value(1)
+            led.value(1)
             startup_sound()
             draw_title()
             draw_status(status_def[status], xs=0)
@@ -626,10 +627,10 @@ else:
             parking_old_ticks = 0
             
             # Hibernate after power reset
-            if machine.wake_reason()[0] != 3:
+            if wake_reason()[0] != 3:
                 hibernate()
             
-            while BTN1.value() != 0:
+            while btn1.value() != 0:
                 new_ticks = ticks_ms()
                 update_diff = ticks_diff(new_ticks, update_old_ticks)
                 balance_diff = ticks_diff(new_ticks, balance_old_ticks)
@@ -691,4 +692,4 @@ else:
         #while True:
         #    
         #    sleep_ms(30)
-LED.value(0)
+led.value(0)
