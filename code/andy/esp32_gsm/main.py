@@ -48,8 +48,9 @@ session_start = 0
 session_rent_time = 0
 
 
-import machine, sys 
-from machine import Pin, ADC, UART, I2C, GPS, DHT, RTC, deepsleep
+#import machine
+from sys import stdout 
+from machine import Pin, SPI, ADC, UART, I2C, GPS, DHT, RTC, deepsleep, reset, wake_description, wake_reason()
 import gsm
 import socket
 import urequests as requests
@@ -128,7 +129,7 @@ if DEMO:
 
 
 # ===== DISPLAY ========
-from machine import Pin, SPI
+#from machine import Pin, SPI
 #import epaper2in9b_mod as epaper2in9b
 import epaper2in9
 
@@ -188,7 +189,7 @@ def draw_balance(iota=session_balance, xs=0, ys=100):
     #fb.text("{} i".format(iota),0,  ys+10, 0)
 
 def draw_rent_time(xs=0, ys=120):
-    global status, status_old, session_rent_time, session_balance, session_start
+    global status, status_old, session_rent_time, session_balance, session_start, parking_old_ticks
     status = status
     status_old = status_old
     session_rent_time= session_rent_time
@@ -202,7 +203,7 @@ def draw_rent_time(xs=0, ys=120):
             if delta > session_rent_time and status == 3:
                 status_old = status
                 status = 4
-                parking_old_ticks = ticks_ms
+                parking_old_ticks = ticks_ms()
                 end_of_session_sound()
             if status == 3:
                 s_delta = session_rent_time - delta
@@ -261,7 +262,7 @@ def checkms(t):
         stop=ticks_ms()
     if DEBUG: print("Pulse:", (stop-start)-2)
 
-
+"""
 def get_pm(p10=PM10_PIN, p25=PM25_PIN):
     while p10.value() !=0:
         sleep_ms(1)
@@ -275,6 +276,24 @@ def get_pm(p10=PM10_PIN, p25=PM25_PIN):
         st_25=ticks_ms()
     while p25.value() == 1:
         sp_25=ticks_ms()
+    if DEBUG: print("PM10:", (sp_10-st_10)-2)
+    if DEBUG: print("PM25:", (sp_25-st_25)-2)
+    return
+"""
+
+def get_pm(p10=PM10_PIN, p25=PM25_PIN):
+    while p10.value() == 0:
+        pass
+    st_10=ticks_ms()
+    while p10.value() == 1:
+        pass
+    sp_10=ticks_ms()
+    while p25.value() == 0:
+        pass
+    st_25=ticks_ms()
+    while p25.value() == 1:
+        pass
+    sp_25=ticks_ms()
     if DEBUG: print("PM10:", (sp_10-st_10)-2)
     if DEBUG: print("PM25:", (sp_25-st_25)-2)
 
@@ -426,8 +445,16 @@ def get_balance(url=NODE_URL, address=m_address, threshold=100):
 def get_address():
     return True, m_address
 
+def sound(on_t, off_t, reps):
+    for i in range(reps):
+        buz.value(0)
+        sleep_ms(on_t)
+        buz.value(1)
+        sleep_ms(off_t)
 
 def startup_sound():
+    sound(20,100,2)
+    """
     buz.value(0)
     sleep_ms(30)
     buz.value(1)
@@ -435,8 +462,14 @@ def startup_sound():
     buz.value(0)
     sleep_ms(30)
     buz.value(1)
+    """
+
+def start_of_session_sound():
+    sound(30,200,3)
 
 def end_of_session_sound():
+    sound(200,400,3)
+    """
     buz.value(0)
     sleep_ms(200)
     buz.value(1)
@@ -448,8 +481,11 @@ def end_of_session_sound():
     buz.value(0)
     sleep_ms(200)
     buz.value(1)
-
+    """
+    
 def alarm_sound():
+    sound(500,500,3)
+    """
     buz.value(0)
     sleep_ms(500)
     buz.value(1)
@@ -462,7 +498,7 @@ def alarm_sound():
     sleep_ms(500)
     buz.value(1)
     sleep_ms(500)
-
+    """
 
 def hibernate():
     if DEBUG: print("Preparing for hibernation...")
@@ -608,6 +644,7 @@ else:
                         if status == 2:
                             status_old = status
                             status = 3 # Session running
+                            start_of_session_sound()
                             session_start = int(time())
                             if DEBUG: print("session_start", session_start)
                             
