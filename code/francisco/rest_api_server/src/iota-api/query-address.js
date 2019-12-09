@@ -1,3 +1,10 @@
+// Close db connection when finish by adding '//done()'
+// https://stackoverflow.com/questions/34803691/node-js-and-pg-module-how-can-i-really-close-connection
+// https://mherman.org/blog/postgresql-and-nodejs/
+
+// If problem on production server persist, check the link below
+// https://www.postgresql.org/message-id/63BB752C-5997-497C-9846-3475ADC9EB00@ausvet.com.au
+
 
 const pg = require('pg')
 const SEED = require('./generate-seed')
@@ -35,6 +42,7 @@ const getAddress = (request, response) => {
     // Check if hardwareID is registered in the DB
     pool.query('SELECT * from "HARDWARE_STATUS" WHERE "hardwareID" = $1;',[hardwareID],(error,results) => {
         if (error) {
+            //done()
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
         } 
@@ -44,11 +52,13 @@ const getAddress = (request, response) => {
             let privateKey = results.rows[0].seed
             address_index = results.rows[0].address_index + 1
             updateHardware(hardwareID, privateKey, address_index,response)
+            //done();
         }
          // If Hardware ID does not exist, request new *seed, *address, and *address_index
         else {
             console.log('\nDevice with ID ' + hardwareID + ' not found.')
             saveNewHardware(hardwareID, response)
+            //done();
         }
     })
 }
@@ -86,11 +96,13 @@ let saveNewHardware = async (hardwareID, response) => {
     // Saving values in the DB
     pool.query('INSERT INTO "HARDWARE_STATUS"("hardwareID", "seed", "session_address", "address_index") VALUES ($1, $2, $3, $4);',[hardwareID, seed, address, address_index = 0], (error,results) => {
         if (error){
+            //done();
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
         }
+        //done();
         console.log("\nHardware with ID " + hardwareID + ' added.')
-        response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "MoreInformation": "Private key and session address were added."})
+        response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "Session address": address, "MoreInformation": "Private key and session address were added to the database."})
     })
 }
 
@@ -107,10 +119,12 @@ let updateHardware = async (hardwareID, privateKey, new_address_index, response)
     // Saving values in the DB
     pool.query('UPDATE "HARDWARE_STATUS" SET "address_index" = $1, "session_address" = $2 WHERE "hardwareID" = $3;',[new_address_index, address, hardwareID], (error,results) => {
         if (error){
+            //done();
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
         }
+        //done();
         console.log("\nHardware with ID " + hardwareID + ' updated.')
-        response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "MoreInformation": "Address session and address index were updated."})
+        response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "Session address": address, "MoreInformation": "Address session and address index were updated in the database."})
     })
 }
