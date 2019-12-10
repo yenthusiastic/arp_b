@@ -131,3 +131,16 @@ Therefore the to be developed prototype might not be able to suport any low-powe
 [MPU6050](https://github.com/adamjezek98/MPU6050-ESP8266-MicroPython) (modified)
 [BME280](https://github.com/robert-hh/BME280)
 [E-Paper](https://github.com/mcauser/micropython-waveshare-epaper/blob/master/epaper2in9.py)
+
+
+## Comiling Modules
+[MicroPython cross compiler](https://github.com/micropython/micropython/tree/master/mpy-cross)
+`python3 -m mpy_cross -v -mno-unicode -mcache-lookup-bc -march=xtensa epaper2in9.py`
+
+Copy *.mpy file to ESP.
+
+```bash
+mpfshell
+open ttyUSB1
+put myfirmware.py main.py
+```
