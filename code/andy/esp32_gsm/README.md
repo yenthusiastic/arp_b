@@ -36,7 +36,7 @@
 |5 |GSM_RST |GSM Module |GPIO digital| |
 |12 | Gate| Mosfet 5V (GPS, Co2, SDS011) |switched off in sleep | pull-down at startup |
 |13 | | | |buildin LED |
-|14 | | | | |
+|14 |INT |MPU6050 | | |
 |15 |DIN |epaper| | |
 |18 |PM10 |SDS011 Sensor |GPIO digital |Input: pulse length |
 |19 |PM25 |SDS011 Sensor |GPIO digital |Input: pulse length |
@@ -46,7 +46,7 @@
 |25 |CLK |epaper | | |
 |26 |TX |GSM Module |Serial | |
 |27 |RX |GSM Module |Serial | |
-|32 |DC |epape | | |
+|32 |DC |epaper | | |
 |33 |CS |epaper | | |
 |34 |BUSY |epaper | |input only, no pulls|
 |35 |TX |GPS |Serial |input only, no pulls |
