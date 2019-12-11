@@ -19,12 +19,15 @@
   "homepage": "https://github.com/yenthusiastic/arp_b#readme",
   "dependencies": {
     "@iota/checksum": "^1.0.0-beta.21",
+    "@iota/converter": "^1.0.0-beta.21",
     "@iota/core": "^1.0.0-beta.21",
+    "@iota/transaction-converter": "^1.0.0-beta.21",
     "@iota/validators": "^1.0.0-beta.21",
     "bcrypt": "^3.0.6",
     "body-parser": "^1.19.0",
+    "crypto": "^1.0.1",
     "express": "^4.17.1",
-    "nodemon": "^1.19.3",
+    "nodemon": "^1.19.4",
     "pg": "^7.12.1"
   }
 }

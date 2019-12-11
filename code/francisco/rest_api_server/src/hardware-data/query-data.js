@@ -1,6 +1,6 @@
-// DB setup
 const pg = require('pg')
 
+// Setup the DB variables
 const conString = {
     host: 'db.dev.iota.pw',
     // Do not hard code your username and password.
@@ -21,26 +21,6 @@ pool.connect(error => {
     }
 })
 
-// Retrieve a new session address for the hardware
-const getSessionAddress = (request, response) => {
-    let hardwareID = request.params.hardwareID
-
-    // Request IOTA address and return it in the http response 
-        // Call the function to produce a new address
-        // ...
-        let iotaAddress = 'QCWAVASCPCXAXAYABBRCXASCCBRCCBBBUAUCABQCSCVAYARAXAYAZAXAYARCRCQCTCCBXATCABCBABX'
-        // Query to update session address into the database
-        // ...
-    
-    pool.query('SELECT * from "HARDWARE_STATUS" WHERE "hardwareID" = $1;',[hardwareID],(error,results) => {
-        if (error) {
-            response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
-            throw error
-        }
-        response.status(200).send({"HttpStatusCode": 200, "HttpMessage": "OK", "NewSessionAddress": results.rows[0].session_address})
-        // response.status(200).send({"HttpStatusCode": 200, "HttpMessage": "OK", "NewSessionAddress": iotaAddress})
-    })
-}
 // Add new sensor data
 const saveSensorData = (request, response) => {
     let {hardwareID, address, latitude, longitude, temperature, humidity, timestamp} = request.body
@@ -74,7 +54,6 @@ const updateHardware = (request, response) => {
 }
 
 module.exports = {
-    getSessionAddress,
     saveSensorData,
     updateHardware
 }

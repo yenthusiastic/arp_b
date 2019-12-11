@@ -31,12 +31,12 @@
 |3V3 	| | epaper, BME280E| | |
 |5V 	| | MPU6050, Buzzer, [GPS, Co2, SDS011]| | |
 |0 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
-|2 |GND |Buzzer |GPIO digital | pull-up at startup |
+|2 |- |Buzzer |GPIO digital | pull-up at startup |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
 |12 | Gate| Mosfet 5V (GPS, Co2, SDS011) |switched off in sleep | pull-down at startup |
 |13 | | | |buildin LED |
-|14 | | | | |
+|14 |INT |MPU6050 | | |
 |15 |DIN |epaper| | |
 |18 |PM10 |SDS011 Sensor |GPIO digital |Input: pulse length |
 |19 |PM25 |SDS011 Sensor |GPIO digital |Input: pulse length |
@@ -46,7 +46,7 @@
 |25 |CLK |epaper | | |
 |26 |TX |GSM Module |Serial | |
 |27 |RX |GSM Module |Serial | |
-|32 |DC |epape | | |
+|32 |DC |epaper | | |
 |33 |CS |epaper | | |
 |34 |BUSY |epaper | |input only, no pulls|
 |35 |TX |GPS |Serial |input only, no pulls |
@@ -131,3 +131,16 @@ Therefore the to be developed prototype might not be able to suport any low-powe
 [MPU6050](https://github.com/adamjezek98/MPU6050-ESP8266-MicroPython) (modified)
 [BME280](https://github.com/robert-hh/BME280)
 [E-Paper](https://github.com/mcauser/micropython-waveshare-epaper/blob/master/epaper2in9.py)
+
+
+## Comiling Modules
+[MicroPython cross compiler](https://github.com/micropython/micropython/tree/master/mpy-cross)
+`python3 -m mpy_cross -v -mno-unicode -mcache-lookup-bc -march=xtensa epaper2in9.py`
+
+Copy *.mpy file to ESP.
+
+```bash
+mpfshell
+open ttyUSB1
+put myfirmware.py main.py
+```
