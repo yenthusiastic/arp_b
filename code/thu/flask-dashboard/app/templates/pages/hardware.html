@@ -1,76 +1,5 @@
 <div class="content">
-    <!-- <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card strpied-tabled-with-hover">
-                    <div class="card-header">
-                        <h4 class="card-title">Hardware Details</h4>
-                        <div class="col-md-12">
-                            <div class="pull-right">
-                                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#create"><span class="fa fa-plus"></span>Add New Hardware</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body table-full-width table-responsive">
-                        <table class="table table-hover table-striped">
-                            <thead>
-                                <th>ID</th>
-                                <th>Status</th>
-                                <th>Attached Sensors</th>
-                                <th>Location</th>
-                                <th>Actions</th>
-                            </thead>
-                            <tbody>
-                                {%if hardware_data%}
-                                {%for hw_data in hardware_data%}
-                                <tr>
-                                    <td>{{hw_data[0]}}</td>
-                                    <td>
-                                        {%if hw_data[1] == "rented" or hw_data[1] == "Rented"%}
-                                        <span class="badge badge-warning">
-                                        {%elif hw_data[1] == "parked" or hw_data[1] == "Parked"%}
-                                        <span class="badge badge-success">
-                                        {%elif hw_data[1] == "defect" or hw_data[1] == "Defect"%}
-                                        <span class="badge badge-danger">
-                                        {%else%}
-                                        <span class="badge badge-info">
-                                        {%endif%}
-                                            {{hw_data[1][0]|upper}}{{hw_data[1][1:]}}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        
-                                        {%for sensor in hw_data[2]%}
-                                        <span class="badge badge-info">
-                                        {% if sensor|length < 5%}
-                                        {{sensor|upper}}
-                                        {%else%}
-                                        {{sensor[0]|upper}}{{sensor[1:]}} 
-                                        {%endif%}
-                                        {%if loop.index < hw_data[2]|length %}<br>{%endif%}
-                                        </span>
-                                        {%endfor%}
-                                        
-                                    </td>
-                                    <td>{%if location_arr%}{{location_arr[loop.index0]}}{%endif%}</td>
-                                    <td class="td-actions">
-                                        <button type="button" rel="tooltip" title="Edit Hardware" onclick="getSelectedID({{hw_data[0]}})"  data-toggle="modal" data-target="#edit" class="btn btn-primary btn-link btn-simple" name="edit_btn" id="edit_btn_{{hw_data[0]}}">
-                                            <i class="fa fa-edit"></i>
-                                        </button>
-                                        <button type="submit" rel="tooltip" title="Delete Hardware" onclick="getSelectedID({{hw_data[0]}})" data-toggle="modal" data-target="#delete" class="btn btn-danger btn-simple btn-link">
-                                            <i class="fa fa-times"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                {%endfor%}
-                                {%endif%}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-    </div> 
-</div> -->
+   
 
 
     <div class="container-fluid">
@@ -294,6 +223,7 @@ $("button[name='edit_btn']").click(function() {
         document.getElementsByName("addr")[0].value = "{{hw_data[5]}}";
 
         sensors = [
+            {%if hw_data[2]%}
             {% for sensor in hw_data[2] %} 
             {% if sensor|length < 5%}
             "{{sensor|upper}}",
@@ -301,6 +231,7 @@ $("button[name='edit_btn']").click(function() {
             "{{sensor[0]|upper}}{{sensor[1:]}}", 
             {%endif%}
             {%endfor%}
+            {%endif%}
         ];
     }
     {%endfor%}
@@ -326,9 +257,11 @@ function actionFormatter(value, row, index) {
 
 function sensorFormatter(value, row){
     sensor_item = "";
-    for (i = 0; i < value.length; i++){
-        sensor_item += ' <span class="badge badge-primary">'+ value[i] + '</span> '
-        
+    if (value != null){
+        for (i = 0; i < value.length; i++){
+            sensor_item += ' <span class="badge badge-primary">'+ value[i] + '</span> '
+            
+        }
     }
     return sensor_item
 };
@@ -343,6 +276,8 @@ function statusFormatter(value, row){
         status_item += '<span class="badge badge-danger"> Defect'
     } else if (value == "Offline" || value == "offline"){
         status_item += '<span class="badge badge-warning"> Offline'
+    } else {
+        status_item += '<span class="badge badge-warning"> Unknown'
     }
     status_item +='</span>'
     
@@ -362,6 +297,7 @@ window.actionEvents = {
             document.getElementsByName("addr")[0].value = "{{hw_data[5]}}";
 
             sensors = [
+                {% if hw_data[2] %}
                 {% for sensor in hw_data[2] %} 
                 {% if sensor|length < 5%}
                 "{{sensor|upper}}",
@@ -369,6 +305,7 @@ window.actionEvents = {
                 "{{sensor[0]|upper}}{{sensor[1:]}}", 
                 {%endif%}
                 {%endfor%}
+                {%endif%}
             ];
         }
         {%endfor%}
@@ -397,11 +334,13 @@ $(document).ready(function() {
     
     
     var hardware_data = [
+    
     {%for hw in hardware_data%}
         {
         "id": "{{hw[0]}}",
         "status": "{{hw[1]}}",
         "sensors": [
+            {% if hw[2] %}
             {% for sensor in hw[2] %} 
             {% if sensor|length < 5%}
             "{{sensor|upper}}",
@@ -409,10 +348,12 @@ $(document).ready(function() {
             "{{sensor[0]|upper}}{{sensor[1:]}}", 
             {%endif%}
             {%endfor%}
+            {%endif%}
         ],
         "location": "{{location_arr[loop.index0]}}"        
         },
     {%endfor%}
+    
     ]
 
     $('#bst_table').bootstrapTable({
