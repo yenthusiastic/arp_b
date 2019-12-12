@@ -82,6 +82,7 @@ class Hardware(db.Model):
     longitude = db.Column(db.Float)
     sensors = db.Column(ARRAY(db.Text))
     place = db.Column(db.Text) 
+    seed = db.Column(db.Text)
    
     
     def __init__(self, hardwareID, address_index, session_address, status, latitude, longitude, sensors):

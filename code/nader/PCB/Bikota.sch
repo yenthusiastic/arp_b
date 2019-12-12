@@ -11260,7 +11260,7 @@ Source: www.kingbright.com</description>
 <part name="GND8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="100K"/>
 <part name="R4" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="1K"/>
-<part name="LED1" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="CHIPLED_0805" package3d_urn="urn:adsk.eagle:package:15821/2"/>
+<part name="MOSFET" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="CHIPLED_0805" package3d_urn="urn:adsk.eagle:package:15821/2"/>
 <part name="R5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="100K"/>
 <part name="R6" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="100K"/>
 <part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2"/>
@@ -11284,6 +11284,7 @@ Source: www.kingbright.com</description>
 <part name="C5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="10uF"/>
 <part name="C6" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="10uF"/>
 <part name="C7" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="10uF"/>
+<part name="C8" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="10uF"/>
 </parts>
 <sheets>
 <sheet>
@@ -11316,8 +11317,8 @@ Source: www.kingbright.com</description>
 <instance part="GND3" gate="1" x="-7.62" y="50.8" smashed="yes">
 <attribute name="VALUE" x="-10.16" y="48.26" size="1.778" layer="96"/>
 </instance>
-<instance part="GND4" gate="1" x="86.36" y="5.08" smashed="yes">
-<attribute name="VALUE" x="83.82" y="2.54" size="1.778" layer="96"/>
+<instance part="GND4" gate="1" x="86.36" y="0" smashed="yes">
+<attribute name="VALUE" x="83.82" y="-2.54" size="1.778" layer="96"/>
 </instance>
 <instance part="JP1" gate="G$1" x="27.94" y="5.08" smashed="yes">
 <attribute name="NAME" x="21.59" y="10.795" size="1.778" layer="95"/>
@@ -11350,7 +11351,7 @@ Source: www.kingbright.com</description>
 <attribute name="NAME" x="44.45" y="-18.8214" size="1.778" layer="95"/>
 <attribute name="VALUE" x="44.45" y="-23.622" size="1.778" layer="96"/>
 </instance>
-<instance part="LED1" gate="G$1" x="66.04" y="-20.32" smashed="yes" rot="R270">
+<instance part="MOSFET" gate="G$1" x="66.04" y="-20.32" smashed="yes" rot="R270">
 <attribute name="NAME" x="61.468" y="-23.876" size="1.778" layer="95"/>
 <attribute name="VALUE" x="61.468" y="-26.035" size="1.778" layer="96"/>
 </instance>
@@ -11441,6 +11442,10 @@ Source: www.kingbright.com</description>
 <attribute name="NAME" x="204.216" y="94.615" size="1.778" layer="95"/>
 <attribute name="VALUE" x="204.216" y="89.789" size="1.778" layer="96"/>
 </instance>
+<instance part="C8" gate="G$1" x="73.66" y="15.24" smashed="yes">
+<attribute name="NAME" x="74.676" y="15.875" size="1.778" layer="95"/>
+<attribute name="VALUE" x="74.676" y="11.049" size="1.778" layer="96"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -11469,10 +11474,14 @@ Source: www.kingbright.com</description>
 <junction x="-2.54" y="86.36"/>
 </segment>
 <segment>
-<wire x1="91.44" y1="25.4" x2="55.88" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="91.44" y1="25.4" x2="73.66" y2="25.4" width="0.1524" layer="91"/>
 <label x="68.58" y="25.4" size="1.778" layer="95"/>
 <pinref part="U$1" gate="G$1" pin="ESP_5V"/>
 <pinref part="JP2" gate="A" pin="2"/>
+<pinref part="C8" gate="G$1" pin="1"/>
+<wire x1="73.66" y1="25.4" x2="55.88" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="73.66" y1="25.4" x2="73.66" y2="17.78" width="0.1524" layer="91"/>
+<junction x="73.66" y="25.4"/>
 </segment>
 <segment>
 <wire x1="-12.7" y1="12.7" x2="-7.62" y2="12.7" width="0.1524" layer="91"/>
@@ -11480,7 +11489,7 @@ Source: www.kingbright.com</description>
 <pinref part="U$8" gate="G$1" pin="VOUT"/>
 </segment>
 <segment>
-<pinref part="LED1" gate="G$1" pin="A"/>
+<pinref part="MOSFET" gate="G$1" pin="A"/>
 <wire x1="68.58" y1="-20.32" x2="83.82" y2="-20.32" width="0.1524" layer="91"/>
 <label x="76.2" y="-22.86" size="1.778" layer="95"/>
 </segment>
@@ -11514,13 +11523,18 @@ Source: www.kingbright.com</description>
 </net>
 <net name="GND" class="0">
 <segment>
-<wire x1="91.44" y1="38.1" x2="86.36" y2="38.1" width="0.1524" layer="91"/>
-<pinref part="U$1" gate="G$1" pin="GND@1"/>
-<wire x1="86.36" y1="38.1" x2="86.36" y2="7.62" width="0.1524" layer="91"/>
 <pinref part="GND4" gate="1" pin="GND"/>
+<pinref part="U$1" gate="G$1" pin="GND@1"/>
 <pinref part="JP2" gate="A" pin="7"/>
 <wire x1="55.88" y1="38.1" x2="86.36" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="38.1" x2="91.44" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="38.1" x2="86.36" y2="7.62" width="0.1524" layer="91"/>
 <junction x="86.36" y="38.1"/>
+<pinref part="C8" gate="G$1" pin="2"/>
+<wire x1="86.36" y1="7.62" x2="86.36" y2="2.54" width="0.1524" layer="91"/>
+<wire x1="73.66" y1="10.16" x2="73.66" y2="7.62" width="0.1524" layer="91"/>
+<wire x1="73.66" y1="7.62" x2="86.36" y2="7.62" width="0.1524" layer="91"/>
+<junction x="86.36" y="7.62"/>
 </segment>
 <segment>
 <wire x1="-12.7" y1="81.28" x2="-7.62" y2="81.28" width="0.1524" layer="91"/>
@@ -11836,7 +11850,7 @@ Source: www.kingbright.com</description>
 <net name="N$6" class="0">
 <segment>
 <pinref part="R4" gate="G$1" pin="2"/>
-<pinref part="LED1" gate="G$1" pin="C"/>
+<pinref part="MOSFET" gate="G$1" pin="C"/>
 <wire x1="53.34" y1="-20.32" x2="60.96" y2="-20.32" width="0.1524" layer="91"/>
 </segment>
 </net>
@@ -12111,8 +12125,12 @@ Source: www.kingbright.com</description>
 <errors>
 <approved hash="104,1,-12.7,43.18,U$3,VIN,ESP5V,,,"/>
 <approved hash="104,1,-12.7,35.56,U$3,GND,MOSFET_GND,,,"/>
+<approved hash="104,1,205.74,99.06,U$4,VIN,ESP3V3,,,"/>
+<approved hash="104,1,205.74,101.6,U$4,GND,MOSFET_GND,,,"/>
 <approved hash="104,1,91.44,71.12,U$1,ESP_3V3,ESP3V3,,,"/>
 <approved hash="104,1,91.44,25.4,U$1,ESP_5V,ESP5V,,,"/>
+<approved hash="104,1,205.74,68.58,U$5,VIN,ESP5V,,,"/>
+<approved hash="104,1,205.74,71.12,U$5,GND,MOSFET_GND,,,"/>
 <approved hash="104,1,205.74,15.24,U$6,VIN,ESP5V,,,"/>
 <approved hash="104,1,205.74,17.78,U$6,GND,MOSFET_GND,,,"/>
 <approved hash="104,1,-12.7,12.7,U$8,VOUT,ESP5V,,,"/>
@@ -12123,13 +12141,12 @@ Source: www.kingbright.com</description>
 <approved hash="106,1,-12.7,40.64,GPS_RX,,,,,"/>
 <approved hash="106,1,180.34,-35.56,N$418,,,,,"/>
 <approved hash="113,1,64.77,-20.6417,LED1,,,,,"/>
-<approved hash="113,1,123.015,-31.75,C1,,,,,"/>
+<approved hash="113,1,123.02,-31.75,C1,,,,,"/>
 <approved hash="113,1,55.6006,48.4861,JP2,,,,,"/>
 <approved hash="113,1,178.037,48.4861,JP3,,,,,"/>
 <approved hash="113,1,55.6429,13.7439,JP4,,,,,"/>
 <approved hash="113,1,178.079,13.7439,JP5,,,,,"/>
-<approved hash="113,1,45.9571,42.1361,JP6,,,,,"/>
-<approved hash="113,1,192.803,39.1439,JP7,,,,,"/>
+<approved hash="113,1,45.9571,54.8361,JP6,,,,,"/>
 </errors>
 </schematic>
 </drawing>
