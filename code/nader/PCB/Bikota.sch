@@ -11260,7 +11260,7 @@ Source: www.kingbright.com</description>
 <part name="GND8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="100K"/>
 <part name="R4" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="1K"/>
-<part name="LED1" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="CHIPLED_0805" package3d_urn="urn:adsk.eagle:package:15821/2"/>
+<part name="MOSFET" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="CHIPLED_0805" package3d_urn="urn:adsk.eagle:package:15821/2"/>
 <part name="R5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="100K"/>
 <part name="R6" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="100K"/>
 <part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2"/>
@@ -11351,7 +11351,7 @@ Source: www.kingbright.com</description>
 <attribute name="NAME" x="44.45" y="-18.8214" size="1.778" layer="95"/>
 <attribute name="VALUE" x="44.45" y="-23.622" size="1.778" layer="96"/>
 </instance>
-<instance part="LED1" gate="G$1" x="66.04" y="-20.32" smashed="yes" rot="R270">
+<instance part="MOSFET" gate="G$1" x="66.04" y="-20.32" smashed="yes" rot="R270">
 <attribute name="NAME" x="61.468" y="-23.876" size="1.778" layer="95"/>
 <attribute name="VALUE" x="61.468" y="-26.035" size="1.778" layer="96"/>
 </instance>
@@ -11489,7 +11489,7 @@ Source: www.kingbright.com</description>
 <pinref part="U$8" gate="G$1" pin="VOUT"/>
 </segment>
 <segment>
-<pinref part="LED1" gate="G$1" pin="A"/>
+<pinref part="MOSFET" gate="G$1" pin="A"/>
 <wire x1="68.58" y1="-20.32" x2="83.82" y2="-20.32" width="0.1524" layer="91"/>
 <label x="76.2" y="-22.86" size="1.778" layer="95"/>
 </segment>
@@ -11850,7 +11850,7 @@ Source: www.kingbright.com</description>
 <net name="N$6" class="0">
 <segment>
 <pinref part="R4" gate="G$1" pin="2"/>
-<pinref part="LED1" gate="G$1" pin="C"/>
+<pinref part="MOSFET" gate="G$1" pin="C"/>
 <wire x1="53.34" y1="-20.32" x2="60.96" y2="-20.32" width="0.1524" layer="91"/>
 </segment>
 </net>
