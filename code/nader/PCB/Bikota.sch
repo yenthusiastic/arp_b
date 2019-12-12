@@ -12125,8 +12125,12 @@ Source: www.kingbright.com</description>
 <errors>
 <approved hash="104,1,-12.7,43.18,U$3,VIN,ESP5V,,,"/>
 <approved hash="104,1,-12.7,35.56,U$3,GND,MOSFET_GND,,,"/>
+<approved hash="104,1,205.74,99.06,U$4,VIN,ESP3V3,,,"/>
+<approved hash="104,1,205.74,101.6,U$4,GND,MOSFET_GND,,,"/>
 <approved hash="104,1,91.44,71.12,U$1,ESP_3V3,ESP3V3,,,"/>
 <approved hash="104,1,91.44,25.4,U$1,ESP_5V,ESP5V,,,"/>
+<approved hash="104,1,205.74,68.58,U$5,VIN,ESP5V,,,"/>
+<approved hash="104,1,205.74,71.12,U$5,GND,MOSFET_GND,,,"/>
 <approved hash="104,1,205.74,15.24,U$6,VIN,ESP5V,,,"/>
 <approved hash="104,1,205.74,17.78,U$6,GND,MOSFET_GND,,,"/>
 <approved hash="104,1,-12.7,12.7,U$8,VOUT,ESP5V,,,"/>
@@ -12137,13 +12141,12 @@ Source: www.kingbright.com</description>
 <approved hash="106,1,-12.7,40.64,GPS_RX,,,,,"/>
 <approved hash="106,1,180.34,-35.56,N$418,,,,,"/>
 <approved hash="113,1,64.77,-20.6417,LED1,,,,,"/>
-<approved hash="113,1,123.015,-31.75,C1,,,,,"/>
+<approved hash="113,1,123.02,-31.75,C1,,,,,"/>
 <approved hash="113,1,55.6006,48.4861,JP2,,,,,"/>
 <approved hash="113,1,178.037,48.4861,JP3,,,,,"/>
 <approved hash="113,1,55.6429,13.7439,JP4,,,,,"/>
 <approved hash="113,1,178.079,13.7439,JP5,,,,,"/>
-<approved hash="113,1,45.9571,42.1361,JP6,,,,,"/>
-<approved hash="113,1,192.803,39.1439,JP7,,,,,"/>
+<approved hash="113,1,45.9571,54.8361,JP6,,,,,"/>
 </errors>
 </schematic>
 </drawing>
