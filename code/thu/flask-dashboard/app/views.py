@@ -397,6 +397,7 @@ def hardware():
         hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.sensors, Hardware.latitude, Hardware.longitude, Hardware.session_address).order_by(Hardware.hardwareID).all()
         print("Getting locations from Hardware Status table")
         for hardware in hardware_data:
+            print(hardware)
             if hardware[3] is not None and hardware[4] is not None:
                 location_str = get_loc_from_degrees(hardware[3], hardware[4])
                 if location_str is not None:
@@ -405,6 +406,7 @@ def hardware():
                     location_arr.append("{}, {}".format(hardware[3], hardware[4]))
             else:
                 location_arr.append("No data available")
+        
                         
         if request.method == "POST":
             if request.form["btn"] == "create_hardware":

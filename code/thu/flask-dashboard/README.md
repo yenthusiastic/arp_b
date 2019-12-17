@@ -1,21 +1,22 @@
-### Uasage Manual - Admin Dashboard Panel for Bikota Renting System
+### Usage Manual - Admin Dashboard Panel for Bikota Renting System
 
 Version: v0.2 (01.12.2019)
 
 Author: Thu Nguyen
 
-#### Description
+#### 1. Description
 The Admin Dashboard Panel is a web platform which provides administration tools for the Bikota Renting Service including managing the mobile renting hardwares, viewing bike distribution on a map, viewing real-time renting statistics, sensor data and managing user preferences.
 
 Available currently at https://web.dev.iota.pw
 
-#### Pages
+#### 2. Pages
 This section describes the various pages available on the Admin Dashboard Panel and the operations that the system admin can perform on each page.
-##### Dashboard
+##### 2.1. Dashboard
 - On this page the system admin can view system statistics including:
     - Total number of hardware modules
     - Total number of renting sessions
     - Total number of sensors mounted on hardware modules
+    - Total number of cities where bikes are available
     - Bike status statistics pie chart
     - Sensor statistics pie chart
     - Distribution of bike and bike usage by location bar chart
@@ -24,7 +25,7 @@ Preview:
 
 <img src="../../../media/admin_dashboard.PNG" width=70%>
 
-##### Charts
+##### 2.2. Charts
 - On this page the system admin can view collected sensor data as line charts
 - The admin can filter sensor data visualization using the input field/ date time picker and dropdown menus, by following parameters:
     - `Hardware ID`, the unique ID of a hardware module on the bike
@@ -45,9 +46,9 @@ Preview:
 <img src="../../../media/admin_charts.PNG" width=70%>
 
 
-##### Map
+##### 2.3. Map
 - On this page the system admin can view the locations of all hardware modules in the system on a map of Germany. Each marker on the map represents one module.
-- By hovering over the marker, the admin can view the status and detailed location (Longitude, Lattitude) of the specific hardware. The admin can click on the hyperlinked location to locate the hardware using Google Maps.
+- By hovering over the marker, the admin can view the status and detailed location (Longitude, Lattitude) of the specific hardware. By clicking on the hyperlinked location, the admin will be directed to a Google Maps link where the hardware is located.
 - The markers are colored differently depending on the hardware status:
     - Green for `parked`
     - Blue for `rented`
@@ -58,10 +59,10 @@ Preview:
 Preview: 
 
 <img src="../../../media/admin_map.PNG" width=70%>
-<img src="../../../media/admin_map2.PNG" width=50%>
+<img src="../../../media/admin_map2.png" width=50%>
 
 
-##### Hardware Manager
+##### 2.4. Hardware Manager
 - On this page the system admin can view a table which shows all details of every hardware module registered in the system. These includes:
     - `ID`, which is the unique ID of the hardware module
     - `Status`, which is the latest status of the hardware. The status property can only be 1 out of 4 values: 
@@ -91,7 +92,7 @@ Preview:
 
 <img src="../../../media/admin_hardware.PNG" width=70%>
 
-##### User Profile
+##### 2.5. User Profile
 - On this page the system admin can activate any of the 3 following sections to make changes to their account data:
     - `Edit profile` section, where account information can be updated including: Company, Username, Email address, First name, Last name, Address, City, Country, Postal code, Biography. A success message will pop up to notify if the profile is successfully updated in the system.
     - `Change password` section, where the admin can change the account's password by typing in the current and the new passwords. A warning message will pop up if the current password(s) is/are incorrect or do not match.
@@ -104,7 +105,7 @@ Preview:
 <img src="../../../media/admin_user2.PNG" width=51%>
 
 
-##### Login/ Register Account
+##### 2.6. Login/ Register Account
 - On this page the system admin can log in with an existing account using a username and password or register a new account using an email, username and password. 
 - The username has to contain a minimum of 4 characters and a maximum of 20 characters. 
 - The password has to contain a minimum of 6 characters and a maximum of 50 characters. 
