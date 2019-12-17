@@ -6,6 +6,8 @@ const port = process.env.PORT || 5100;
 const app = express()
 const db_i = require('./iota-api/query-address')
 
+let flag
+
 // User data
 app.get('/no_production_users_view',db_u.getUsers)
 app.post('/register', bodyParser.json(), db_u.registerUsers)
@@ -17,6 +19,10 @@ app.post('/data', bodyParser.json(), db.saveSensorData)
 app.put('/status', bodyParser.json(), db.updateHardware)
 
 // IOTA API
-app.get('/address/:hardwareID',db_i.getAddress)
+app.get('/address/:hardwareID', db_i.getAddress)
+// app.get('/address/:hardwareID', db_i.updateAddress)
+
+// Check if session_address == next_session_address, call "update-nextAddress-db.js" to update next_session_address
+// ...
 
 app.listen(port,() => console.log(`Listening port ${port}\n`))
