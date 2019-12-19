@@ -28,8 +28,8 @@
 ## Pin Mapping
 |Pin ESP| Pin AUX|AUX Device|Protocol|Note|
 |---    |---     |---       |---     |--- |
-|3V3 	| | epaper, BME280E| | |
-|5V 	| | MPU6050, Buzzer, [GPS, Co2, SDS011]| | |
+|3V3 	| | epaper, BME280E, Buzzer| | |
+|5V 	| | MPU6050, [GPS, Co2, SDS011]| | |
 |0 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
 |2 |- |Buzzer |GPIO digital | pull-up at startup |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
