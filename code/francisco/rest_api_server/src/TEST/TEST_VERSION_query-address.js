@@ -96,6 +96,47 @@ const getAddress = (request, response) => {
         }
     })
 }
+// Original function with different name
+// const updateAddress = (request, response, next) => {
+//     let hardwareID = request.params.hardwareID
+
+//     // TEST
+//     let time = new Date()
+//     console.log('\n*' + time.getSeconds() + ':' + time.getMilliseconds() + '\t# Start updateAddress')
+
+//     // Check if hardwareID is registered in the DB
+//     pool.query('SELECT * from "HARDWARE_STATUS" WHERE "hardwareID" = $1;',[hardwareID],(error,results) => {
+//         if (error) {
+//             //done()
+//             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
+//             throw error
+//         } 
+//         // If Hardware ID exist, request new *address based on the current *address_index
+//         else if(results.rows[0] != undefined){
+//             // console.log('\nDevice with ID ' + hardwareID + ' found.')
+
+//             // TEST
+//             let time = new Date()
+//             console.log('\n*' + time.getSeconds() + ':' + time.getMilliseconds() + '\t# Device with ID ' + hardwareID + ' found.')
+
+//             let privateKey = results.rows[0].seed
+//             address_index = results.rows[0].address_index + 1
+//             address = results.rows[0].next_session_address
+
+//             // INSERT A FUNCTION TO RETURN IN A RESPONSE THE next_session_address as the session_address
+//             updateHardware(hardwareID, address_index,response)
+//             // FUNCTION TO UPDATE next_session_address
+//             // updateHardware_onDataBase(hardwareID,privateKey, address_index, response)
+//             //done();
+//         }
+//          // If Hardware ID does not exist, request new *seed, *address, and *address_index
+//         else {
+//             console.log('\nDevice with ID ' + hardwareID + ' not found.')
+//             saveNewHardware(hardwareID, response)
+//             //done();
+//         }
+//     })
+// }
 
 function reqSeed_promise(){
     return new Promise(resolve => {
@@ -219,4 +260,5 @@ let updateHardware = (hardwareID, new_address_index, response) => {
 
 module.exports = {
     getAddress,
+    // updateAddress
 }

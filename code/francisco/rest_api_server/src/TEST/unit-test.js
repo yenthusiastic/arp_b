@@ -1,4 +1,5 @@
 // // Request seed
+
 // const SEED = require('../iota-api/generate-seed')
 // function reqSeed(){
 //     return new Promise(resolve => {
@@ -15,6 +16,7 @@
 // newSeed()
 
 // // Request address
+
 const ADDRESS = require('../iota-api/generate-address')
 function reqAddress(seed){
     return new Promise(resolve => {
