@@ -2,10 +2,6 @@
 // https://stackoverflow.com/questions/34803691/node-js-and-pg-module-how-can-i-really-close-connection
 // https://mherman.org/blog/postgresql-and-nodejs/
 
-// If problem on production server persist, check the link below
-// https://www.postgresql.org/message-id/63BB752C-5997-497C-9846-3475ADC9EB00@ausvet.com.au
-
-
 const pg = require('pg')
 const SEED = require('./generate-seed')
 const ADDRESS = require('./generate-address')
@@ -15,10 +11,6 @@ let address
 let address_index
 let nextSessionAddress
 let privateKey
-
-// TEST
-let time = new Date()
-console.log('\n*' + time.getSeconds() + ':' + time.getMilliseconds() + '\t# Start time')
 
 // Setup the DB variables
 const conString = {
@@ -45,11 +37,6 @@ pool.connect(error => {
 const getAddress = (request, response) => {
     let hardwareID = request.params.hardwareID
 
-    // // TEST
-    // let time = new Date()
-    // console.log('\n*' + time.getSeconds() + ':' + time.getMilliseconds() + '\t# Start getAddress f(x)')
-    
-
     // Check if hardwareID is registered in the DB
     pool.query('SELECT * from "HARDWARE_STATUS" WHERE "hardwareID" = $1;',[hardwareID],(error,results) => {
         if (error) {
@@ -59,38 +46,19 @@ const getAddress = (request, response) => {
         } 
         // If Hardware ID exist, request new *address based on the current *address_index
         else if(results.rows[0] != undefined){
-            // console.log('\nDevice with ID ' + hardwareID + ' found.')
-
-            // TEST
-            let time = new Date()
-            console.log('\n*' + time.getSeconds() + ':' + time.getMilliseconds() + '\t# Device with ID ' + hardwareID + ' found.')
+            console.log('\n# Device with ID ' + hardwareID + ' found.')
 
             privateKey = results.rows[0].seed
             address_index = results.rows[0].address_index + 1
             address = results.rows[0].next_session_address
-            
-            // updateHardware_onDataBase(hardwareID,privateKey, address_index, response)
-            
-            //  // TEST
-            // let time2 = new Date()
-            // console.log('\n*' + time2.getSeconds() + ':' + time2.getMilliseconds() + '\t# updateHardware_onDataBase is being executed...')
-            
-            // FUNCTION TO UPDATE next_session_address
+              
             updateHardware(hardwareID, address_index,response)
-            // TEST
-            let time3 = new Date()
-            console.log('\n*' + time3.getSeconds() + ':' + time3.getMilliseconds() + '\t# updateHardware is being executed...')
-
-            // // TEST
-            // let time1 = new Date()
-            // console.log('\n*' + time1.getSeconds() + ':' + time1.getMilliseconds() + '\t# Finish getAddress f(x)')
-
             //done();
-            // next()
         }
         //  If Hardware ID does not exist, request new *seed, *address, and *address_index
         else {
-            console.log('\nDevice with ID ' + hardwareID + ' not found.')
+            console.log('\n# Device with ID ' + hardwareID + ' not found.')
+
             saveNewHardware(hardwareID, response)
             //done();
         }
@@ -140,7 +108,7 @@ let reqNewAddress_async = async(seed, address_index) => {
 }
 
 let saveNewHardware = async (hardwareID, response) => {                
-    // Request new *seed, *address, and *address_index
+    // Request new *seed, *address, *address_index, and next_session_address
     await reqNewSeedAddress_async() 
     // Saving values in the DB
     pool.query('INSERT INTO "HARDWARE_STATUS"("hardwareID", "seed", "session_address", "address_index", "next_session_address") VALUES ($1, $2, $3, $4, $5);',[hardwareID, seed, address, address_index = 0, nextSessionAddress], (error,results) => {
@@ -150,40 +118,8 @@ let saveNewHardware = async (hardwareID, response) => {
             throw error
         }
         //done();
-        console.log("\nHardware with ID " + hardwareID + ' added.')
+        console.log("\n# Hardware with ID " + hardwareID + ' added.')
         response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "Session address": address, "MoreInformation": "Private key and session address were added to the database."})
-    })
-}
-
-let updateHardware_onDataBase = async (hardwareID, privateKey, new_address_index, response) => {   
-    
-    
-    // TEST
-    let time1 = new Date()
-    console.log("\n*" + time1.getSeconds() + ':' + time1.getMilliseconds() + "\t# Inside updateHardware_onDataBase: async started.")
-    
-    // // Request *address
-    await reqNewAddress_async(privateKey, new_address_index) 
-    // Saving values in the DB
-
-
-    // TEST
-    let time = new Date()
-    console.log("\n*" + time.getSeconds() + ':' + time.getMilliseconds() + "\t# Inside updateHardware_onDataBase: async finished.")
-
-    pool.query('UPDATE "HARDWARE_STATUS" SET "address_index" = $1, "next_session_address" = $2 WHERE "hardwareID" = $3;',[new_address_index, nextSessionAddress, hardwareID], (error,results) => {
-        if (error){
-            //done();
-            response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
-            throw error
-        }
-        //done();
-        // console.log("\n# Next session address for hardware with ID " + hardwareID + ' updated.')
-                
-        // TEST
-        let time = new Date()
-        console.log("\n*" + time.getSeconds() + ':' + time.getMilliseconds() + "\t# Next session address for hardware with ID " + hardwareID + ' updated.')
-        // response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "Session address": address, "MoreInformation": "Address session and address index were updated in the database."})
     })
 }
 
@@ -196,24 +132,24 @@ let updateHardware = (hardwareID, new_address_index, response) => {
             throw error
         }
         //done();
-
-        // TEST
-        let time = new Date()
-        console.log("\n*" + time.getSeconds() + ':' + time.getMilliseconds() + "\t# Session address for hardware with ID " + hardwareID + ' updated.')
-
-        // console.log("\n# Session address for hardware with ID " + hardwareID + ' updated.')
-        response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "Session address": address, "MoreInformation": "Address session and address index were updated in the database."})             
-        
-
-        // TEST
-        let time2 = new Date()
-        console.log('\n*' + time2.getSeconds() + ':' + time2.getMilliseconds() + '\t# updateHardware_onDataBase is being executed...')
-             
+        console.log("\n# Session address for hardware with ID " + hardwareID + ' updated.')
+        response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "Session address": address, "MoreInformation": "Address session and address index were updated in the database."})    
         updateHardware_onDataBase(hardwareID,privateKey, address_index, response)
-        // TEST
-        let time1 = new Date()
-        console.log("\n*" + time1.getSeconds() + ':' + time1.getMilliseconds() + "\t# Response status sent! ")
+    })
+}
 
+let updateHardware_onDataBase = async (hardwareID, privateKey, new_address_index, response) => {   
+    // // Request *address_index, and  *next_session_address
+    await reqNewAddress_async(privateKey, new_address_index) 
+    // Saving values in the DB
+    pool.query('UPDATE "HARDWARE_STATUS" SET "address_index" = $1, "next_session_address" = $2 WHERE "hardwareID" = $3;',[new_address_index, nextSessionAddress, hardwareID], (error,results) => {
+        if (error){
+            //done();
+            response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
+            throw error
+        }
+        //done();
+        console.log("\n# Next session address for hardware with ID " + hardwareID + ' updated.')
     })
 }
 
