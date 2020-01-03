@@ -1,17 +1,17 @@
 import time
 
 # Acceleration registers
-_REG_WHOAMI                = const(0x0F)   # Who am I (0x33)
-_REG_TEMPCFG               = const(0x1F)
-_REG_ACC_CONFIG            = const(0x20)   # Axis configurations and power-modes
-_REG_HIGH_PASS_FILTER      = const(0x21)   # Configuring the high-pass filters
-_REG_INT_CONFIG            = const(0x22)   # Interrupt configurations
-_REG_SCALE_MODES           = const(0x23)   # Set-up the full-scale of the accelerometer
-_REG_LATCH_CONFIG          = const(0x24)   # Latch configurations
-_REG_INT_LOGICS            = const(0x30)   # Interrupt configurations (different axis)
-_REG_INTERRUPT             = const(0x31)   # Interrupt status
-_REG_THRESHOLD             = const(0x32)   # Acceleration threshold
-_REG_DURATION              = const(0x33)   # Acceleration duration
+REG_WHOAMI                = const(0x0F)   # Who am I (0x33)
+REG_TEMPCFG               = const(0x1F)
+REG_ACC_CONFIG            = const(0x20)   # Axis configurations and power-modes
+REG_HIGH_PASS_FILTER      = const(0x21)   # Configuring the high-pass filters
+REG_INT_CONFIG            = const(0x22)   # Interrupt configurations
+REG_SCALE_MODES           = const(0x23)   # Set-up the full-scale of the accelerometer
+REG_LATCH_CONFIG          = const(0x24)   # Latch configurations
+REG_INT_LOGICS            = const(0x30)   # Interrupt configurations (different axis)
+REG_INTERRUPT             = const(0x31)   # Interrupt status
+REG_THRESHOLD             = const(0x32)   # Acceleration threshold
+REG_DURATION              = const(0x33)   # Acceleration duration
 
 # Register constants:
 RANGE_16_G                 = const(0b11)   # +/- 16g
@@ -41,12 +41,12 @@ def init_sensor(i2c_obj, scl=None, sda=None):
     
     
 def init_me():
-    write_reg(_REG_LATCH_CONFIG, 0x80)
+    write_reg(REG_LATCH_CONFIG, b'\x08')
     time.sleep(0.01)
-    write_reg(_REG_ACC_CONFIG, 0x07)
-    write_reg(_REG_SCALE_MODES, 0x88)
-    write_reg(_REG_TEMPCFG, 0x80)
-    write_reg(_REG_LATCH_CONFIG, 0x08)
+    write_reg(REG_ACC_CONFIG, b'\x07')
+    write_reg(REG_SCALE_MODES, b'\x88')
+    write_reg(REG_TEMPCFG, b'\x80')
+    write_reg(REG_LATCH_CONFIG, b'\x08')
 
 
 def acceleration():
@@ -57,7 +57,7 @@ def acceleration():
     """
     divider = 1
 
-    #x, y, z = struct.unpack('<hhh', self._read_register(_REG_OUT_X_L | 0x80, 6))
+    #x, y, z = struct.unpack('<hhh', self._read_register(REG_OUT_X_L | 0x80, 6))
 
     x = read_reg(0x28)
     y = read_reg(0x2A)
@@ -78,7 +78,7 @@ def i2c_test():
     
     """
     global i2c_
-    b = i2c_.readfrom_mem(IMU_ADDRESS, _REG_WHOAMI, 1)
+    b = i2c_.readfrom_mem(IMU_ADDRESS, REG_WHOAMI, 1)
     c = []
     for i in b:
         c.append(i)
@@ -109,8 +109,8 @@ def write_reg(REG_ADDR, HEX):
 
     """
     global i2c_
-    i2c_.writeto(IMU_ADDRESS, bytearray([REG_ADDR, HEX]))
-    print("%s written to %s" % (HEX, REG_ADDR))
+    i2c_.writeto_mem(IMU_ADDRESS, REG_ADDR, DATA)
+    print("%s written to address %s" % (DATA, REG_ADDR))
     
 
 def set_duration(TIME_IN_MS):
@@ -127,7 +127,7 @@ def set_duration(TIME_IN_MS):
     DURATION = TIME_IN_MS/10
     DURATION = round(DURATION)
     DURATION = bytearray(DURATION)
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_DURATION, DURATION]))
+    write_reg(REG_DURATION, DURATION)
 
 
 def set_threshold(THRESHOLD_IN_MG, RANGE):
@@ -146,7 +146,7 @@ def set_threshold(THRESHOLD_IN_MG, RANGE):
     THRESHOLD = round(THRESHOLD)
     THRESHOLD = hex(THRESHOLD)
     THRESHOLD = bytearray([THRESHOLD])
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_THRESHOLD, THRESHOLD]))
+    write_reg(REG_THRESHOLD, THRESHOLD)
 
 
 def set_interrupts(DURATION, THRESHOLD):
@@ -154,26 +154,26 @@ def set_interrupts(DURATION, THRESHOLD):
 
     Here, all the parameters necessary for an appropriate interrupt are defined and written into the registers of the accelerometer.
 
-    :variable _REG_HIGH_PASS_FILTER (0x21): Used to activate the inbuilt High-Pass Filter
-    :variable _REG_INT_CONFIG (0x22): Enables the general interrupt(s)
-    :variable _REG_SCALE_MODES (0x23): Defines the scale of the acceleration sensor (±2G, ±4G, ±8G, ±16G)
-    :variable _REG_LATCH_CONFIG (0x24): Activating latched interrupt requests
-    :variable _REG_THRESHOLD (0x32): Defines the interrupt threshold value
-    :variable _REG_DURATION (0x33): Defines the interrupt duration of the interrupt event
-    :variable _REG_INT_LOGICS (0x30): Enabling interrupt generations on all axis with a logical OR-Combination of interrupt events
-    :variable _REG_ACC_CONFIG (0x20): Activating all three axis including Low-Power mode (ODR of 100Hz) 
+    :variable REG_HIGH_PASS_FILTER (0x21): Used to activate the inbuilt High-Pass Filter
+    :variable REG_INT_CONFIG (0x22): Enables the general interrupt(s)
+    :variable REG_SCALE_MODES (0x23): Defines the scale of the acceleration sensor (±2G, ±4G, ±8G, ±16G)
+    :variable REG_LATCH_CONFIG (0x24): Activating latched interrupt requests
+    :variable REG_THRESHOLD (0x32): Defines the interrupt threshold value
+    :variable REG_DURATION (0x33): Defines the interrupt duration of the interrupt event
+    :variable REG_INT_LOGICS (0x30): Enabling interrupt generations on all axis with a logical OR-Combination of interrupt events
+    :variable REG_ACC_CONFIG (0x20): Activating all three axis including Low-Power mode (ODR of 100Hz) 
 
     """
     global i2c_
     print('Writing to registers...')
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_HIGH_PASS_FILTER, 0x09]))
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_INT_CONFIG, 0x40]))
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_SCALE_MODES, 0x00]))
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_LATCH_CONFIG, 0x00]))
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_THRESHOLD, 0x06]))
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_DURATION, 0x00]))
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_INT_LOGICS, 0x2A]))
-    i2c_.writeto(IMU_ADDRESS, bytearray([_REG_ACC_CONFIG, 0x5F]))
+    write_reg(REG_HIGH_PASS_FILTER, b'\x09')
+    write_reg(REG_INT_CONFIG, b'\x40')
+    write_reg(REG_SCALE_MODES, b'\x00')
+    write_reg(REG_LATCH_CONFIG, b'\x00')
+    write_reg(REG_THRESHOLD, HEb'\x06'X)
+    write_reg(REG_DURATION, b'\x00')
+    write_reg(REG_INT_LOGICS, b'\x2A')
+    write_reg(REG_ACC_CONFIG, b'\x5F')
     print('Writing completed!')
     
     

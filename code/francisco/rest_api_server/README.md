@@ -1,6 +1,6 @@
 # BIKOTA REST API Server
 
-Restful API appliction to store and retrieve information from the BIKOTA hardware to the PostgreSQL database.
+Rest API to store and retrieve information from the BIKOTA hardware to the PostgreSQL database.
 
 ## Prerequisites
 
@@ -13,11 +13,13 @@ Ensure that you have met the following requirements:
 
 To install the REST API, follow these steps:
 
-* Press the "Clone or download" button of this repository, and then click on "Download ZIP".
+* Press the "Clone or download" button of this repository, and then copy the link to clone the repository or click  on "Download ZIP".
 * Open the console from the folder where you download the REST API, and run the following commands:
 	* Install the dependencies.
+
 	`npm install`
 	* To start the server.
+
 	`npm run start`
 
 ## Using the server
@@ -26,7 +28,7 @@ Once the server is up and running, you can start sending http request to the end
 
 **URL**
 
-http://be.dev.iota.pw
+http://be.dev.iota.pw/
 
 **Endpoints**
 
@@ -37,14 +39,6 @@ Method | Target | Body Parameters |Description
  GET | address/<Hardware_id> | N/A | Retrieve a new session address for the hardware
  POST | data | hardwareID,address,latitude,longitude,temperature,humidity,timestamp|Add new sensor data
  PUT | status | hardwareID,status,latitude,longitude |Update the hardware (bike)'s status
-
-* Users data
-
-Method | Target | Body Parameters| Description
----------|----------|---------|---------
- GET | no_production_users_view | N/A |Retrieve list of users registered
- POST | register | user, email, password |Add new user
- PUT | login | email, password |Verify user on the database
 
 **Status code**
 
@@ -58,6 +52,49 @@ Status Code | Message | Information
 
 ## Examples
 
+* Using [Python](https://www.python.org/downloads/)
+
+1. Import the libraries:
+
+```
+import requests as req
+import json
+```
+2. Run the code below:
+
+```
+# Example GET request to Javascript-based backend
+header = {"Content-Type": "application/json"}
+resp = req.get("https://be.dev.iota.pw/address/37")
+print(resp.text)
+```
+
+```
+# Example POST request to Javascript-based backend
+header = {"Content-Type": "application/json"}
+resp = req.post("https://be.dev.iota.pw/data", json={
+	"hardwareID":"1",
+	"address":"Postman_test",
+	"latitude":"61.123",
+	"longitude":"7.933",
+	"temperature":"19.2",
+	"humidity":"35.7",
+	"timestamp":"2019-10-15 13:37:05.749277+02"
+},headers = header)
+print(resp.text)
+```
+
+```
+# Example PUT request to Javascript-based backend
+header = {"Content-Type": "application/json"}
+resp = req.put("https://be.dev.iota.pw/status", json={
+	"status":"rented",
+	"latitude":"50.123",
+	"longitude":"5.933",
+	"hardwareID":"8"
+},headers = header)
+print(resp.text)
+```
 * Using [Postman](https://www.getpostman.com/downloads/)
 
 Testing the post method:
@@ -89,30 +126,7 @@ Key | Value | Description
 	"timestamp":"2019-10-13 02:19:05.749277+02"
 }
 ```
-* Using [Python](https://www.python.org/downloads/)
 
-1. Import the libraries:
-
-```
-import requests as req
-import json
-```
-2. Run the code below:
-
-```
-# Example POST request to Javascript-based backend
-header = {"Content-Type": "application/json"}
-resp = req.post("https://be.dev.iota.pw/data", json={
-	"hardwareID":"1",
-	"address":"Postman_test",
-	"latitude":"61.123",
-	"longitude":"7.933",
-	"temperature":"19.2",
-	"humidity":"35.7",
-	"timestamp":"2019-10-15 13:37:05.749277+02"
-},headers = header)
-print(resp.text)
-```
 **Note**: Do not use json.dumps() in the POST and PUT request, otherwise the request will be received as a string instead of an object.
 
 ## Contact

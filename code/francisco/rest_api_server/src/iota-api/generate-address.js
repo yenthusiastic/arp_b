@@ -12,10 +12,9 @@ let newAddress = (seed, address_index = 0) => {
         iota.getNewAddress(seed, {
             index: address_index,
             total: 2,
-            // security: 2
         }).then((addresses) => {
             let addressWithChecksum = new Array(0)
-            // Add checksum to each address
+            // Add checksum to each address generated
             for(var address in addresses){
                 let addChecksum = iotaLib.addChecksum(addresses[address],9)
                 addressWithChecksum.push(addChecksum)
