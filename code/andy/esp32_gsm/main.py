@@ -5,19 +5,15 @@
 
 # ===== IMPORTS ========
 from sys import stdout 
-from machine import Pin, SPI, ADC, UART, I2C, GPS, DHT, RTC, deepsleep, reset, wake_description, wake_reason
+from machine import Pin, SPI, ADC, UART, I2C, GPS, RTC, deepsleep, reset, wake_description, wake_reason
 import gsm
 import socket
 import urequests as requests
 import json
 from time import sleep, sleep_ms, ticks_ms, ticks_diff, time, strftime
 
-import mpu6050 as mpu
-import bme280_no_hum as bme280_float
-import sds011
-
-import epaper2in9
-import framebuf
+#import epaper2in9
+#import framebuf
 # ===== /IMPORTS ========
 
 
@@ -29,10 +25,11 @@ GSM_USER = 'vodafone'
 GSM_PASS = 'vodafone'
 
 # Module Settings
-HARDWARE_ID = const(1)
+HARDWARE_ID = const(55)
 API_KEY = "2ed617ed018c0b13f209fc0bbe75ab8ab1a1d303"
 PHONE_NUMBER = '+491745851814'
 SERVER_URL = "https://req.dev.iota.pw/"
+BACKEND_URL = "https://be.dev.iota.pw"
 NODE_URL2 = "https://nodes.iotadev.org/"
 NODE_URL = "https://nodes.thetangle.org/"
 
@@ -40,8 +37,23 @@ UPDATE_INV = const(1000)
 
 RENT_TIME_FACTOR = 0.5
 
-# dev-strings
-json_data = [{"hardwareID": 1}, {"vbat": 3850}]
+# Accelerometer Config
+ACC_ADDRESS = const(0x18)
+ACC_INTERRUPT_PIN = 14
+# Registers
+REG_WHOAMI                = const(0x0F)   # Who am I (0x33)
+REG_TEMPCFG               = const(0x1F)
+REG_ACC_CONFIG            = const(0x20)   # Axis configurations and power-modes
+REG_HIGH_PASS_FILTER      = const(0x21)   # Configuring the high-pass filters
+REG_INT_CONFIG            = const(0x22)   # Interrupt configurations
+REG_SCALE_MODES           = const(0x23)   # Set-up the full-scale of the accelerometer
+REG_LATCH_CONFIG          = const(0x24)   # Latch configurations
+REG_INT_LOGICS            = const(0x30)   # Interrupt configurations (different axis)
+REG_INTERRUPT             = const(0x31)   # Interrupt status
+REG_THRESHOLD             = const(0x32)   # Acceleration threshold
+REG_DURATION              = const(0x33)   # Acceleration duration
+
+
 
 #m_address = "SVJQSVYGFUYZHKSQD9OYGSEMCSAWKNXEXMGJSUKQHHDYPDDOTVXYCHFWEAOCZUVOQFANVVLIDAPOTIDY9UCQYMMMXX"
 #dev1
@@ -102,9 +114,17 @@ mos = Pin(12, Pin.OUT, value=0)
 
 # Alarm Buzzer
 buz = Pin(2, Pin.OUT, value=1)
+buz.value(0)
+sleep_ms(50)
+buz.value(1)
+
 
 # CO2 sensor, MH-Z14
 adc=ADC(Pin(36))
+
+# Battery sense Pin
+bat = ADC(Pin(39))
+bat.atten(ADC.ATTN_11DB)          # 0 - 3.6 V
 
 # GPS
 # RX is not used
@@ -112,29 +132,32 @@ gps = GPS(UART(2, rx=35, tx=33, baudrate=9600, bits=8, parity=None, stop=1, time
 gps.startservice()
 
 
-# PM sensor, SSD011
+# PM sensor, SDS011
 PM10_PIN = Pin(19, Pin.IN)
 PM25_PIN = Pin(18, Pin.IN)
-
-
-# I2C
-i2c = I2C(0, I2C.MASTER, scl=Pin(22), sda=Pin(21), freq=400000)
-
-# accelerometer/ gyroscope, MPU6050
-mpu.init_sensor(i2c)
-
-# temperature/ humidity/ atmosperic pressure, BME280
-bme = bme280_float.BME280(i2c=i2c)
-
 
 if DEMO:
     mos.value(1)
 
 
+# I2C
+i2c = I2C(0, I2C.MASTER, scl=Pin(22), sda=Pin(21), freq=400000)
+
+import lis3dh_git as lis3dh
+import bme280_float
+#import sds011 # using PWM output
+
+acc = lis3dh.LIS3DH_I2C(i2c)
+#acc.data_rate=rate = lis3dh.DATARATE_100_HZ
+#acc.range = lis3dh.RANGE_2_G
+
+# temperature/ atmosperic pressure/ humidity, BME280
+bme = bme280_float.BME280(i2c=i2c)
+
+
 # ===== DISPLAY ========
-#from machine import Pin, SPI
-#import epaper2in9b_mod as epaper2in9b
-#import epaper2in9
+import epaper2in9
+import framebuf
 
 spi = SPI(2, baudrate=2000000, polarity=1, phase=0, sck=Pin(25), mosi=Pin(15), miso=Pin(0))
 btn1 = Pin(0, Pin.IN, Pin.PULL_UP)
@@ -150,8 +173,6 @@ WHITE = const(1)
 W = const(128)
 H = const(296)
 
-
-#import framebuf
 buf = bytearray(W * H // 8)
 fb = framebuf.FrameBuffer(buf, W, H, framebuf.MONO_HLSB)
 fb.fill(WHITE)
@@ -218,7 +239,7 @@ def draw_rent_time(xs=0, ys=120):
                 
 
 def update_display():
-    e.set_frame_memory(buf, x, y, W, H)
+    e.set_frame_memory(buf, 0, 0, W, H)
     e.display_frame()
 
 def clear_buf(color = WHITE):
@@ -262,6 +283,25 @@ def checkms(t):
     while t.value()==1:
         stop=ticks_ms()
     if DEBUG: print("Pulse:", (stop-start)-2)
+
+
+def get_bat_voltage():
+    volt = (bat.read() / 4095) * 3.99  # raw Voltage
+    #return volt * 1.99                 # voltage divider
+    return float("{0:.2f}".format(volt * 1.99))
+
+
+def acc_set_interrupt():
+    acc._i2c.writeto_mem(ACC_ADDRESS, REG_HIGH_PASS_FILTER, b'\x09')
+    acc._i2c.writeto_mem(ACC_ADDRESS, REG_INT_CONFIG, b'\x40')
+    acc._i2c.writeto_mem(ACC_ADDRESS, REG_SCALE_MODES, b'\x00')
+    acc._i2c.writeto_mem(ACC_ADDRESS, REG_LATCH_CONFIG, b'\x00')
+    acc._i2c.writeto_mem(ACC_ADDRESS, REG_THRESHOLD, b'\x0A') # x06
+    acc._i2c.writeto_mem(ACC_ADDRESS, REG_DURATION, b'\x03')  # x00
+    acc._i2c.writeto_mem(ACC_ADDRESS, REG_INT_LOGICS, b'\x2A')
+    acc._i2c.writeto_mem(ACC_ADDRESS, REG_ACC_CONFIG, b'\x5F')
+    
+    
 
 """
 def get_pm(p10=PM10_PIN, p25=PM25_PIN):
@@ -353,12 +393,12 @@ def gsm_connect():
         sleep(0.3)
     if gsm.status()[0] is 98 or 89 or 0:
         gsm.start(tx=27, rx=26, apn=GSM_APN, user=GSM_USER, password=GSM_PASS)
-        if DEBUG: sys.stdout.write('Waiting for AT command response...')
+        if DEBUG: stdout.write('Waiting for AT command response...')
         for retry in range(50):
             if gsm.atcmd('AT'):
                 break
             else:
-                if DEBUG: sys.stdout.write('.')
+                if DEBUG: stdout.write('.')
                 sleep_ms(500)
         else:
             raise Exception("Modem not responding!")
@@ -366,7 +406,7 @@ def gsm_connect():
         if DEBUG: print("Connecting to GSM...")
         gsm.connect()
         while gsm.status()[0] != 1:
-            sys.stdout.write('.')
+            stdout.write('.')
             sleep_ms(200)
             #pass
         print('IP:', gsm.ifconfig()[0])
@@ -388,6 +428,7 @@ def gsm_online_check(connect=False):
 
 
 def gsm_shutdown():
+    if DEBUG: print("Shuting down GSM module...")
     if gsm.stop():
         GSM_PWR.value(1)
         sleep(0.1)
@@ -443,8 +484,23 @@ def get_balance(url=NODE_URL, address=m_address, threshold=100):
 
 
 # TODO: request address from server
-def get_address():
-    return True, m_address
+def get_address(online=True):
+    if online:
+        try:
+            if DEBUG: print("Requesting new address...")
+            r = http_request(method="GET", url=BACKEND_URL + "/address/" + str(HARDWARE_ID))
+            if DEBUG: print("Got: ", r.text)
+            adr = json.loads(r.text)["Session address"]
+            if adr is not None:
+                return True, adr
+            else:
+                return False, None
+        except Exception as e:
+            print("Exception at get_address: ", e)
+            return False, None
+    else:
+        return True, m_address
+
 
 def sound(on_t, off_t, reps):
     for i in range(reps):
@@ -455,60 +511,30 @@ def sound(on_t, off_t, reps):
 
 def startup_sound():
     sound(20,100,2)
-    """
-    buz.value(0)
-    sleep_ms(30)
-    buz.value(1)
-    sleep_ms(200)
-    buz.value(0)
-    sleep_ms(30)
-    buz.value(1)
-    """
 
 def start_of_session_sound():
     sound(30,200,3)
 
 def end_of_session_sound():
     sound(200,400,3)
-    """
-    buz.value(0)
-    sleep_ms(200)
-    buz.value(1)
-    sleep_ms(400)
-    buz.value(0)
-    sleep_ms(200)
-    buz.value(1)
-    sleep_ms(400)
-    buz.value(0)
-    sleep_ms(200)
-    buz.value(1)
-    """
     
 def alarm_sound():
     sound(500,500,3)
-    """
-    buz.value(0)
-    sleep_ms(500)
-    buz.value(1)
-    sleep_ms(500)
-    buz.value(0)
-    sleep_ms(500)
-    buz.value(1)
-    sleep_ms(500)
-    buz.value(0)
-    sleep_ms(500)
-    buz.value(1)
-    sleep_ms(500)
-    """
 
+
+# TODO: fix watchdog reset at draw_qr
 def hibernate():
     if DEBUG: print("Preparing for hibernation...")
+    gsm_shutdown()
+    mos.value(0) # turn off 5V AUX
     e.set_lut(e.LUT_FULL_UPDATE)
+    draw_title()
     draw_status(status_def[1])
+    check, hst = get_address()
+    hma = make_qr(hst)
     rtc.write(2, 1) # write status "sleeping" in RTC
     rtc.write(3, 1) # flag: address in RTC memory
-    hst = session_address
-    hma = make_qr(session_address)
+    
     if DEBUG: print("Making RTC string.")
     for i in range(len(hma)):
         hst += ","
@@ -525,7 +551,6 @@ def hibernate():
     draw_rent_time(xs=-1)
     draw_qr(m=hma, scale=3)
     update_display()
-    mos.value(0) # turn off 5V AUX
     print("Going into deepsleep...")
     deepsleep()
 
@@ -547,44 +572,50 @@ def r():
 """
 
 
-
-
-e.set_lut(e.LUT_FULL_UPDATE)
-session_matrix = None
-status_old = rtc.read(0)
-if DEBUG: print("status_old from memory: ", status_old)
-
-
 # TODO: CHECK WAKE UP REASON
 print("\n\nReset cause:",wake_description())
 status = 2 # Updating balance
 # 'Deepsleep wake-up'
 # reason (3, 1)
 
+if btn1.value() is not 0:
+    
 
+    e.set_lut(e.LUT_FULL_UPDATE)
+    session_matrix = None
+    status_old = rtc.read(0)
+    if DEBUG: print("status_old from memory: ", status_old)
 
-if rtc.read(3):
-    if DEBUG: print("Reading session_address from memory...")
-    session_address = rtc.read_string().split(',')[0]
-    if DEBUG and session_address is not None: print("session_address read.")
-else:
-    check, s_adr = get_address()
-    if check is True:
-        session_address = s_adr
-if rtc.read(5):
-    if DEBUG: print("Reading QR-Code from memory...")
-    sst = rtc.read_string().split(',')[1:]
-    session_matrix = []
-    for i in range(len(sst)):
-        session_matrix.append([])
-        for j in range(len(sst[i])):
-            if sst[i][j] == '1':
-                session_matrix[i].append(1)
+    if rtc.read(3):
+        if DEBUG: print("Reading session_address from memory...")
+        session_address = rtc.read_string().split(',')[0]
+        if DEBUG and session_address is not None: print("session_address read.")
+    else:
+        for i in range(2):
+            check, s_adr = get_address()
+            print("get_address: {0}, {1}".format(check, s_adr))
+            if check is True:
+                session_address = s_adr
+                break
             else:
-                session_matrix[i].append(0)
-    if DEBUG: print("QR-Code read.")
+                print("get_address: False, try again...")
+                
+    if rtc.read(5):
+        if DEBUG: print("Reading QR-Code from memory...")
+        sst = rtc.read_string().split(',')[1:]
+        session_matrix = []
+        for i in range(len(sst)):
+            session_matrix.append([])
+            for j in range(len(sst[i])):
+                if sst[i][j] == '1':
+                    session_matrix[i].append(1)
+                else:
+                    session_matrix[i].append(0)
+        if DEBUG: print("QR-Code read.")
 
 
+print("HardwareID: ", HARDWARE_ID)
+print("Battery Voltage: ",get_bat_voltage())
 
 session_balance = 0
 timestamp = strftime("%Y-%m-%d %H:%M:%S")
@@ -600,8 +631,11 @@ if btn1.value() == 0:
 else:
     adc.collect(1, len=10, readmv=True)
     while True:
-        if True: #btn1.value() == 0:
-            #break
+        # Hibernate after power reset
+        if wake_reason()[0] != 3:
+            hibernate()
+                
+        if btn1.value() is not 0:
             led.value(1)
             startup_sound()
             draw_title()
@@ -621,14 +655,12 @@ else:
                 print("time()", time())
                 sleep(1)
             sleep_ms(1)
-            update_old_ticks = 0
-            new_ticks = 0
-            balance_old_ticks = 0
-            parking_old_ticks = 0
             
-            # Hibernate after power reset
-            if wake_reason()[0] != 3:
-                hibernate()
+            new_ticks = ticks_ms()
+            update_old_ticks = 0
+            balance_old_ticks = new_ticks
+            parking_old_ticks = new_ticks
+            
             
             while btn1.value() != 0:
                 new_ticks = ticks_ms()
@@ -658,14 +690,15 @@ else:
                     
                 # UPDATING BALANCE
                 if status == 2:
-                    session_balance = get_balance(url=NODE_URL2, address=m_address[:81])
+                    session_balance = get_balance(url=NODE_URL2, address=session_address[:81])
                     #session_balance = counter
                     
                 #SESSION RUNNING
+                # TODO: ensure balance update happens only x seconds into te running session
                 elif status == 3:
                     if balance_diff > 80000: # check balance every 80 seconds
                         balance_old_ticks = new_ticks
-                        session_balance = get_balance(url=NODE_URL2, address=m_address[:81])
+                        session_balance = get_balance(url=NODE_URL2, address=session_address[:81])
                 
                 # SESSION OVER
                 if status == 4:
