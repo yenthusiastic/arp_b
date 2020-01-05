@@ -68,13 +68,14 @@ DEMO = True
 
 status_def = {
     0:"Undefined",
-    1:"Sleeping",
+    1:"Connecting",
     2:"Updating Balance",
     3:"Session running",
     4:"Session over!",
     5:"BROKEN",
     6:"ALARM",
-    7:"Offline"
+    7:"Offline",
+    9:"Sleeping"
 }
 
 
@@ -233,6 +234,7 @@ def draw_rent_time(xs=0, ys=120):
                 status = 4
                 parking_old_ticks = ticks_ms()
                 end_of_session_sound()
+                parking_old_ticks = new_ticks
             if status == 3:
                 s_delta = session_rent_time - delta
                 dmin = int(s_delta // 60)
@@ -243,8 +245,12 @@ def draw_rent_time(xs=0, ys=120):
                 draw_balance(iota = -1)
                 fb.text("Park the bike!", 0, ys, BLACK)
                 
-
 def update_display():
+    # TODO: should contain all logic to draw the whole display
+    # based on status and status dependend values like balance, rent time
+    pass
+
+def draw_display():
     e.set_frame_memory(buf, 0, 0, W, H)
     e.display_frame()
 
@@ -262,15 +268,12 @@ def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
             address = m_address_chsum
         m = make_qr(address)
     if DEBUG: print("Drawing QR code.")
-    # TODO: fix watchdog trigger from code below
     for y in range(len(m)*scale):
         for x in range(len(m[0])*scale):
-            value = m[y//scale][x//scale]
-            if value == 0:
-                value=0xFF
+            if m[y//scale][x//scale] == 0:
+                fb.pixel(xs+x, ys+y, 0xFF)
             else:
-                value=0x00
-            fb.pixel(xs+x, ys+y, value)
+                fb.pixel(xs+x, ys+y, 0x00)
 #========== /DISPLAY =================
 
 
@@ -384,6 +387,10 @@ def gps_location():
         return (data[1], data[2])
     else:
         return False
+
+def send_sensor_data():
+    # TODO: collect and send the sensor data to backend server
+    pass
 #========== /SENSORS =================
 
 
@@ -543,6 +550,9 @@ def alarm_sound():
 #========== /SOUND =================
 
 
+
+
+
 # TODO: fix watchdog reset at draw_qr
 def hibernate():
     if DEBUG: print("Preparing for hibernation...")
@@ -550,18 +560,10 @@ def hibernate():
     mos.value(0) # turn off 5V AUX
     e.set_lut(e.LUT_FULL_UPDATE)
     draw_title()
-    draw_status(status_def[1])
+    draw_status(status_def[9])
     check, hst = get_address()
-    """
-    for i in range(2):
-        check, s_adr = get_address()
-        print("get_address: {0}, {1}".format(check, s_adr))
-        if check is True:
-            session_address = s_adr
-            break
-        else:
-            print("get_address: False, try again...")
-    """
+    if check is False:
+        pass # TODO
     gsm_shutdown()
     hma = make_qr(hst)
     rtc.write(2, 1) # write status "sleeping" in RTC
@@ -582,7 +584,7 @@ def hibernate():
     draw_balance(-1)
     draw_rent_time(xs=-1)
     draw_qr(m=hma, scale=3)
-    update_display()
+    draw_display()
     print("Going into deepsleep...")
     deepsleep()
 
@@ -591,6 +593,19 @@ def r():
     reset()
 
 
+
+# TODO: put all session_status related decision trees into this function
+def update_status():
+    global status, status_old
+    if DEBUG: print("update_status in: status: {0}, status_old: {1}".format(status, status_old))
+    if not gsm_online_check() or rtc.now()[0] == 1970:
+        if DEBUG: print("Not online, setting status 'connecting'...")
+        status_old = status
+        status = 1
+    elif status == 1:
+        status_old = status
+        status = 2
+    if DEBUG: print("update_status out: status: {0}, status_old: {1}".format(status, status_old))
 
 
 # RTC memory status registers:
@@ -667,6 +682,7 @@ if btn1.value() is not 0:
 #========== /INIT =================
 
 
+
 #========== MAIN =================
 print("HardwareID: ", HARDWARE_ID)
 print("Battery Voltage: ",get_bat_voltage())
@@ -682,100 +698,112 @@ jsn= {"hardwareID":"1","address":"Postman_test","latitude":"61.123","longitude":
 counter = 0
 demo_balance = 0
 
+
+# TODO: try-except block?
 if btn1.value() == 0:
     pass
 else:
     adc.collect(1, len=10, readmv=True)
-    while True:
+    #while True:
                 
-        if btn1.value() is not 0:
-            led.value(1)
-            startup_sound()
-            draw_title()
-            draw_status(status_def[status], xs=0)
+    if btn1.value() is not 0:
+        update_status()
+        led.value(1)
+        startup_sound()
+        draw_title()
+        
+        draw_status(status_def[status], xs=0)
+        if session_matrix is not None:
+            draw_qr(m=session_matrix, scale=3)
+        else:
+            # TODO: what happens if no matrix is avaiable?
+            pass
+            #draw_qr(address=session_address, scale=3)
+        
+        if status == 2:
             draw_balance(session_balance)
-            update_display()
-            if session_matrix is not None:
-                draw_qr(m=session_matrix, scale=3)
-            else:
-                draw_qr(address=session_address, scale=3)
-            update_display()
-            e.set_lut(e.LUT_PARTIAL_UPDATE)
+            draw_display()
+        elif status == 1:
             
-            if rtc.now()[0] == 1970:  # if RTC is not set up via NTP
-                if DEBUG: print("RTC not set up, calling gsm_online_check()")
-                gsm_online_check(connect=True)
-                print("time()", time())
-                sleep(1)
-            sleep_ms(1)
-            
+            draw_display()
+            gsm_online_check(connect=True)
+            print("time()", time())
+            #sleep(1)
+        #draw_display()
+                
+        sleep_ms(1)
+        
+        new_ticks = ticks_ms()
+        update_old_ticks = 0
+        balance_old_ticks = new_ticks
+        parking_old_ticks = new_ticks
+        
+        e.set_lut(e.LUT_PARTIAL_UPDATE)
+        while btn1.value() != 0:
+            update_status()
             new_ticks = ticks_ms()
-            update_old_ticks = 0
-            balance_old_ticks = new_ticks
-            parking_old_ticks = new_ticks
+            update_diff = ticks_diff(new_ticks, update_old_ticks)
+            balance_diff = ticks_diff(new_ticks, balance_old_ticks)
+            parking_diff = ticks_diff(new_ticks, parking_old_ticks)
             
-            
-            while btn1.value() != 0:
-                new_ticks = ticks_ms()
-                update_diff = ticks_diff(new_ticks, update_old_ticks)
-                balance_diff = ticks_diff(new_ticks, balance_old_ticks)
-                parking_diff = ticks_diff(new_ticks, parking_old_ticks)
+            if update_diff >= UPDATE_INV or update_diff < 0:
+                counter+=1
+                #print("update")
+                update_old_ticks = new_ticks
                 
-                if update_diff >= UPDATE_INV or update_diff < 0:
-                    #print("update")
-                    update_old_ticks = new_ticks
-                    
-                    # Start session
-                    if session_balance > 0:
-                        if status == 2:
-                            status_old = status
-                            status = 3 # Session running
-                            start_of_session_sound()
-                            session_start = int(time())
-                            if DEBUG: print("session_start", session_start)
-                            
-                    draw_date()
-                    draw_balance(session_balance, ys=100)
-                    draw_rent_time()
-                    draw_status(status_def[status], xs=0)
-                    update_display()
-                    counter+=1
-                    
-                # UPDATING BALANCE
-                if status == 2:
+                # Start session
+                if session_balance > 0:
+                    if status == 2:
+                        status_old = status
+                        status = 3 # Session running
+                        start_of_session_sound()
+                        session_start = int(time())
+                        if DEBUG: print("session_start", session_start)
+                        
+                draw_date()
+                draw_rent_time()
+                draw_status(status_def[status], xs=0)
+                draw_display()
+                
+                
+            # UPDATING BALANCE
+            if status == 2:
+                sound(2, 0, 1)
+                session_balance = get_balance(url=NODE_URL2, address=session_address[:81])
+                #session_balance = counter
+                if DEMO:
+                    if btn1.value() == 0:
+                        demo_balance = 1
+                        session_balance = demo_balance
+                        if DEBUG: print("DEMO MODE ACTIVATED\nsession_balance = 1\nRelease button...")
+                        sound(2, 100, 3)
+                        sleep(2)
+                draw_balance(session_balance, ys=100)
+                draw_display()
+                
+            #SESSION RUNNING
+            # TODO: ensure balance update happens only x seconds into the running session
+            elif status == 3:
+                if balance_diff > 80000: # check balance every 80 seconds
+                    balance_old_ticks = new_ticks
                     session_balance = get_balance(url=NODE_URL2, address=session_address[:81])
-                    #session_balance = counter
                     if DEMO:
-                        if btn1.value() == 0:
-                            demo_balance = 1
+                        if demo_balance > 0:
                             session_balance = demo_balance
-                            print("DEMO MODE ACTIVATED\nsession_balance = 1\nRelease button...")
-                            sleep(2)
-                    
-                #SESSION RUNNING
-                # TODO: ensure balance update happens only x seconds into the running session
-                elif status == 3:
-                    if balance_diff > 80000: # check balance every 80 seconds
-                        balance_old_ticks = new_ticks
-                        session_balance = get_balance(url=NODE_URL2, address=session_address[:81])
-                        if DEMO:
-                            if demo_balance > 0:
-                                session_balance = demo_balance
-                # SESSION OVER
-                if status == 4:
-                    if parking_diff > 10:
-                        # TODO: check for no vibration = bike is parked
-                        if True:
-                            hibernate()
-                
-                print("counter", counter)
-                #print("update_old_ticks", update_old_ticks)
-                #rint("new_ticks", new_ticks)
-                #print("diff", ticks_diff(update_new_ticks, update_old_ticks))
-                print("\n")
-                sleep_ms(300)
-            break
-        print(counter)
+            # SESSION OVER
+            if status == 4:
+                if parking_diff > 10:
+                    # TODO: check for no vibration = bike is parked
+                    if True:
+                        hibernate()
+            
+            print("inner while: counter", counter)
+            #print("update_old_ticks", update_old_ticks)
+            #rint("new_ticks", new_ticks)
+            #print("diff", ticks_diff(update_new_ticks, update_old_ticks))
+            print("\n")
+            sleep_ms(300)
+        print("counter_end", counter)
         #if gps_location() == (0.0, 0.0):
         #    print("No location fix:", gps_location())
         #else:
