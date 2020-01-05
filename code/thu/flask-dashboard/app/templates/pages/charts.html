@@ -138,6 +138,10 @@
     
     
     <script>
+        var selected_hw = 0;
+        var hw_addresses;
+        var hw_sensors;
+
         function validateForm() {
             if (document.forms["input_form"]["hw_select"].value == ""){
                 demo.showNotification(from="top", align="center", msg="Please select at least one hardware to show graph", color="warning");
@@ -163,7 +167,7 @@
             document.getElementById('dtp').disabled = state;
             document.getElementsByClassName('fa-calendar')[0].disabled = state;
             if ( document.getElementById('dtp').disabled) {
-                clear_fields("dtp");
+                document.getElementsByName("datetime_label")[0].value = "";
             }
         }
     
@@ -187,7 +191,19 @@
                     break;
                 case "dtp":
                     document.getElementsByName("datetime_label")[0].value = "";
-                    break
+                    $('#addr_select').selectpicker('val', '');
+                    $('#addr_select').find('option').remove();
+                    $('#addr_select').prop("disabled", false);
+                    var ul_addr = document.getElementsByName("addr_select")[0];
+                    
+                    for (i = 0; i < hw_addresses[selected_hw].length; i++){
+                        var li1 = document.createElement("option");
+                        var linkText1 = document.createTextNode(hw_addresses[selected_hw][i]);
+                        li1.appendChild(linkText1);
+                        ul_addr.appendChild(li1);
+                    }
+                    $('#addr_select').selectpicker('refresh');
+                    break;
     
             }
             
@@ -328,10 +344,6 @@
             $('#endDate').daterangepicker({
               startDate: moment()
             });
-
-
-            var hw_addresses;
-            var hw_sensors;
 
             {%if hw_sensor_addr %}
             hw_addresses = [
