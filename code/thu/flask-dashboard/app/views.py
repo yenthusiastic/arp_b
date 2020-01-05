@@ -18,7 +18,7 @@ from app        import app, lm, db, bc
 from app.models import User, SensorData, Hardware
 from app.forms  import LoginForm, RegisterForm
 import psycopg2 
-from datetime import datetime
+from datetime import datetime, timedelta
 from geopy.geocoders import Nominatim
 
 
@@ -75,78 +75,74 @@ conn = connect_DB()
 
 def exec_query(msg, num_values):
     print("""Executing SQL query on Database server...""")
-    
-    cur = conn.cursor()
-    cur.execute(msg)
-    conn.commit()
-    res = cur.fetchall()
-    if res:
-        if num_values == 1:
-            res = [r[0] for r in res]
-            print('Success. Database connection closed.')
-            return res
-        elif num_values == 2:
-            timestamp = []
-            #values = []
-            selector_data = []
-            for row in res:
-                timestamp.append(row[0])
-                selector_data.append(row[1])
-            #values.append(selector_data)
-            print('Success. Database connection closed.')
-            return timestamp, selector_data
-        else:
-            timestamp = []
-            values = []
-            for row in res:
-                timestamp.append(row[0])
-            for index in range (1, num_values):
+    try:
+        cur = conn.cursor()
+        cur.execute(msg)
+        conn.commit()
+        res = cur.fetchall()
+        if res:
+            if num_values == 1:
+                res = [r[0] for r in res]
+                print('Success. Database connection closed.')
+                return res
+            elif num_values == 2:
+                timestamp = []
+                #values = []
                 selector_data = []
                 for row in res:
-                    selector_data.append(row[index])
-                values.append(selector_data)
-            print('Success. Database connection closed.')
-            return timestamp, values
-    else:
-        print("Error while executing SQL query: {}".format(msg))
-        return -1
+                    timestamp.append(row[0])
+                    selector_data.append(row[1])
+                #values.append(selector_data)
+                print('Success. Database connection closed.')
+                return timestamp, selector_data
+            else:
+                timestamp = []
+                values = []
+                for row in res:
+                    timestamp.append(row[0])
+                for index in range (1, num_values):
+                    selector_data = []
+                    for row in res:
+                        selector_data.append(row[index])
+                    values.append(selector_data)
+                print('Success. Database connection closed.')
+                return timestamp, values
+        else:
+            print("No results returned from SQL query: {}".format(msg))
+            return -1
+    except Exception as e:
+        print("Error executing SQL Query: {}\n Error details:".format(msg), e)
+        return -2
         
 
-def query_data_default(table, selectors, hw_id, limit=50):
-    query = 'SELECT "timestamp", '
-    for selector in selectors:
-        query += '"{}" , '.format(selector)
-    query  = query[:-2] + ' FROM (SELECT "timestamp", EXTRACT(SECOND FROM "timestamp") AS "seconds", '
-    for selector in selectors:
-        query += '"{}" , '.format(selector)
-    query = query[:-2] + 'FROM public."{}" WHERE "hardwareID" = {} AND '.format(table, hw_id)
-    for selector in selectors:
-        query += '"{}" IS NOT NULL AND '.format(selector)
-    query = query[:-4] + 'ORDER BY "timestamp" DESC) AS TEMP_TABLE WHERE MOD(CAST(TEMP_TABLE."seconds" AS INT), 5) = 0 ORDER BY TEMP_TABLE."timestamp" ASC '
-    if limit:
-        query += 'LIMIT {} '.format(limit)
-    #print(query)
-    print("""Executing SQL query on Database server...""")
-    return exec_query(query, len(selectors)+1)
-
-def query_data_range(table, selector, hw_id, date_range, interval="1 hour", date_format_str = "DD.MM.YYYY HH24:MI:SS"):
-    query = 'SELECT * FROM (SELECT "timestamp", "{}" '.format(selector)
+def query_data_range(table, selector, hw_id, date_range, date_format_str = "DD.MM.YYYY HH24:MI:SS"):
+    datetimeFormat = '%d.%m.%Y %H:%M:%S'
+    query = 'SELECT * FROM (SELECT "timestamp", "{}", "index" '.format(selector)
     query += 'FROM public."{}" WHERE "hardwareID" = {} AND '.format(table, hw_id)
     query += '"{}" IS NOT NULL AND '.format(selector)
     if len(date_range) > 1:
-        query += """"timestamp" BETWEEN TO_TIMESTAMP('{0}','{2}') AND TO_TIMESTAMP('{1}','{2}') ORDER BY "timestamp" DESC) AS TEMP_TABLE ORDER BY TEMP_TABLE."timestamp" ASC""".format(date_range[0], date_range[1], date_format_str)
+        hour_difference = int((datetime.strptime(date_range[1], datetimeFormat) -  datetime.strptime(date_range[0], datetimeFormat))/timedelta(minutes=5)/24)
+        print("hour_difference: ", hour_difference) 
+        query += """"timestamp" BETWEEN TO_TIMESTAMP('{0}','{2}') AND TO_TIMESTAMP('{1}','{2}') ORDER BY "timestamp" DESC) AS TEMP_TABLE WHERE index%(5*{3}) = 0 ORDER BY TEMP_TABLE."timestamp" ASC """.format(date_range[0], date_range[1], date_format_str, hour_difference)
     elif len(date_range) == 1:
-        query += """ "timestamp" BETWEEN TO_TIMESTAMP('{0}','{2}') - interval '{1}' AND TO_TIMESTAMP('{0}','{2}') ORDER BY "timestamp" DESC) AS TEMP_TABLE ORDER BY TEMP_TABLE."timestamp" ASC""".format(date_range[0], interval, date_format_str)
+        query += """ "timestamp" BETWEEN TO_TIMESTAMP('{0}','{1}') - interval '1 hour' AND TO_TIMESTAMP('{0}','{1}') ORDER BY "timestamp" DESC) AS TEMP_TABLE  WHERE index%5 = 0 ORDER BY TEMP_TABLE."timestamp" ASC""".format(date_range[0], date_format_str)
     print(query)
     return exec_query(query,2)
 
 def query_data_addr(table, selector, hw_id, addr):
-    query = 'SELECT "timestamp", "{0}" FROM (SELECT "timestamp", "address", "{0}" '.format(selector)
-    query += 'FROM public."{}" WHERE "hardwareID" = {} AND '.format(table, hw_id)
-    query += '"{}" IS NOT NULL AND '.format(selector)
-    query += """ "address" = '{}' ORDER BY "timestamp" DESC) AS TEMP_TABLE ORDER BY TEMP_TABLE."timestamp" ASC """.format(addr)
-    print("""Executing SQL query on Database server...""")
-    return exec_query(query, 2)
+    begin_time = db.session.query(SensorData.timestamp).filter(SensorData.address==addr).order_by(SensorData.timestamp.asc()).first()[0]
+    end_time = db.session.query(SensorData.timestamp).filter(SensorData.address==addr).order_by(SensorData.timestamp.desc()).first()[0]
+    hour_difference = int((end_time -  begin_time)/timedelta(minutes=5)/24)
+    print("hour_difference: ", hour_difference)
+    if hour_difference != 0:
+        query = 'SELECT "timestamp", "{0}" FROM (SELECT "timestamp", "address", "{0}", "index" '.format(selector)
+        query += 'FROM public."{}" WHERE "hardwareID" = {} AND '.format(table, hw_id)
+        query += '"{}" IS NOT NULL AND '.format(selector)
+        query += """ "address" = '{0}' ORDER BY "timestamp" DESC) AS TEMP_TABLE WHERE index%(5*{1}) = 0 ORDER BY TEMP_TABLE."timestamp" ASC """.format(addr, hour_difference)
+        print("""Executing SQL query on Database server...""")
+        return exec_query(query, 2)
+    else:
+        return -1
 
 def get_hw_ids(table="SENSOR_DATA"):
     print("""Getting all hardware IDs...""")
@@ -573,9 +569,11 @@ def charts():
                                 data['labels'] = res[0]
                                 data["legend"].append("Hardware {}".format(hw_id)) 
                             except:
-                                flash("No data found for hardware {} and sensor {}".format(hw_id, sensor), "warning")
-                        else:
-                            flash("No data found for hardware {} and sensor {}".format(hw_id, sensor), "warning")
+                                if res == -1:
+                                    flash("No data found for hardware {} and sensor {}".format(selected_hw_ids[0], sensor), "warning")
+                                else:
+                                    flash("Could not query data for hardware {} and sensor {}".format(selected_hw_ids[0], sensor), "warning")
+                        
                     if data["series"]:
                         chart_data.append(data)
                 elif addr_str != "":
@@ -589,9 +587,10 @@ def charts():
                             data['labels'] = res[0]
                             chart_data.append(data)
                         except:
-                            flash("No data found for for hardware {} and sensor {}".format(selected_hw_ids[0], sensor), "warning")
-                    else:
-                        flash("No data found for session address {} and sensor {}".format(addr_str, sensor), "warning")
+                            if res == -1:
+                                flash("No data found for hardware {} and sensor {}".format(selected_hw_ids[0], sensor), "warning")
+                            else:
+                                flash("Could not query data for hardware {} and sensor {}".format(selected_hw_ids[0], sensor), "warning")
             return render_template('layouts/default.html',
                                         content=render_template( 'pages/charts.html',
                                         x_axis = x_axis,
