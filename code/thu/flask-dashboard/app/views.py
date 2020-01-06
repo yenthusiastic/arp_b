@@ -516,12 +516,19 @@ def charts():
         for hw_id in hw_ids:
             hw_data = dict()
             hw_id = "{}".format(hw_id)
-            addresses = [hardware.address for hardware in db.session.query(SensorData.address).filter(SensorData.hardwareID==hw_id).distinct().order_by(SensorData.address).all() if hardware.address != ""]
             sensors = db.session.query(Hardware.sensors).filter(Hardware.hardwareID==hw_id).all()[0][0]
-            hw_data["addresses"] = addresses
-            hw_data["sensors"] = sensors
-            print(hw_data)
-            hw_sensor_addr[hw_id] = hw_data
+            if sensors:
+                query = """SELECT "address", "timestamp" FROM (SELECT "address", MAX("timestamp") AS "timestamp" """
+                query += """ FROM public."SENSOR_DATA" WHERE "hardwareID" = {} AND "address" IS NOT NULL """.format(hw_id)
+                for sensor in sensors:
+                    query += """ AND "{}" IS NOT NULL """.format(sensor.lower())
+                query += """ GROUP BY "address") AS TEMP_TABLE WHERE TEMP_TABLE."address" <> '' ORDER BY TEMP_TABLE."timestamp" DESC"""
+                addresses = exec_query(query,1)
+                if type(addresses) == list:
+                    hw_data["addresses"] = addresses
+                hw_data["sensors"] = sensors
+                print(hw_data)
+                hw_sensor_addr[hw_id] = hw_data
         
         if request.method == "POST":
             chart_data = []
@@ -617,6 +624,16 @@ def charts():
         flash("Please log in or register to access dashboard", "warning")
         return redirect('/login.html')
 
+def get_last_sensor_value(cur, sensor, hw):
+    query = """SELECT * FROM (SELECT MAX("timestamp"), "{0}" AS "timestamp" FROM public."SENSOR_DATA" WHERE "hardwareID" = {1} AND "{0}" IS NOT NULL GROUP BY "{0}") AS TEMP_TABLE ORDER BY TEMP_TABLE."timestamp" DESC LIMIT 1""".format(sensor, hw)
+    try:
+        cur.execute(query)
+        res = cur.fetchone()
+        if res:
+            print(res)
+            return res
+    except:
+        return None
 
 # Render the map page
 @app.route('/map.html', methods=['GET', 'POST'])
@@ -628,22 +645,48 @@ def map():
             "Defect": [],
             "Offline": []
         }
+        
+        no_location_count = 0
+        sensor_data = dict()
+        available_hw = []
         hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.latitude, Hardware.longitude).order_by(Hardware.hardwareID).all()
         for hardware in hardware_data:
             if hardware[2] is not None and hardware[3] is not None:
                 status = hardware.status[0].upper() + hardware.status[1:]
-                map_points[status].append(
-                    {
+                
+                map_point = {
                         "name" : hardware[0],
                         "status" : hardware[1],
                         "lat" : hardware[2],
                         "lon" : hardware[3],
                         "loc" : geolocator.reverse("{}, {}".format(hardware[2], hardware[3])).raw["address"]
                     }
-                )
+                map_points[status].append(map_point)
+                available_hw.append(map_point)
+            else:
+                no_location_count = no_location_count+1
+        cur = conn.cursor()
+        for sensor in units:
+            data = []
+            for hw in available_hw:
+                last_sensor_value = get_last_sensor_value(cur, sensor.lower(), hw["name"])
+                if last_sensor_value:
+                    data.append({
+                        "name": hw["name"],
+                        "sensor_value": last_sensor_value[1],
+                        "timestamp": datetime.strftime(last_sensor_value[0], "%d.%m.%Y %H:%M:%S"), 
+                        "lat": hw["lat"],
+                        "lon": hw["lon"]
+                        })
+            sensor_data[sensor] = data
+        conn.commit()
         return render_template('layouts/default.html',
                                     content=render_template( 'pages/map.html',
-                                    map_points=map_points),
+                                    map_points=map_points,
+                                    no_location_count=no_location_count,
+                                    total_hw=len(hardware_data),
+                                    sensor_data=sensor_data,
+                                    units=units)
                                 )
     else:
         flash("Please log in or register to access dashboard", "warning")

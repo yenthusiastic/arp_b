@@ -1,15 +1,39 @@
 <div class="content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Bikota Hardware Distribution Map</h4>
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Bikota Hardware Distribution Map</h4>
+                {%if no_location_count%}<p><i>(Total {{total_hw}} hardwares, {{no_location_count}} with no location data)</i></p>{%endif%}
+            </div>
+            <div class="row card-body">
+                <div class="col-md-9">
+                    <div id="map"></div> 
+                </div>
+                <div class="col-md-3">
+                    <label> Hardware Status </label><br>
+                    <div class="btn-group bootstrap-select">
+                        <select class="selectpicker" name="status_select" id="status_select" data-title="Filter by Status" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" tabindex="-98">
+                            {% if map_points %}
+                            <option>Select All</option>
+                            {% for status in map_points%}
+                            <option>{{status}}</option>
+                            {% endfor %}
+                            {%endif%}
+                        </select>
                     </div>
-                    <div class="card-body">
-                        <div id="map"></div> 
+                    <br><br>
+                    <label> Sensor Type </label><br>
+                    <div class="btn-group bootstrap-select">
+                        <select class="selectpicker" name="sensor_select" id="sensor_select" data-title="Filter by Sensor" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" tabindex="-98">
+                            {% if sensor_data %}
+                            {% for sensor in sensor_data%}
+                            <option>{{sensor}}</option>
+                            {% endfor %}
+                            {%endif%}
+                        </select>
                     </div>
                 </div>
+                
             </div>
         </div>
     </div>
@@ -19,6 +43,11 @@
 <script src="https://code.highcharts.com/mapdata/countries/de/de-all.js"></script>
 <script>
     var states, cities;
+    var units = {
+        {%for sensor in sensor_data%}
+        "{{sensor}}" : "{{units[sensor]}}",
+        {%endfor%}
+    }
     // Prepare the geojson
     Highcharts.getJSON('https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/germany.geo.json', function (geojson) {
 
@@ -29,140 +58,217 @@
 
     // Initiate the chart
     map_div = document.getElementById("map");
-    Highcharts.mapChart(map_div, {
+    
+    
+    var chart_config = {
 
-    chart: {
-        map: 'countries/de/de-all',
-        height: "700px",
-    },
-
-    title: {
-        text: ''
-    },
-
-    mapNavigation: {
-        enabled: true
-    },
-
-    tooltip: {
-        useHTML: true,
-        style: {
-            pointerEvents: 'auto'
+        chart: {
+            map: 'countries/de/de-all',
+            height: "700px",
         },
-        headerFormat: '',
-        pointFormat: '<b>Hardware {point.name}: {point.status}</b><br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">{point.lat}, {point.lon}</a>'
-    },
 
-    series: [
-        {
-            // Use the de-all map with no data as a basemap
-            name: 'Basemap',
-            borderColor: '#A0A0A0',
-            showInLegend: false
-        }, {
-            name: 'Separators',
-            type: 'mapline',
-            showInLegend: false,
-            enableMouseTracking: false
-        }, 
-        {
-            name: "States",
-            type: 'map',
-            data: states,
-            color: "#f2adec",
-            states: {
-                hover: {
-                    color: "dark-grey"
+        title: {
+            text: ''
+        },
+        colorAxis: {
+            visible: false
+        },
+        
+        mapNavigation: {
+            enabled: true
+        },
+        legend: {
+            layout: 'vertical',
+            borderWidth: 0,
+            backgroundColor: 'rgba(255,255,255,0.85)',
+            floating: true,
+            align: 'left',
+            verticalAlign: 'bottom'
+        },
+        
+        tooltip: {
+            useHTML: true,
+            style: {
+                pointerEvents: 'auto'
+            },
+            headerFormat: '',
+            pointFormat: '<b>Hardware {point.name}: {point.status}</b><br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon}</a>'
+            
+        },
+
+        series: [
+            {
+                // Use the de-all map with no data as a basemap
+                name: 'Basemap',
+                borderColor: '#A0A0A0',
+                showInLegend: false
+            }, {
+                name: 'Separators',
+                type: 'mapline',
+                showInLegend: false,
+                enableMouseTracking: false
+            }, 
+            {
+                name: "States",
+                type: 'map',
+                data: states,
+                color: "#f2adec",
+                states: {
+                    hover: {
+                        color: "dark-grey"
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}',
+                    style: {
+                        width: '80px' // force line-wrap
+                    }
+                },
+                showInLegend: false
+                
+            },  
+            {%for status in map_points%}
+            {
+                // hardware status
+                type: 'mappoint',
+                marker: {
+                    radius: 8
+                },
+                name: '{{status}}',
+                id: "{{status}}",
+                data: [{%for map_point in map_points[status]%} 
+                    {
+                        'name' : "{{map_point['name']}}",
+                        'lat' : {{map_point["lat"]}},
+                        'lon' : {{map_point["lon"]}},
+                        'status' : "{{map_point['status']}}",
+                        'loc' : "{{map_point['loc']}}"
+                    }, 
+                {%endfor%}],
+                showInLegend: true,
+                //color: "#ffc107",                
+            },
+            {%endfor%}
+            {%for sensor in sensor_data%}
+            {
+                // Sensor data
+                type: 'mappoint',
+                marker: {
+                    radius: 10
+                },
+                name: "{{sensor}}",
+                id: "{{sensor}}",
+                data: [{%for data in sensor_data[sensor]%} 
+                    {
+                        'id' : "{{data['name']}}",
+                        'value': {{data["sensor_value"]}},
+                        'lat' : {{data["lat"]}},
+                        'lon' : {{data["lon"]}},
+                        'timestamp' : "{{data['timestamp']}}",
+                        'loc' : "{{data['loc']}}"
+                    }, 
+                {%endfor%}],
+                showInLegend: false,
+                visible: false,
+                //color: "#ffc107",
+                
+            },
+            {%endfor%}
+        ]
+    };
+    var highmap= Highcharts.mapChart(map_div, chart_config);
+
+    $("#sensor_select").on("changed.bs.select", 
+        function(e, clickedIndex, newValue, oldValue) {
+            selected_sensor = $('#sensor_select :selected')[0].value;
+            selected_series = highmap.get(selected_sensor);
+            $('#map').highcharts().tooltip.update({pointFormat : '<b> Hardware {point.id} : {point.value}' + units[selected_sensor] + '</b><br>Last recorded at {point.timestamp}<br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon}</a>'});
+            if (selected_sensor == "Temperature"){
+                $('#map').highcharts().colorAxis[0].update({
+                    visible:true,
+                    min: -20.0,
+                    max: 40.0,
+                    type: 'linear',
+                    minColor: '#1E57EF',
+                    maxColor: '#F51D16',
+//                     stops: [
+//                         [0.0, '#16F5EB'],
+//                         [20.0, '#F5F116'],
+//                         [40.0, '#F51D16']
+//                     ]
+                });
+            } else if (selected_sensor == "Humidity"){
+                $('#map').highcharts().colorAxis[0].update({
+                    visible:true,
+                    min: 0,
+                    max: 100,
+                    type: 'linear',
+                    minColor: '#F51D16',
+                    maxColor: '#1E57EF',
+//                     stops: [
+//                         [20.0, '#F5F116'],
+//                         [40.0, '#EEF516'],
+//                         [60.0, '#3BF516'],
+//                         [80.0, '#16F5EB'],
+//                         [100.0, '#1E57EF']
+//                     ]
+                });
+            }
+            if (newValue){
+                for (var i = 0; i < highmap.series.length; i ++){
+                    if (highmap.series[i].name == selected_sensor){
+                        selected_series.update({visible: true, showInLegend: false});
+                    } else {
+                        if (i > 2){
+                            $('#map').highcharts().series[i].update({visible: false, showInLegend: false});
+                        } else {
+                            $('#map').highcharts().series[i].update({visible: true, showInLegend: false});
+                        }
+                    }
                 }
-            },
-            dataLabels: {
-                enabled: true,
-                format: '{point.name}',
-                style: {
-                    width: '80px' // force line-wrap
+            }
+            
+    });
+
+    $("#status_select").on("changed.bs.select", 
+        function(e, clickedIndex, newValue, oldValue) {
+            selected_status = $('#status_select :selected')[0].value;
+            $('#map').highcharts().tooltip.update({pointFormat : '<b>Hardware {point.name}: {point.status}</b><br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon}</a>'});
+                            
+            if (newValue){
+                $('#map').highcharts().colorAxis[0].update({
+                    minColor: '#ffffff',
+                    maxColor: '#ffffff',
+                    visible:false,
+                });
+                if (selected_status == "Select All"){
+                    for (var i = 0; i < highmap.series.length; i ++){
+                        if (i < 3){
+                            $('#map').highcharts().series[i].update({visible: true, showInLegend: false});
+                        }
+                        else if (i < 7){
+                            $('#map').highcharts().series[i].update({visible: true, showInLegend: true});
+                        } else {
+                            $('#map').highcharts().series[i].update({visible: false, showInLegend: false});
+                        }
+                    }
+                } else {
+                    for (var i = 0; i < highmap.series.length; i ++){
+                        if (highmap.series[i].name == selected_status){
+                            $('#map').highcharts().series[i].update({visible: true, showInLegend: true});
+                        }
+                        else {
+                            if (i > 2){
+                                $('#map').highcharts().series[i].update({visible: false, showInLegend: false});
+                            }
+                        }
+                    }
                 }
-            },
-            showInLegend: false
-        },  
-        {
-            // Parked bikes
-            type: 'mappoint',
-            marker: {
-                radius: 5
-            },
-            name: 'Parked',
-            data: [{%for map_point in map_points['Parked']%} 
-                {
-                    'name' : "{{map_point['name']}}",
-                    'lat' : {{map_point["lat"]}},
-                    'lon' : {{map_point["lon"]}},
-                    'status' : "{{map_point['status']}}",
-                    'loc' : "{{map_point['loc']}}",
-                    
-                }, 
-            {%endfor%}],
-            color: "green",
+                
+            }
             
-        },
-        {
-            // Rented bikes
-            type: 'mappoint',
-            marker: {
-                radius: 5
-            },
-            name: 'Rented',
-            data: [{%for map_point in map_points['Rented']%} 
-                {
-                    'name' : "{{map_point['name']}}",
-                    'lat' : {{map_point["lat"]}},
-                    'lon' : {{map_point["lon"]}},
-                    'status' : "{{map_point['status']}}",
-                    'loc' : "{{map_point['loc']}}"
-                }, 
-            {%endfor%}],
-            color: "#17a2b8",
-            
-        },
-        {
-            // Defect hardwares
-            type: 'mappoint',
-            marker: {
-                radius: 5
-            },
-            name: 'Defect',
-            data: [{%for map_point in map_points['Defect']%} 
-                {
-                    'name' : "{{map_point['name']}}",
-                    'lat' : {{map_point["lat"]}},
-                    'lon' : {{map_point["lon"]}},
-                    'status' : "{{map_point['status']}}",
-                    'loc' : "{{map_point['loc']}}"
-                }, 
-            {%endfor%}],
-            color: "red",
-            
-        },
-        {
-            // Offline hardwares
-            type: 'mappoint',
-            marker: {
-                radius: 5
-            },
-            name: 'Offline',
-            data: [{%for map_point in map_points['Offline']%} 
-                {
-                    'name' : "{{map_point['name']}}",
-                    'lat' : {{map_point["lat"]}},
-                    'lon' : {{map_point["lon"]}},
-                    'status' : "{{map_point['status']}}",
-                    'loc' : "{{map_point['loc']}}"
-                }, 
-            {%endfor%}],
-            color: "#ffc107",
-            
-        }
-    ]
-});
+    });
 
 
 </script>
