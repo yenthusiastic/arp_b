@@ -22,15 +22,15 @@ from datetime import datetime, timedelta
 from geopy.geocoders import Nominatim
 
 
-geolocator = Nominatim(user_agent="Bikota")
+geolocator = Nominatim(user_agent="Bikota", timeout=5)
 
 units = {
     "Temperature" : "°C",
     "Humidity" : "%H",
     "CO2" : "PPM",
     "Pressure" : "hPa",
-    "PM10" : "PPM",
-    "PM25" : "PPM"
+    "PM10" : "ug/m^3",
+    "PM25" : "ug/m^3"
 }
 
 total_sensors = 0
@@ -673,13 +673,14 @@ def map():
                 if last_sensor_value:
                     data.append({
                         "name": hw["name"],
-                        "sensor_value": last_sensor_value[1],
+                        "value": last_sensor_value[1],
                         "timestamp": datetime.strftime(last_sensor_value[0], "%d.%m.%Y %H:%M:%S"), 
                         "lat": hw["lat"],
                         "lon": hw["lon"]
                         })
             sensor_data[sensor] = data
         conn.commit()
+        print(sensor_data)
         return render_template('layouts/default.html',
                                     content=render_template( 'pages/map.html',
                                     map_points=map_points,

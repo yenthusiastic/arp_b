@@ -58,8 +58,7 @@
 
     // Initiate the chart
     map_div = document.getElementById("map");
-    
-    
+        
     var chart_config = {
 
         chart: {
@@ -80,7 +79,6 @@
         legend: {
             layout: 'vertical',
             borderWidth: 0,
-            backgroundColor: 'rgba(255,255,255,0.85)',
             floating: true,
             align: 'left',
             verticalAlign: 'bottom'
@@ -91,7 +89,7 @@
             style: {
                 pointerEvents: 'auto'
             },
-            headerFormat: '',
+            headerFormat: '<span style="color:{point.color}">\u25CF</span>',
             pointFormat: '<b>Hardware {point.name}: {point.status}</b><br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon}</a>'
             
         },
@@ -133,7 +131,8 @@
                 // hardware status
                 type: 'mappoint',
                 marker: {
-                    radius: 8
+                    radius: 8,
+                    symbol:'circle'
                 },
                 name: '{{status}}',
                 id: "{{status}}",
@@ -150,98 +149,180 @@
                 //color: "#ffc107",                
             },
             {%endfor%}
-            {%for sensor in sensor_data%}
-            {
-                // Sensor data
-                type: 'mappoint',
-                marker: {
-                    radius: 10
-                },
-                name: "{{sensor}}",
-                id: "{{sensor}}",
-                data: [{%for data in sensor_data[sensor]%} 
-                    {
-                        'id' : "{{data['name']}}",
-                        'value': {{data["sensor_value"]}},
-                        'lat' : {{data["lat"]}},
-                        'lon' : {{data["lon"]}},
-                        'timestamp' : "{{data['timestamp']}}",
-                        'loc' : "{{data['loc']}}"
-                    }, 
-                {%endfor%}],
-                showInLegend: false,
-                visible: false,
-                //color: "#ffc107",
-                
-            },
-            {%endfor%}
+            
         ]
     };
     var highmap= Highcharts.mapChart(map_div, chart_config);
+    var colorAxis = $('#map').highcharts().colorAxis[0];
 
     $("#sensor_select").on("changed.bs.select", 
         function(e, clickedIndex, newValue, oldValue) {
             selected_sensor = $('#sensor_select :selected')[0].value;
-            selected_series = highmap.get(selected_sensor);
-            $('#map').highcharts().tooltip.update({pointFormat : '<b> Hardware {point.id} : {point.value}' + units[selected_sensor] + '</b><br>Last recorded at {point.timestamp}<br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon}</a>'});
+            //selected_series = highmap.get(selected_sensor);
+            var series_data;
+            $('#map').highcharts().tooltip.update({pointFormat : '<b> Hardware {point.id} : {point.value}' + units[selected_sensor] + '</b><br>Last recorded at {point.timestamp}<br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon})</a>'});
             if (selected_sensor == "Temperature"){
-                $('#map').highcharts().colorAxis[0].update({
-                    visible:true,
-                    min: -20.0,
-                    max: 40.0,
-                    type: 'linear',
-                    minColor: '#1E57EF',
-                    maxColor: '#F51D16',
-//                     stops: [
-//                         [0.0, '#16F5EB'],
-//                         [20.0, '#F5F116'],
-//                         [40.0, '#F51D16']
-//                     ]
+                colorAxis.update({
+                    min: -25,
+                    max: 40,
+                    labels: {
+                        format: '{value}{{units["Temperature"]}}'
+                    },
+                    stops: [
+                        [0, '#0000ff'],
+                        [0.3, '#6da5ff'],
+                        [0.6, '#ffff00'],
+                        [1, '#ff0000']
+                    ],
+                    visible: true
+                });
+                $('#map').highcharts().legend.update({
+                    title: {
+                        text: 'Degrees of Celsius'
+                    }
                 });
             } else if (selected_sensor == "Humidity"){
-                $('#map').highcharts().colorAxis[0].update({
+                colorAxis.update({
                     visible:true,
                     min: 0,
                     max: 100,
-                    type: 'linear',
-                    minColor: '#F51D16',
-                    maxColor: '#1E57EF',
-//                     stops: [
-//                         [20.0, '#F5F116'],
-//                         [40.0, '#EEF516'],
-//                         [60.0, '#3BF516'],
-//                         [80.0, '#16F5EB'],
-//                         [100.0, '#1E57EF']
-//                     ]
+                    labels: {
+                        format: '{value}{{units["Humidity"]}}'
+                    },
+                });
+                $('#map').highcharts().legend.update({
+                    title: {
+                        text: 'Relative Humidity'
+                    }
                 });
             }
+            else if (selected_sensor == "Pressure"){
+                colorAxis.update({
+                    visible:true,
+                    min: 925,
+                    max: 1100,
+                    labels: {
+                        format: '{value}{{units["Pressure"]}}'
+                    },
+                });
+                $('#map').highcharts().legend.update({
+                    title: {
+                        text: 'Pressure'
+                    }
+                });
+            }
+            else if (selected_sensor == "PM10"){
+                colorAxis.update({
+                    visible:true,
+                    min: 0,
+                    max: 500,
+                    labels: {
+                        format: '{value}{{units["PM10"]}}'
+                    },
+                });
+                $('#map').highcharts().legend.update({
+                    title: {
+                        text: 'PM10'
+                    }
+                });
+            }
+            else if (selected_sensor == "PM25"){
+                colorAxis.update({
+                    visible:true,
+                    min: 0,
+                    max: 500,
+                    labels: {
+                        format: '{value}{{units["PM25"]}}'
+                    },
+                });
+                $('#map').highcharts().legend.update({
+                    title: {
+                        text: 'PM25'
+                    }
+                });
+            }
+            else if (selected_sensor == "CO2"){
+                colorAxis.update({
+                    visible:true,
+                    min: 300,
+                    max: 5000,
+                    labels: {
+                        format: '{value}{{units["CO2"]}}'
+                    },
+                });
+                $('#map').highcharts().legend.update({
+                    title: {
+                        text: 'CO2'
+                    }
+                });
+            }
+            colorAxis =  $('#map').highcharts().colorAxis[0];
             if (newValue){
                 for (var i = 0; i < highmap.series.length; i ++){
-                    if (highmap.series[i].name == selected_sensor){
-                        selected_series.update({visible: true, showInLegend: false});
+                    if (i > 6){
+                        $('#map').highcharts().series[i].remove();
+                    }
+                    else if (i > 2){
+                        $('#map').highcharts().series[i].update({visible: false, showInLegend: false});
                     } else {
-                        if (i > 2){
-                            $('#map').highcharts().series[i].update({visible: false, showInLegend: false});
-                        } else {
-                            $('#map').highcharts().series[i].update({visible: true, showInLegend: false});
-                        }
+                        $('#map').highcharts().series[i].update({visible: true});
                     }
                 }
+
+                {%for sensor in units%}
+                    if(selected_sensor == '{{sensor}}'){
+                        highmap.addSeries({
+                            // Sensor data
+                            type: 'mappoint',
+                            marker: {
+                                radius: 10,
+                                symbol:'circle'
+                            },
+                            name: selected_sensor,
+                            id: selected_sensor,
+                            color: '',
+                            data: [{%for data in sensor_data[sensor]%} 
+                                {
+                                    'id' : "{{data['name']}}",
+                                    'value': parseInt({{data["value"]}},10) || 'No data',
+                                    'lat' : {{data["lat"]}},
+                                    'lon' : {{data["lon"]}},
+                                    'timestamp' : "{{data['timestamp']}}",
+                                    'loc' : "{{data['loc']}}",
+                                    
+                                }, 
+                            {%endfor%}],
+                            visible: true,
+                            
+                        }, true);
+                    }
+
+                {%endfor%}
+
+                
+
             }
+            points = highmap.get(selected_sensor).data;
+            points.forEach((point) => {
+                point.update({'color':colorAxis.toColor(point.value)}, true);
+            })
             
     });
 
     $("#status_select").on("changed.bs.select", 
         function(e, clickedIndex, newValue, oldValue) {
             selected_status = $('#status_select :selected')[0].value;
-            $('#map').highcharts().tooltip.update({pointFormat : '<b>Hardware {point.name}: {point.status}</b><br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon}</a>'});
-                            
+            $('#map').highcharts().tooltip.update({pointFormat : '<b>Hardware {point.name}: {point.status}</b><br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon})</a>'});
+            $('#map').highcharts().colorAxis[0].update({
+                visible:false,
+            });         
+            $('#map').highcharts().legend.update({
+                title: {
+                    text: ''
+                }
+            });   
             if (newValue){
-                $('#map').highcharts().colorAxis[0].update({
-                    minColor: '#ffffff',
-                    maxColor: '#ffffff',
-                    visible:false,
-                });
+                
                 if (selected_status == "Select All"){
                     for (var i = 0; i < highmap.series.length; i ++){
                         if (i < 3){
