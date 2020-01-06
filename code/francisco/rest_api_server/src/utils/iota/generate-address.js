@@ -1,10 +1,5 @@
-
-const IOTA = require('@iota/core')
+const iota = require('./iota-api')
 const iotaLib = require('@iota/checksum')
-
-const iota = IOTA.composeAPI({
-    provider: 'https://nodes.iotadev.org'
-})
 
 // Generate an address promise
 let newAddress = (seed, address_index = 0) => {

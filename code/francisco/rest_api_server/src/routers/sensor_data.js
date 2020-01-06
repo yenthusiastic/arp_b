@@ -1,28 +1,10 @@
-const pg = require('pg')
-
-// Setup the DB variables
-const conString = {
-    host: 'db.dev.iota.pw',
-    // Do not hard code your username and password.
-    // Consider using Node environment variables.
-    // https://www.npmjs.com/package/pg-pool
-    user: 'arp_b',     
-    password: 'iota999',
-    database: 'arp_b',
-    port: 6000,
-}
-let pool = new pg.Pool(conString)
-
-// Connect to the database
-pool.connect(error => {
-    if (error) {
-        console.log("Problems when connecting to the database.")
-        throw error
-    }
-})
+const pool = require('../db/postgresql')
+const express = require('express')
+const bodyParser = require('body-parser')
+const router = new express.Router()
 
 // Add new sensor data
-const saveSensorData = (request, response) => {
+router.post('/data', bodyParser.json(), (request, response) => {
     let {hardwareID, address, latitude, longitude, temperature, humidity, timestamp} = request.body
     if(!hardwareID || !address || !latitude || !longitude || !temperature || !humidity || !timestamp){
         response.status(400).send({"HttpStatusCode": 500, "HttpMessage": "Bad Request", "MoreInformation": "Post request does not content required value(s)."})
@@ -32,13 +14,13 @@ const saveSensorData = (request, response) => {
                 response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
                 throw error
             }
-            response.status(200).send({"HttpStatusCode": 201, "HttpMessage": "OK", "MoreInformation": "Hardware added."})
+            response.status(200).send({"HttpStatusCode": 201, "HttpMessage": "OK", "MoreInformation": "Sensor data added."})
         })
     }
-    // Create another conditional to avoid hardware duplication
-}
+})
+
 // Update the hardware (bike)'s status
-const updateHardware = (request, response) => {
+router.put('/status', bodyParser.json(),(request, response) => {
     let { status, latitude, longitude, hardwareID } = request.body
     if(!status || !latitude || !longitude || !hardwareID){
         response.status(400).send({"HttpStatusCode": 500, "HttpMessage": "Bad Request", "MoreInformation": "Post request does not content required value(s)."})
@@ -48,12 +30,9 @@ const updateHardware = (request, response) => {
                 response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
                 throw error
             }
-            response.status(200).send({"HttpStatusCode": 201, "HttpMessage": "OK", "MoreInformation": "Status updated."})
+            response.status(200).send({"HttpStatusCode": 201, "HttpMessage": "OK", "MoreInformation": "Hardware status updated."})
         })
     }
-}
+})
 
-module.exports = {
-    saveSensorData,
-    updateHardware
-}
+module.exports = router
