@@ -5,7 +5,7 @@
 
 # ===== IMPORTS ========
 from sys import stdout 
-from machine import Pin, SPI, ADC, UART, I2C, GPS, RTC, deepsleep, reset, wake_description, wake_reason
+from machine import Pin, SPI, ADC, UART, I2C, GPS, RTC, deepsleep, reset, wake_description, wake_reason, resetWDT
 import gsm
 import socket
 import urequests as requests
@@ -17,6 +17,8 @@ from time import sleep, sleep_ms, ticks_ms, ticks_diff, time, strftime
 
 
 # ===== CONFIG ========
+
+SENSOR_MODE = const(0) # if 1, enable sensors
 
 # APN Credentials
 GSM_APN  = 'web.vodafone.de'
@@ -34,7 +36,7 @@ NODE_URL = "https://nodes.thetangle.org/"
 
 UPDATE_INV = const(1000)
 
-RENT_TIME_FACTOR = 0.5
+RENT_TIME_FACTOR = 0.15
 
 # Accelerometer Config
 ACC_ADDRESS = const(0x18)
@@ -140,26 +142,29 @@ gps.startservice()
 PM10_PIN = Pin(19, Pin.IN)
 PM25_PIN = Pin(18, Pin.IN)
 
+
 # Turn on auxiliary sensors
+if DEBUG: print("SENSOR_MODE:", SENSOR_MODE)
+if DEBUG: print("Powering on sensors...")
 mos.value(1)
 
 
-
-
-import lis3dh_git as lis3dh
-import bme280_float
 #import sds011 # using PWM output
 
 # I2C
 i2c = I2C(0, I2C.MASTER, scl=Pin(22), sda=Pin(21), freq=400000)
 
+# Accelerometer 
+import lis3dh_git as lis3dh
 acc = lis3dh.LIS3DH_I2C(i2c)
 acc.data_rate = lis3dh.DATARATE_100_HZ
 acc.range = lis3dh.RANGE_4_G
 
 
 # temperature/ atmosperic pressure/ humidity, BME280
-bme = bme280_float.BME280(i2c=i2c)
+if SENSOR_MODE:
+    import bme280_float
+    bme = bme280_float.BME280(i2c=i2c)
 
 
 # ===== DISPLAY ========
@@ -259,7 +264,7 @@ def clear_buf(color = WHITE):
     fb.fill_rect(0, 0, W, H, color)
 
 
-def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
+def draw_qr(m=None, address=None, xs=23, ys=211, scale=1): #scale3: xs=2, ys=170; scale2: xs=23, ys=211
     if DEBUG: print("draw_qr")
     fb.fill_rect(xs, ys, W, H-ys, WHITE)   # clear QR area with WHITE fill
     if m == None:
@@ -269,6 +274,7 @@ def draw_qr(m=None, address=None, xs=2, ys=170, scale=1):
         m = make_qr(address)
     if DEBUG: print("Drawing QR code.")
     for y in range(len(m)*scale):
+        resetWDT()
         for x in range(len(m[0])*scale):
             if m[y//scale][x//scale] == 0:
                 fb.pixel(xs+x, ys+y, 0xFF)
@@ -336,49 +342,50 @@ def get_pm(p10=PM10_PIN, p25=PM25_PIN):
     return
 """
 
-def get_pm(p10=PM10_PIN, p25=PM25_PIN):
-    while p10.value() == 0:
-        pass
-    st_10=ticks_ms()
-    while p10.value() == 1:
-        pass
-    sp_10=ticks_ms()
-    while p25.value() == 0:
-        pass
-    st_25=ticks_ms()
-    while p25.value() == 1:
-        pass
-    sp_25=ticks_ms()
-    if DEBUG: print("PM10:", (sp_10-st_10)-2)
-    if DEBUG: print("PM25:", (sp_25-st_25)-2)
+if SENSOR_MODE:
+    def get_pm(p10=PM10_PIN, p25=PM25_PIN):
+        while p10.value() == 0:
+            pass
+        st_10=ticks_ms()
+        while p10.value() == 1:
+            pass
+        sp_10=ticks_ms()
+        while p25.value() == 0:
+            pass
+        st_25=ticks_ms()
+        while p25.value() == 1:
+            pass
+        sp_25=ticks_ms()
+        if DEBUG: print("PM10:", (sp_10-st_10)-2)
+        if DEBUG: print("PM25:", (sp_25-st_25)-2)
 
 
-def get_co2():
-    ppm = 0
-    av_mv = 0
-    if adc.progress()[0] == False:
-        av_mv = adc.collected()[2]
-        adc.collect(1, len=10, readmv=True)
-        ppm = ((av_mv-400)/1600)*5000
-        if ppm < 350:
-            ppm = 0
-    return ppm, av_mv
+    def get_co2():
+        ppm = 0
+        av_mv = 0
+        if adc.progress()[0] == False:
+            av_mv = adc.collected()[2]
+            adc.collect(1, len=10, readmv=True)
+            ppm = ((av_mv-400)/1600)*5000
+            if ppm < 350:
+                ppm = 0
+        return ppm, av_mv
 
 
-def get_bme():
-  try:
-    temp, hpa, _ = bme.values
-    #temp, hpa, hum = bme.values
-    #if (isinstance(temp, float) and isinstance(hum, float)) or (isinstance(temp, int) and isinstance(hum, int)):
-    #  msg = (b'{0:3.1f},{1:3.1f}'.format(temp, hum))
-    #  hum = round(hum, 2)
-    #return temp, hum, hpa
-    return temp, hpa
-    #else:
-    #  return None #('Invalid sensor readings.')
-  except OSError as e:
-    print('Failed to read BME sensor: ', e)
-    return None
+    def get_bme():
+      try:
+        temp, hpa, _ = bme.values
+        #temp, hpa, hum = bme.values
+        #if (isinstance(temp, float) and isinstance(hum, float)) or (isinstance(temp, int) and isinstance(hum, int)):
+        #  msg = (b'{0:3.1f},{1:3.1f}'.format(temp, hum))
+        #  hum = round(hum, 2)
+        #return temp, hum, hpa
+        return temp, hpa
+        #else:
+        #  return None #('Invalid sensor readings.')
+      except OSError as e:
+        print('Failed to read BME sensor: ', e)
+        return None
 
 
 def gps_location():
@@ -390,6 +397,10 @@ def gps_location():
 
 def send_sensor_data():
     # TODO: collect and send the sensor data to backend server
+    # TODO: send GPS
+    if SENSOR_MODE:
+        # TODO: send environmental sensor data
+        pass
     pass
 #========== /SENSORS =================
 
@@ -470,6 +481,7 @@ def hangup():
 #========== HTTP =================
 def http_request(method="GET", url=SERVER_URL, headers={}, data=None, json=None):
     try:
+        resetWDT()
         gsm_online_check(True)
         req_status = None
         if DEBUG: print("Sending {} request...".format(method))
@@ -512,7 +524,7 @@ def get_address(online=True):
             if DEBUG: print("Requesting new address...")
             r = http_request(method="GET", url=BACKEND_URL + "/address/" + str(HARDWARE_ID))
             if DEBUG: print("Got: ", r.text)
-            adr = json.loads(r.text)["Session address"]
+            adr = json.loads(r.text)["SessionAddress"]
             if adr is not None:
                 return True, adr
             else:
@@ -572,6 +584,7 @@ def hibernate():
     if DEBUG: print("Making RTC string.")
     for i in range(len(hma)):
         hst += ","
+        resetWDT()
         for j in range(len(hma[i])):
             if hma[i][j]:
                 hst += "1"
@@ -583,7 +596,7 @@ def hibernate():
     if DEBUG: print("Draw 'sleep' frame.")
     draw_balance(-1)
     draw_rent_time(xs=-1)
-    draw_qr(m=hma, scale=3)
+    draw_qr(m=hma, xs=2, ys=170, scale=3)
     draw_display()
     print("Going into deepsleep...")
     deepsleep()
@@ -714,7 +727,8 @@ else:
         
         draw_status(status_def[status], xs=0)
         if session_matrix is not None:
-            draw_qr(m=session_matrix, scale=3)
+            #draw_qr(m=session_matrix, scale=2)
+            draw_qr(m=session_matrix, xs=2, ys=170, scale=3)
         else:
             # TODO: what happens if no matrix is avaiable?
             pass
