@@ -52,8 +52,8 @@ When no port number is given explicitly, the default port number 5000 will be us
 For local machine, access the web server at `127.0.0.1:<custom-port-number>`.
 
 #### Access web server
-- The Flask server for User Interface will be running on port 5021 and accessible at bikota.dev.iota.pw
-- The Flask server for Admin Panel will be running on port 5020 and accessible at web.dev.iota.pw
+- The Flask server for User Interface will be running on port 5021 and accessible at [bikota.dev.iota.pw](bikota.dev.iota.pw)
+- The Flask server for Admin Panel will be running on port 5020 and accessible at [web.dev.iota.pw](web.dev.iota.pw)
 
 
 ### Plans/ TODOs
@@ -100,10 +100,10 @@ Currently sensor data is being saved into the database every second, which means
             - Current address
             - Current status
             - Current location 
-        - [ ] Group markers as bubbles by locations
         - [ ] Filter map by 
-            - [ ] Status
-            - [ ] Location & radius
+            - [x] Status
+            - [x] Sensor type
+        - [ ] Zoom to map by user location
     - [X] Hardware management
         - [X] Create new hardware with required details
             - Hardware ID
@@ -118,7 +118,7 @@ Currently sensor data is being saved into the database every second, which means
         - [X] Sensor type
         - [X] Session address
         - [X] Time range
-    - [ ] Visualize aggregated instead of raw sensor data when the queried time period returns too many data points (checked Sensor data aggregation policy section for details)
+    - [x] Visualize aggregated instead of raw sensor data when the queried time period returns too many data points (checked Sensor data aggregation policy section for details)
     - [ ] Constant refresh rate of 5 seconds
 
 

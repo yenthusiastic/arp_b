@@ -7,31 +7,33 @@
             </div>
             <div class="row card-body">
                 <div class="col-md-9">
-                    <div id="map"></div> 
+                    <!-- <div id="map"></div>  -->
+                    <div id="map" style="height: 750px;"></div>
                 </div>
                 <div class="col-md-3">
                     <label> Hardware Status </label><br>
                     <div class="btn-group bootstrap-select">
                         <select class="selectpicker" name="status_select" id="status_select" data-title="Filter by Status" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" tabindex="-98">
-                            {% if map_points %}
                             <option>Select All</option>
-                            {% for status in map_points%}
-                            <option>{{status}}</option>
-                            {% endfor %}
-                            {%endif%}
+                            <option>Parked</option>
+                            <option>Rented</option>
+                            <option>Offline</option>
+                            <option>Defect</option>
                         </select>
                     </div>
                     <br><br>
                     <label> Sensor Type </label><br>
                     <div class="btn-group bootstrap-select">
                         <select class="selectpicker" name="sensor_select" id="sensor_select" data-title="Filter by Sensor" data-style="btn-info btn-outline" data-menu-style="dropdown-blue" tabindex="-98">
-                            {% if sensor_data %}
-                            {% for sensor in sensor_data%}
+                            {% if units %}
+                            {% for sensor in units%}
                             <option>{{sensor}}</option>
                             {% endfor %}
                             {%endif%}
                         </select>
                     </div>
+                    <!-- <br><br>
+                    <button class="btn btn-info btn-fill" onclick="zoomToUserLoc()">Zoom to current location</button> -->
                 </div>
                 
             </div>
@@ -39,317 +41,311 @@
     </div>
 </div>
 
+<style>
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+.legend {
+    line-height: 18px;
+    color: #555;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+</style>
 
-<script src="https://code.highcharts.com/mapdata/countries/de/de-all.js"></script>
 <script>
-    var states, cities;
-    var units = {
-        {%for sensor in sensor_data%}
-        "{{sensor}}" : "{{units[sensor]}}",
-        {%endfor%}
-    }
-    // Prepare the geojson
-    Highcharts.getJSON('https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/germany.geo.json', function (geojson) {
+    var map = L.map('map', {zoomControl: false}).setView([50.955914, 10.344412], 6);
+    var zoomHome = L.Control.zoomHome();
+    zoomHome.addTo(map);
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/light-v9',
+    accessToken: 'pk.eyJ1IjoieWVudGh1bmd1eWVuIiwiYSI6ImNrNTVzcnpkZTAwMnozZm8xbHUwd2l3bHQifQ.keCI792ppiRlVLieMK84nQ'
+}).addTo(map);
 
-    // Prepare the geojson
-    states = Highcharts.geojson(geojson, 'map'),
-    cities = Highcharts.geojson(geojson, 'mappoint')
-    });
-
-    // Initiate the chart
-    map_div = document.getElementById("map");
-        
-    var chart_config = {
-
-        chart: {
-            map: 'countries/de/de-all',
-            height: "700px",
-        },
-
-        title: {
-            text: ''
-        },
-        colorAxis: {
-            visible: false
-        },
-        
-        mapNavigation: {
-            enabled: true
-        },
-        legend: {
-            layout: 'vertical',
-            borderWidth: 0,
-            floating: true,
-            align: 'left',
-            verticalAlign: 'bottom'
-        },
-        
-        tooltip: {
-            useHTML: true,
-            style: {
-                pointerEvents: 'auto'
-            },
-            headerFormat: '<span style="color:{point.color}">\u25CF</span>',
-            pointFormat: '<b>Hardware {point.name}: {point.status}</b><br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon}</a>'
-            
-        },
-
-        series: [
-            {
-                // Use the de-all map with no data as a basemap
-                name: 'Basemap',
-                borderColor: '#A0A0A0',
-                showInLegend: false
-            }, {
-                name: 'Separators',
-                type: 'mapline',
-                showInLegend: false,
-                enableMouseTracking: false
-            }, 
-            {
-                name: "States",
-                type: 'map',
-                data: states,
-                color: "#f2adec",
-                states: {
-                    hover: {
-                        color: "dark-grey"
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.name}',
-                    style: {
-                        width: '80px' // force line-wrap
-                    }
-                },
-                showInLegend: false
-                
-            },  
-            {%for status in map_points%}
-            {
-                // hardware status
-                type: 'mappoint',
-                marker: {
-                    radius: 8,
-                    symbol:'circle'
-                },
-                name: '{{status}}',
-                id: "{{status}}",
-                data: [{%for map_point in map_points[status]%} 
-                    {
-                        'name' : "{{map_point['name']}}",
-                        'lat' : {{map_point["lat"]}},
-                        'lon' : {{map_point["lon"]}},
-                        'status' : "{{map_point['status']}}",
-                        'loc' : "{{map_point['loc']}}"
-                    }, 
-                {%endfor%}],
-                showInLegend: true,
-                //color: "#ffc107",                
-            },
-            {%endfor%}
-            
-        ]
-    };
-    var highmap= Highcharts.mapChart(map_div, chart_config);
-    var colorAxis = $('#map').highcharts().colorAxis[0];
-
-    $("#sensor_select").on("changed.bs.select", 
-        function(e, clickedIndex, newValue, oldValue) {
-            selected_sensor = $('#sensor_select :selected')[0].value;
-            //selected_series = highmap.get(selected_sensor);
-            var series_data;
-            $('#map').highcharts().tooltip.update({pointFormat : '<b> Hardware {point.id} : {point.value}' + units[selected_sensor] + '</b><br>Last recorded at {point.timestamp}<br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon})</a>'});
-            if (selected_sensor == "Temperature"){
-                colorAxis.update({
-                    min: -25,
-                    max: 40,
-                    labels: {
-                        format: '{value}{{units["Temperature"]}}'
-                    },
-                    stops: [
-                        [0, '#0000ff'],
-                        [0.3, '#6da5ff'],
-                        [0.6, '#ffff00'],
-                        [1, '#ff0000']
-                    ],
-                    visible: true
-                });
-                $('#map').highcharts().legend.update({
-                    title: {
-                        text: 'Degrees of Celsius'
-                    }
-                });
-            } else if (selected_sensor == "Humidity"){
-                colorAxis.update({
-                    visible:true,
-                    min: 0,
-                    max: 100,
-                    labels: {
-                        format: '{value}{{units["Humidity"]}}'
-                    },
-                });
-                $('#map').highcharts().legend.update({
-                    title: {
-                        text: 'Relative Humidity'
-                    }
-                });
-            }
-            else if (selected_sensor == "Pressure"){
-                colorAxis.update({
-                    visible:true,
-                    min: 925,
-                    max: 1100,
-                    labels: {
-                        format: '{value}{{units["Pressure"]}}'
-                    },
-                });
-                $('#map').highcharts().legend.update({
-                    title: {
-                        text: 'Pressure'
-                    }
-                });
-            }
-            else if (selected_sensor == "PM10"){
-                colorAxis.update({
-                    visible:true,
-                    min: 0,
-                    max: 500,
-                    labels: {
-                        format: '{value}{{units["PM10"]}}'
-                    },
-                });
-                $('#map').highcharts().legend.update({
-                    title: {
-                        text: 'PM10'
-                    }
-                });
-            }
-            else if (selected_sensor == "PM25"){
-                colorAxis.update({
-                    visible:true,
-                    min: 0,
-                    max: 500,
-                    labels: {
-                        format: '{value}{{units["PM25"]}}'
-                    },
-                });
-                $('#map').highcharts().legend.update({
-                    title: {
-                        text: 'PM25'
-                    }
-                });
-            }
-            else if (selected_sensor == "CO2"){
-                colorAxis.update({
-                    visible:true,
-                    min: 300,
-                    max: 5000,
-                    labels: {
-                        format: '{value}{{units["CO2"]}}'
-                    },
-                });
-                $('#map').highcharts().legend.update({
-                    title: {
-                        text: 'CO2'
-                    }
-                });
-            }
-            colorAxis =  $('#map').highcharts().colorAxis[0];
-            if (newValue){
-                for (var i = 0; i < highmap.series.length; i ++){
-                    if (i > 6){
-                        $('#map').highcharts().series[i].remove();
-                    }
-                    else if (i > 2){
-                        $('#map').highcharts().series[i].update({visible: false, showInLegend: false});
-                    } else {
-                        $('#map').highcharts().series[i].update({visible: true});
-                    }
-                }
-
-                {%for sensor in units%}
-                    if(selected_sensor == '{{sensor}}'){
-                        highmap.addSeries({
-                            // Sensor data
-                            type: 'mappoint',
-                            marker: {
-                                radius: 10,
-                                symbol:'circle'
-                            },
-                            name: selected_sensor,
-                            id: selected_sensor,
-                            color: '',
-                            data: [{%for data in sensor_data[sensor]%} 
-                                {
-                                    'id' : "{{data['name']}}",
-                                    'value': parseInt({{data["value"]}},10) || 'No data',
-                                    'lat' : {{data["lat"]}},
-                                    'lon' : {{data["lon"]}},
-                                    'timestamp' : "{{data['timestamp']}}",
-                                    'loc' : "{{data['loc']}}",
-                                    
-                                }, 
-                            {%endfor%}],
-                            visible: true,
-                            
-                        }, true);
-                    }
-
-                {%endfor%}
-
-                
-
-            }
-            points = highmap.get(selected_sensor).data;
-            points.forEach((point) => {
-                point.update({'color':colorAxis.toColor(point.value)}, true);
+    L.geoJson(german_states, {
+        onEachFeature: function(feature, layer) {
+            var label = L.marker(layer.getBounds().getCenter(), {
+            icon: L.divIcon({
+                className: 'label',
+                html: feature.properties.NAME_1,
+                iconSize: [100, 40]
+                })
             })
-            
-    });
+        }
+    }).addTo(map);
+
+
+    var point_data = [];
+    {%if geojson_data%}
+    {%for point_data in geojson_data%}
+        point_data.push({{point_data|safe}})
+    {%endfor%}
+    {%endif%}
+
+
+    var info = L.control();
+
+    info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+        this.update();
+        return this._div;
+    };
+
+    // method that we will use to update the control based on feature properties passed
+    info.update = function (props) {
+        this._div.innerHTML = '<b>Hardware Details</b>' +  (props ?
+        '<br>Hardware ID: ' + props.name + '<br>Status: ' + props.status : '<br>Hover over a marker');
+    };
+
+    info.addTo(map);
+
+    var statusColor = {
+        "Parked": "#90ed7d", 
+        "Rented": "#8085e9", 
+        "Offline": "#f7a35c", 
+        "Defect": "#f15c80"
+    };
+
+    var legend = L.control({position: 'bottomright'});
+    var legendDiv;
+    legend.onAdd = function (map) {
+
+        legendDiv = L.DomUtil.create('div', 'info legend');      
+        legendDiv.innerHTML  = "<b>Hardware Status</b><br>";  
+
+        for (var key in statusColor) {
+            legendDiv.innerHTML +=
+                '<i style="background:' + statusColor[key] + '"></i> ' + key + '<br>';
+        }
+        return legendDiv;
+    };
+
+    legend.addTo(map);
+
+    var geojsonMarkerOptions = {
+        radius: 8,
+        weight: 1.5,
+        opacity: 1,
+        fillOpacity: 1,
+        color: "white",
+    };
+
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            click: zoomToFeature
+        });
+    }
+
+    var bikes_by_status = {};
+    for (var key in statusColor){
+        bikes_by_status[key] = L.geoJSON(point_data, {
+            style: function(feature) {
+                if (feature.properties.status == key){
+                    geojsonMarkerOptions.fillColor = statusColor[key];
+                    return geojsonMarkerOptions;
+                }
+            },
+            onEachFeature : onEachFeature,
+            pointToLayer: function (feature, latlng) {
+                if (feature.properties.status == key) return L.circleMarker(latlng, geojsonMarkerOptions);
+                }
+        })
+        bikes_by_status[key].addTo(map);
+    };
+
+    function highlightFeature(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 3,
+            radius: 10,
+        });
+
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        }
+        info.update(layer.feature.properties);
+    }
+
+    function resetHighlight(e) {
+        var layer = e.target;
+        layer.setStyle({
+            weight: 1.5,
+            radius: 8,
+        });
+        info.update();
+    }
+
+    function zoomToFeature(e) {
+        var latLngs = [ e.target.getLatLng() ];
+        var markerBounds = L.latLngBounds(latLngs);
+        map.fitBounds(markerBounds);
+        e.target.bindPopup(e.target.feature.properties.popupContent).openPopup();
+    }
+
+    var sensorGrades = {
+        "Temperature": [-20, 0, 20, 40, 60],
+        "Humidity": [0, 20, 40, 60, 80, 100],
+        "Pressure": [926, 970, 1013, 1057, 1100],
+        "CO2": [0, 1000, 2000, 3000, 4000, 5000],
+        "PM10": [0, 100, 200, 300, 400, 500],
+        "PM25": [0, 100, 200, 300, 400, 500]
+    };
+
+    function getColor(d, sensorType) {
+        var grades = sensorGrades[sensorType]; 
+        switch(sensorType){
+            case "Temperature": 
+                
+                return d > grades[4]  ? '#E31A1C' :
+                        d > grades[3]  ? '#FC4E2A' :
+                        d > grades[2]   ? '#FD8D3C' :
+                        d > grades[1]   ? '#FEB24C' :
+                        d > grades[0]   ? '#FED976' :
+                                        '#FFEDA0';
+            case "Humidity": 
+                return  d > grades[5]  ? '#BD0026' :
+                        d > grades[4]  ? '#E31A1C' :
+                        d > grades[3]  ? '#FC4E2A' :
+                        d > grades[2]   ? '#FD8D3C' :
+                        d > grades[1]  ? '#FEB24C' :
+                        d > grades[0]   ? '#FED976' :
+                                        '#FFEDA0';
+            case "Pressure": 
+                return  d > grades[4]  ? '#E31A1C' :
+                        d > grades[3]  ? '#FC4E2A' :
+                        d > grades[2]   ? '#FD8D3C' :
+                        d > grades[1]   ? '#FEB24C' :
+                        d > grades[0]   ? '#FED976' :
+                                        '#FFEDA0';
+            case "CO2": 
+                return  d > grades[5]  ? '#BD0026' :
+                        d > grades[4]  ? '#E31A1C' :
+                        d > grades[3]  ? '#FC4E2A' :
+                        d > grades[2]   ? '#FD8D3C' :
+                        d > grades[1]   ? '#FEB24C' :
+                        d > grades[0]   ? '#FED976' :
+                                        '#FFEDA0';
+            case "PM10": 
+                return  d > grades[5]  ? '#BD0026' :
+                        d > grades[4]  ? '#E31A1C' :
+                        d > grades[3]  ? '#FC4E2A' :
+                        d > grades[2]   ? '#FD8D3C' :
+                        d > grades[1]   ? '#FEB24C' :
+                        d > grades[0]   ? '#FED976' :
+                                        '#FFEDA0';
+            case "PM25": 
+                return  d > grades[5]  ? '#BD0026' :
+                        d > grades[4]  ? '#E31A1C' :
+                        d > grades[3]  ? '#FC4E2A' :
+                        d > grades[2]   ? '#FD8D3C' :
+                        d > grades[1]   ? '#FEB24C' :
+                        d > grades[0]   ? '#FED976' :
+                                        '#FFEDA0';
+        }
+    }
+
+    var bikes_by_sensors = {};
+    {%for sensor in units%}
+    bikes_by_sensors['{{sensor}}'] = L.geoJSON(point_data, {
+            style: function(feature) {
+                geojsonMarkerOptions.fillColor = getColor(feature.properties.sensor_data['{{sensor}}'].value, '{{sensor}}');
+                return geojsonMarkerOptions;
+            },
+            onEachFeature : onEachFeature,
+            pointToLayer: function (feature, latlng) {
+                for (var sensor_key in feature.properties.sensor_data){
+                    if (sensor_key == '{{sensor}}') return L.circleMarker(latlng, geojsonMarkerOptions);
+                }
+            }
+        })
+    {%endfor%}
 
     $("#status_select").on("changed.bs.select", 
         function(e, clickedIndex, newValue, oldValue) {
             selected_status = $('#status_select :selected')[0].value;
-            $('#map').highcharts().tooltip.update({pointFormat : '<b>Hardware {point.name}: {point.status}</b><br>Location: <a target="_blank" href="https://google.com/maps/dir//\'{point.lat},{point.lon}\'/">({point.lat}, {point.lon})</a>'});
-            $('#map').highcharts().colorAxis[0].update({
-                visible:false,
-            });         
-            $('#map').highcharts().legend.update({
-                title: {
-                    text: ''
-                }
-            });   
             if (newValue){
-                
+                info.update = function (props) {
+                    this._div.innerHTML = '<b>Hardware Details</b>' +  (props ?
+                    '<br>Hardware ID: ' + props.name + '<br>Status: ' + props.status : '<br>Hover over a marker');
+                };
+                info.update();
+                for (var key in bikes_by_sensors){
+                    map.removeLayer(bikes_by_sensors[key]);
+                }
                 if (selected_status == "Select All"){
-                    for (var i = 0; i < highmap.series.length; i ++){
-                        if (i < 3){
-                            $('#map').highcharts().series[i].update({visible: true, showInLegend: false});
-                        }
-                        else if (i < 7){
-                            $('#map').highcharts().series[i].update({visible: true, showInLegend: true});
-                        } else {
-                            $('#map').highcharts().series[i].update({visible: false, showInLegend: false});
-                        }
+                    for (var key in bikes_by_status){
+                        bikes_by_status[key].addTo(map);
+                    }
+                    legendDiv.innerHTML  = "<b>Hardware Status</b><br>";  
+                    for (var key in statusColor) {
+                        legendDiv.innerHTML +=
+                            '<i style="background:' + statusColor[key] + '"></i> ' + key + '<br>';
                     }
                 } else {
-                    for (var i = 0; i < highmap.series.length; i ++){
-                        if (highmap.series[i].name == selected_status){
-                            $('#map').highcharts().series[i].update({visible: true, showInLegend: true});
-                        }
-                        else {
-                            if (i > 2){
-                                $('#map').highcharts().series[i].update({visible: false, showInLegend: false});
-                            }
-                        }
+                    for (var key in bikes_by_status){
+                        map.removeLayer(bikes_by_status[key]);
                     }
+                    bikes_by_status[selected_status].addTo(map);
+                    legendDiv.innerHTML  = "<b>Hardware Status</b><br>"; 
+                    legendDiv.innerHTML += '<i style="background:' + statusColor[selected_status] + '"></i> ' + selected_status + '<br>';
+                    
                 }
                 
             }
-            
     });
+
+    var units = {
+        {%for sensor in units%}
+        "{{sensor}}" : "{{units[sensor]|safe}}",
+        {%endfor%}
+    };
+
+
+    $("#sensor_select").on("changed.bs.select", 
+        function(e, clickedIndex, newValue, oldValue) {
+            selected_sensor = $('#sensor_select :selected')[0].value;
+            if (newValue){
+                for (var key in bikes_by_status){
+                    map.removeLayer(bikes_by_status[key]);
+                }
+                for (var key in bikes_by_sensors){
+                    map.removeLayer(bikes_by_sensors[key]);
+                }
+                info.update = function (props) {
+                    this._div.innerHTML = '<b>Sensor Details</b>' +  (props ?
+                    '<br>Hardware ID: ' + props.name + '<br>' + selected_sensor + ': ' + props.sensor_data[selected_sensor].value + '<br>Last recorded at ' + props.sensor_data[selected_sensor].timestamp : '<br>Hover over a marker');
+                };
+                info.update();
+                var grades = sensorGrades[selected_sensor]; 
+                
+                legendDiv.innerHTML  = "<b>" + selected_sensor + " (" + units[selected_sensor] + ")</b><br>"; 
+                for (var i = 0; i < grades.length; i++) {
+                    legendDiv.innerHTML += '<i style="background:' + getColor(grades[i] + 1, selected_sensor) + '"></i>';
+                    if (i == grades.length - 1){
+                        legendDiv.innerHTML += "> " + grades[i] + '<br>';
+                    } else {
+                        legendDiv.innerHTML += grades[i] + ' - ' + grades[i+1] + '<br>';
+                    }
+                }
+                bikes_by_sensors[selected_sensor].addTo(map);
+            }
+    });
+
 
 
 </script>

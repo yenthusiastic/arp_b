@@ -18,3 +18,4 @@ class Config():
     SECRET_KEY   = "77tgFCdrEEdv77554##@3" 
     SQLALCHEMY_TRACK_MODIFICATIONS 	= False
     SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://arp_b:iota999@db.dev.iota.pw:6000/arp_b"
+    GEOIPIFY_API_KEY = "at_sNiimE0ncxvU3mdcRqRsXUM794c4d"

@@ -22,15 +22,15 @@ from datetime import datetime, timedelta
 from geopy.geocoders import Nominatim
 
 
-geolocator = Nominatim(user_agent="Bikota", timeout=5)
+geolocator = Nominatim(user_agent="Bikota", timeout=10)
 
 units = {
     "Temperature" : "°C",
     "Humidity" : "%H",
     "CO2" : "PPM",
     "Pressure" : "hPa",
-    "PM10" : "ug/m^3",
-    "PM25" : "ug/m^3"
+    "PM10" : "ug/m<sup>3</sup>",
+    "PM25" : "ug/m<sup>3</sup>"
 }
 
 total_sensors = 0
@@ -625,7 +625,7 @@ def charts():
         return redirect('/login.html')
 
 def get_last_sensor_value(cur, sensor, hw):
-    query = """SELECT * FROM (SELECT MAX("timestamp"), "{0}" AS "timestamp" FROM public."SENSOR_DATA" WHERE "hardwareID" = {1} AND "{0}" IS NOT NULL GROUP BY "{0}") AS TEMP_TABLE ORDER BY TEMP_TABLE."timestamp" DESC LIMIT 1""".format(sensor, hw)
+    query = """SELECT "timestamp", "{0}" FROM public."SENSOR_DATA" WHERE "hardwareID" = {1} AND "{0}" IS NOT NULL ORDER BY "timestamp" DESC LIMIT 1""".format(sensor, hw)
     try:
         cur.execute(query)
         res = cur.fetchone()
@@ -639,54 +639,58 @@ def get_last_sensor_value(cur, sensor, hw):
 @app.route('/map.html', methods=['GET', 'POST'])
 def map():
     if current_user.is_authenticated:
-        map_points = {
-            "Parked": [],
-            "Rented": [],
-            "Defect": [],
-            "Offline": []
-        }
-        
+        geojson_data_arr = []
         no_location_count = 0
-        sensor_data = dict()
+
         available_hw = []
         hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.latitude, Hardware.longitude).order_by(Hardware.hardwareID).all()
+        
         for hardware in hardware_data:
             if hardware[2] is not None and hardware[3] is not None:
-                status = hardware.status[0].upper() + hardware.status[1:]
-                
-                map_point = {
-                        "name" : hardware[0],
-                        "status" : hardware[1],
-                        "lat" : hardware[2],
-                        "lon" : hardware[3],
-                        "loc" : geolocator.reverse("{}, {}".format(hardware[2], hardware[3])).raw["address"]
-                    }
-                map_points[status].append(map_point)
-                available_hw.append(map_point)
+                try:
+                    sensor_data = dict()
+                    status = hardware.status[0].upper() + hardware.status[1:]
+                    try:
+                        loc = geolocator.reverse("{}, {}".format(hardware[2], hardware[3])).raw["address"]
+                    except:
+                        loc = "Unknown"
+                    cur = conn.cursor()
+                    sensors = db.session.query(Hardware.sensors).filter(Hardware.hardwareID==hardware[0]).all()[0][0]
+                    for sensor in sensors:
+                        last_sensor_value = get_last_sensor_value(cur, sensor.lower(), hardware[0])
+                        if last_sensor_value:
+                            sensor_value = last_sensor_value[1]
+                            timestamp = datetime.strftime(last_sensor_value[0], "%d.%m.%Y %H:%M:%S")
+                            sensor_data[sensor] = {
+                                "value": sensor_value,
+                                "timestamp": timestamp
+                            }
+                            
+                    conn.commit()
+                    geojson_data_arr.append({
+                        "type": "Feature",
+                        "properties": {
+                            "name": hardware[0],
+                            "status": hardware[1],
+                            "sensor_data" : sensor_data,
+                            "popupContent": "Hardware {0}: {1}<br>Location (lat, lon): <a target='_blank' href='https://google.com/maps/dir//{2},{3}'>{2}, {3}</a><br>Location details: {4}".format(hardware[0], hardware[1], hardware[2], hardware[3], loc)
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [hardware[3], hardware[2]]
+                        }
+                    })
+                    available_hw.append(hardware)
+                except:
+                    print("Status unknown for hardware ", hardware[0])
             else:
                 no_location_count = no_location_count+1
-        cur = conn.cursor()
-        for sensor in units:
-            data = []
-            for hw in available_hw:
-                last_sensor_value = get_last_sensor_value(cur, sensor.lower(), hw["name"])
-                if last_sensor_value:
-                    data.append({
-                        "name": hw["name"],
-                        "value": last_sensor_value[1],
-                        "timestamp": datetime.strftime(last_sensor_value[0], "%d.%m.%Y %H:%M:%S"), 
-                        "lat": hw["lat"],
-                        "lon": hw["lon"]
-                        })
-            sensor_data[sensor] = data
-        conn.commit()
-        print(sensor_data)
         return render_template('layouts/default.html',
                                     content=render_template( 'pages/map.html',
-                                    map_points=map_points,
                                     no_location_count=no_location_count,
                                     total_hw=len(hardware_data),
                                     sensor_data=sensor_data,
+                                    geojson_data=geojson_data_arr,
                                     units=units)
                                 )
     else:

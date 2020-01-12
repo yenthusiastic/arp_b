@@ -1,6 +1,6 @@
 ### Usage Manual - Admin Dashboard Panel for Bikota Renting System
 
-Version: v0.2 (01.12.2019)
+Version: v0.4 (12.01.2020)
 
 Author: Thu Nguyen
 
@@ -23,9 +23,30 @@ This section describes the various pages available on the Admin Dashboard Panel 
 
 Preview: 
 
-<img src="../../../media/admin_dashboard.PNG" width=70%>
+<img src="../../../media/admin_dashboard.PNG" width=1000%>
 
-##### 2.2. Charts
+##### 2.2. Map
+- On this page the system admin can have an overview of all hardware modules in the system as distributed on a map of Germany. Each marker on the map represents one module.
+- By hovering over the marker, the admin can view the ID and last status of the specific hardware. 
+- By clicking on the marker, the map will zoom into the location of that hardware. The admin can view detailed location of the hardware. By clicking on the hyperlinked location, the admin will be directed to a Google Maps link where the hardware is located.
+- In the default view, the markers are colored differently depending on the hardware status.
+
+Preview: 
+
+<img src="../../../media/admin_map.PNG" width=100%>
+
+<img src="../../../media/admin_map2.PNG" width=100%>
+
+- The admin can filter the hardwares using the <button style="color: #1DC7EA">Hardware status<i class="fa fa-chevron-down"></i></button> dropdown menu on the right side of the map.
+- The admin can also filter the hardwares on the map by sensor type using the <button style="color: #1DC7EA">Sensor type<i class="fa fa-chevron-down"></i></button> dropdown menu. Only hardware modules with selected sensor type attached will be shown on the map. By hovering over the marker, the admin can view the ID of the hardware, the last sensor value and corresponding timestamp recorded from the module. The color of the marker varies depending on the sensor value and the scale on the bottom right corner.  
+- The admin can zoom in, zoom out or reset to default zoom with the <button>+</button>, <button>-</button> or <button><i class="fa fa-home"></i></button> buttons on the top left corner correspondingly.
+
+Preview: 
+
+<img src="../../../media/admin_map3.png" width=100%>
+
+
+##### 2.3. Charts
 - On this page the system admin can view collected sensor data as line charts
 - The admin can filter sensor data visualization using the input field/ date time picker and dropdown menus, by following parameters:
     - `Hardware ID`, the unique ID of a hardware module on the bike
@@ -40,27 +61,11 @@ Preview:
 - The admin can clear the input fields and selections using the <button><i class="fa fa-remove" style="color: red"></i></button> (Clear) icon next to each input field
 - The admin has to click on the <button style="color: #1DC7EA">Update Charts</button> button to apply the selected filters. A warning message will pop up if the admin clicks this button while inputs are missing or when no data is found for selected fiters.
 - Sensor data corresponding to the selected filters will be displayed as line chart(s) with proper title, legend and labels. Each chart shows the data for only a single sensor type but for one or more hardwares or session addresses.
+- The data has been aggregated to render smooth curve on the visualization.
 
 Preview: 
 
-<img src="../../../media/admin_charts.PNG" width=70%>
-
-
-##### 2.3. Map
-- On this page the system admin can view the locations of all hardware modules in the system on a map of Germany. Each marker on the map represents one module.
-- By hovering over the marker, the admin can view the status and detailed location (Longitude, Lattitude) of the specific hardware. By clicking on the hyperlinked location, the admin will be directed to a Google Maps link where the hardware is located.
-- The markers are colored differently depending on the hardware status:
-    - Green for `parked`
-    - Blue for `rented`
-    - Yellow for `offline`
-    - Red for `defect`
-
-
-Preview: 
-
-<img src="../../../media/admin_map.PNG" width=70%>
-<img src="../../../media/admin_map2.png" width=50%>
-
+<img src="../../../media/admin_charts.PNG" width=1000%>
 
 ##### 2.4. Hardware Manager
 - On this page the system admin can view a table which shows all details of every hardware module registered in the system. These includes:
@@ -90,7 +95,7 @@ Preview:
 
 Preview: 
 
-<img src="../../../media/admin_hardware.PNG" width=70%>
+<img src="../../../media/admin_hardware.PNG" width=100%>
 
 ##### 2.5. User Profile
 - On this page the system admin can activate any of the 3 following sections to make changes to their account data:
@@ -101,8 +106,8 @@ Preview:
 
 Preview: 
 
-<img src="../../../media/admin_user1.PNG" width=70%>
-<img src="../../../media/admin_user2.PNG" width=51%>
+<img src="../../../media/admin_user1.PNG" width=100%>
+<img src="../../../media/admin_user2.PNG" width=70%>
 
 
 ##### 2.6. Login/ Register Account
@@ -114,8 +119,8 @@ Preview:
 
 Preview: 
 
-<img src="../../../media/admin_login.PNG" width=70%>
-<img src="../../../media/admin_register.PNG" width=70%>
+<img src="../../../media/admin_login.PNG" width=100%>
+<img src="../../../media/admin_register.PNG" width=100%>
 
 -------
 Based on [Flask Dashboard Light](https://appseed.us/admin-dashboards/flask-dashboard-light-bootstrap) provided by **AppSeed**
