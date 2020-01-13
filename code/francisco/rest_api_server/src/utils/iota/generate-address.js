@@ -1,5 +1,6 @@
 const iota = require('./iota-api')
 const iotaLib = require('@iota/checksum')
+const nodeStatus = require('./node-status')
 
 // Generate an address promise
 let newAddress = (seed, address_index = 0) => {
@@ -21,8 +22,10 @@ let newAddress = (seed, address_index = 0) => {
     });
 }
 let generateAddress = async function(seed, address_index){
-    let result = await newAddress(seed, address_index)
-    return result
+    if(nodeStatus){
+        let result = await newAddress(seed, address_index)
+        return result
+    }
 }
 
 module.exports = {
