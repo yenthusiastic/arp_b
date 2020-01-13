@@ -17,7 +17,7 @@ router.get('/address/:hardwareID', (request, response) => {
     // Connect to the DB
     pool.connect((error, client, done) => {
         if (error) {
-            console.log("Problems when connecting to the database 1.")
+            console.log("Problems when connecting to the database.")
             throw error
         }
         // Check if hardwareID is registered in the DB
@@ -29,7 +29,7 @@ router.get('/address/:hardwareID', (request, response) => {
             } 
             // If Hardware ID exist, request new *address based on the current *address_index
             else if(results.rows[0] != undefined){
-                console.log('\n# Device with ID ' + hardwareID + ' found.')
+                // console.log('\n# Device with ID ' + hardwareID + ' found.')
 
                 privateKey = results.rows[0].seed
                 address_index = results.rows[0].address_index + 1
@@ -40,7 +40,7 @@ router.get('/address/:hardwareID', (request, response) => {
             }
             //  If Hardware ID does not exist, request new *seed, *address, and *address_index
             else {
-                console.log('\n# Device with ID ' + hardwareID + ' not found.')
+                // console.log('\n# Device with ID ' + hardwareID + ' not found.')
 
                 saveNewHardware(client, hardwareID, response)
                 done();
@@ -100,7 +100,7 @@ let saveNewHardware = async (client, hardwareID, response) => {
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
         }
-        console.log("\n# Hardware with ID " + hardwareID + ' added.')
+        // console.log("\n# Hardware with ID " + hardwareID + ' added.')
         response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "SessionAddress": address, "MoreInformation": "Private key and session address were added to the database."})
     })
 }
@@ -112,7 +112,7 @@ let updateHardware = (client, hardwareID, new_address_index, response) => {
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
         }
-        console.log("\n# Session address for hardware with ID " + hardwareID + ' updated.')
+        // console.log("\n# Session address for hardware with ID " + hardwareID + ' updated.')
         response.status(201).send({"HttpStatusCode": 201, "HttpMessage": "OK", "SessionAddress": address, "MoreInformation": "Address session and address index were updated in the database."})    
         updateHardware_onDataBase(client, hardwareID,privateKey, address_index, response)
     })
@@ -127,7 +127,7 @@ let updateHardware_onDataBase = async (client, hardwareID, privateKey, new_addre
             response.status(500).send({"HttpStatusCode": 500, "HttpMessage": "Internal Server Error", "MoreInformation": "Problems requesting data to the database."})
             throw error
         }
-        console.log("\n# Next session address for hardware with ID " + hardwareID + ' updated.')
+        // console.log("\n# Next session address for hardware with ID " + hardwareID + ' updated.')
     })
 }
 
