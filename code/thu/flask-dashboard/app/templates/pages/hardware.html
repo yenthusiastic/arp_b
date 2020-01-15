@@ -132,7 +132,7 @@
                     </div>
                     <div class="form-group">  
                         <label>Session Address</label>           
-                        <input class="form-control " type="text" name="addr" disabled>
+                        <a class="form-control " name="addr"></a>
                     </div>
                 </div>
                 <div class="modal-footer ">
@@ -220,7 +220,7 @@ $("button[name='edit_btn']").click(function() {
         status = "{{hw_data[0]|lower}}";
         console.log(status);
         document.getElementsByName("location")[0].value = "{{hw_data[3]}}, {{hw_data[4]}}";
-        document.getElementsByName("addr")[0].value = "{{hw_data[5]}}";
+        {%if hw_data[5]%} document.getElementsByName("addr")[0].textContent = "{{hw_data[5]}}";{%endif%}
 
         sensors = [
             {%if hw_data[2]%}
@@ -294,7 +294,7 @@ window.actionEvents = {
         if ({{loop.index}} == selected_id){
             status = "{{hw_data[1]|lower}}";
             document.getElementsByName("location")[0].value = "{{hw_data[3]}}, {{hw_data[4]}}";
-            document.getElementsByName("addr")[0].value = "{{hw_data[5]}}";
+            {%if hw_data[5]%} document.getElementsByName("addr")[0].textContent = "{{hw_data[5]}}";{%endif%}
 
             sensors = [
                 {% if hw_data[2] %}
@@ -350,7 +350,7 @@ $(document).ready(function() {
             {%endfor%}
             {%endif%}
         ],
-        "location": "{{location_arr[loop.index0]}}"        
+        "location": "{{location_arr[loop.index0]}}"       
         },
     {%endfor%}
     

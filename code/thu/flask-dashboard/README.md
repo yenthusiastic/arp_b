@@ -33,9 +33,9 @@ Preview:
 
 Preview: 
 
-<img src="../../../media/admin_map.PNG" width=100%>
+<img src="../../../media/admin_map.png" width=100%>
 
-<img src="../../../media/admin_map2.PNG" width=100%>
+<img src="../../../media/admin_map2.png" width=100%>
 
 - The admin can filter the hardwares using the <button style="color: #1DC7EA">Hardware status<i class="fa fa-chevron-down"></i></button> dropdown menu on the right side of the map.
 - The admin can also filter the hardwares on the map by sensor type using the <button style="color: #1DC7EA">Sensor type<i class="fa fa-chevron-down"></i></button> dropdown menu. Only hardware modules with selected sensor type attached will be shown on the map. By hovering over the marker, the admin can view the ID of the hardware, the last sensor value and corresponding timestamp recorded from the module. The color of the marker varies depending on the sensor value and the scale on the bottom right corner.  

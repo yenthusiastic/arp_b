@@ -88,9 +88,9 @@
                                                             Session Address (In descending time order)
                                                         </label>
                                                         
-                                                        <div style="display:flex; flex-direction:row;">
-                                                            <div class="btn-group bootstrap-select">
-                                                                <select class="selectpicker" name="addr_select" id="addr_select" data-title="Select Session Address" data-style="btn-info btn-outline"  data-live-search="true" data-menu-style="dropdown-blue" tabindex="-98">
+                                                        <div style="display:flex; flex-direction:row">
+                                                            <div class="btn-group bootstrap-select" style="width:100%">
+                                                                <select data-width="100%" class="selectpicker" name="addr_select" id="addr_select" data-title="Select Session Address" data-style="btn-info btn-outline"  data-live-search="true" data-menu-style="dropdown-blue" tabindex="-98">
                                                                     
                                                                 </select>
                                                             </div>
@@ -390,7 +390,7 @@
                     if (newValue){
                         index = clickedIndex;
                     } else {
-                        index = parseInt($('#hw_select :selected')[0].label) - 1;
+                        index = $('#hw_select')[0].selectedIndex;
                     }
                     console.log(index);
                     $('#addr_select').selectpicker('val', '');
@@ -428,8 +428,7 @@
                 }
                 
                 $('#addr_select').selectpicker('refresh');
-                $('#sensor_select').selectpicker('refresh');
-                           
+                $('#sensor_select').selectpicker('refresh');        
                    
                 });
 
@@ -458,7 +457,6 @@
 
             $('#addr_select').selectpicker('refresh');
             $('#sensor_select').selectpicker('refresh');
-            $('#addr_select').selectpicker('refresh');
              
             
         });

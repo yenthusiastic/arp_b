@@ -122,7 +122,6 @@ def query_data_range(table, selector, hw_id, date_range, date_format_str = "DD.M
     query += '"{}" IS NOT NULL AND '.format(selector)
     if len(date_range) > 1:
         hour_difference = int((datetime.strptime(date_range[1], datetimeFormat) -  datetime.strptime(date_range[0], datetimeFormat))/timedelta(minutes=5)/24)
-        print("hour_difference: ", hour_difference) 
         query += """"timestamp" BETWEEN TO_TIMESTAMP('{0}','{2}') AND TO_TIMESTAMP('{1}','{2}') ORDER BY "timestamp" DESC) AS TEMP_TABLE WHERE index%(5*{3}) = 0 ORDER BY TEMP_TABLE."timestamp" ASC """.format(date_range[0], date_range[1], date_format_str, hour_difference)
     elif len(date_range) == 1:
         query += """ "timestamp" BETWEEN TO_TIMESTAMP('{0}','{1}') - interval '1 hour' AND TO_TIMESTAMP('{0}','{1}') ORDER BY "timestamp" DESC) AS TEMP_TABLE  WHERE index%5 = 0 ORDER BY TEMP_TABLE."timestamp" ASC""".format(date_range[0], date_format_str)
@@ -133,12 +132,19 @@ def query_data_addr(table, selector, hw_id, addr):
     begin_time = db.session.query(SensorData.timestamp).filter(SensorData.address==addr).order_by(SensorData.timestamp.asc()).first()[0]
     end_time = db.session.query(SensorData.timestamp).filter(SensorData.address==addr).order_by(SensorData.timestamp.desc()).first()[0]
     hour_difference = int((end_time -  begin_time)/timedelta(minutes=5)/24)
-    print("hour_difference: ", hour_difference)
+    multiplier = 5
+    if hour_difference < 1:
+        hour_difference = int((end_time -  begin_time)/timedelta(minutes=1)/12)
+        multiplier = 3
+        if hour_difference < 10:
+            hour_difference = int((end_time -  begin_time)/timedelta(minutes=1)/4)
+            multiplier = 1
+    print("hour_difference, multplier: ", hour_difference, multiplier)
     if hour_difference != 0:
         query = 'SELECT "timestamp", "{0}" FROM (SELECT "timestamp", "address", "{0}", "index" '.format(selector)
         query += 'FROM public."{}" WHERE "hardwareID" = {} AND '.format(table, hw_id)
         query += '"{}" IS NOT NULL AND '.format(selector)
-        query += """ "address" = '{0}' ORDER BY "timestamp" DESC) AS TEMP_TABLE WHERE index%(5*{1}) = 0 ORDER BY TEMP_TABLE."timestamp" ASC """.format(addr, hour_difference)
+        query += """ "address" = '{0}' ORDER BY "timestamp" DESC) AS TEMP_TABLE WHERE index%({1}*{2}) = 0 ORDER BY TEMP_TABLE."timestamp" ASC """.format(addr, hour_difference, multiplier)
         print("""Executing SQL query on Database server...""")
         return exec_query(query, 2)
     else:
@@ -642,8 +648,7 @@ def map():
         geojson_data_arr = []
         no_location_count = 0
 
-        available_hw = []
-        hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.latitude, Hardware.longitude).order_by(Hardware.hardwareID).all()
+        hardware_data = db.session.query(Hardware.hardwareID, Hardware.status, Hardware.latitude, Hardware.longitude, Hardware.place).all()
         
         for hardware in hardware_data:
             if hardware[2] is not None and hardware[3] is not None:
@@ -672,6 +677,7 @@ def map():
                         "properties": {
                             "name": hardware[0],
                             "status": hardware[1],
+                            "place" : hardware[4],
                             "sensor_data" : sensor_data,
                             "popupContent": "Hardware {0}: {1}<br>Location (lat, lon): <a target='_blank' href='https://google.com/maps/dir//{2},{3}'>{2}, {3}</a><br>Location details: {4}".format(hardware[0], hardware[1], hardware[2], hardware[3], loc)
                         },
@@ -680,7 +686,6 @@ def map():
                             "coordinates": [hardware[3], hardware[2]]
                         }
                     })
-                    available_hw.append(hardware)
                 except:
                     print("Status unknown for hardware ", hardware[0])
             else:
