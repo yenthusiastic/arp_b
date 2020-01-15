@@ -42,7 +42,7 @@ curl -L https://github.com/docker/compose/releases/download/1.25.0/docker-compos
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 #### 3. Install PostgreSQL and PgAdmin from Docker images
-The [docker-compose.yml](../code/thu/docker-compose.yml) file will be used to launch 2 inter-dependent containers for PostgreSQL server and PgAdmin server. Certain configurations for the server are contained in this file.
+The [docker-compose.yml](../code/thu/docker-compose.yml) file will be used to launch 2 inter-dependent containers for PostgreSQL server and PgAdmin server. Certain configurations for the servers are contained in this file.
 ```bash
 cd ../code/thu/
 sudo docker-compose -d up
@@ -102,28 +102,4 @@ CREATE TABLE public."USERS"
 The graphical view of the Tables (Schemas) is as follows:
 
 <img src = "../media/db_new.png" width="720px">
-
-#### 4. Install psycopg2 
-**Psycopg2** package is required for the communication between any Python application, e.g. the [Python API server](API_python.md) and the PostgreSQL database server. Try `pip install psycopg2`. If not successful, try following steps:
-```bash
-sudo apt-get install libpq-dev
-git clone https://github.com/psycopg/psycopg2
-cd psycopg2
-python setup.py build
-sudo python setup.py install
-```
-
-#### 5. Install MessagePack Implementation
-**MessagePack** allows sending data (from hardware module side) and storing data (on the PostgreSQL server side) as bytes of JSON format in order to limit the usage of mobile Internet. Example:
-
-<img src="../media/messagepack.PNG" Swidth="70%">
-
-Follow instructions on this [MessagePack Implementation for PostgreSQL Github repo](https://github.com/patriksimek/msgpack-postgres) to execute `encode.sql` and `decode.sql` scripts on the Postgres server using **psql** client or **PgAdmin** web interface. To test the installation:
-```sql
-select msgpack_encode('{"hello": "world"}'::jsonb);
--- returns 0x81a568656c6c6fa5776f726c64
-
-select msgpack_decode(decode('81a568656c6c6fa5776f726c64', 'hex'));
--- returns '{"hello": "world"}'
-```
 

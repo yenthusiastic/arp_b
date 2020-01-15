@@ -7,7 +7,7 @@ Author: Thu Nguyen
 #### 1. Description
 The Admin Dashboard Panel is a web platform which provides administration tools for the Bikota Renting Service including managing the mobile renting hardwares, viewing bike distribution on a map, viewing real-time renting statistics, sensor data and managing user preferences.
 
-Available currently at https://web.dev.iota.pw
+Available currently at [admin.bikota.xyz](http://admin.bikota.xyz)
 
 #### 2. Pages
 This section describes the various pages available on the Admin Dashboard Panel and the operations that the system admin can perform on each page.
@@ -23,7 +23,7 @@ This section describes the various pages available on the Admin Dashboard Panel 
 
 Preview: 
 
-<img src="../../../media/admin_dashboard.PNG" width=1000%>
+<img src="../../../media/admin_dashboard.PNG" width=100%>
 
 ##### 2.2. Map
 - On this page the system admin can have an overview of all hardware modules in the system as distributed on a map of Germany. Each marker on the map represents one module.
