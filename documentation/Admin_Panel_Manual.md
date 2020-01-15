@@ -1,6 +1,6 @@
 ### Usage Manual - Admin Dashboard Panel for Bikota Renting System
 
-Version: v0.4 (12.01.2020)
+Version: v0.5 (15.01.2020)
 
 Author: Thu Nguyen
 
@@ -23,7 +23,7 @@ This section describes the various pages available on the Admin Dashboard Panel 
 
 Preview: 
 
-<img src="../../../media/admin_dashboard.PNG" width=100%>
+<img src="../media/admin_dashboard.PNG" width=100%>
 
 ##### 2.2. Map
 - On this page the system admin can have an overview of all hardware modules in the system as distributed on a map of Germany. Each marker on the map represents one module.
@@ -33,17 +33,17 @@ Preview:
 
 Preview: 
 
-<img src="../../../media/admin_map.png" width=100%>
+<img src="../media/admin_map.png" width=100%>
 
-<img src="../../../media/admin_map2.png" width=100%>
+<img src="../media/admin_map2.png" width=100%>
 
-- The admin can filter the hardwares using the <button style="color: #1DC7EA">Hardware status<i class="fa fa-chevron-down"></i></button> dropdown menu on the right side of the map.
-- The admin can also filter the hardwares on the map by sensor type using the <button style="color: #1DC7EA">Sensor type<i class="fa fa-chevron-down"></i></button> dropdown menu. Only hardware modules with selected sensor type attached will be shown on the map. By hovering over the marker, the admin can view the ID of the hardware, the last sensor value and corresponding timestamp recorded from the module. The color of the marker varies depending on the sensor value and the scale on the bottom right corner.  
-- The admin can zoom in, zoom out or reset to default zoom with the <button>+</button>, <button>-</button> or <button><i class="fa fa-home"></i></button> buttons on the top left corner correspondingly.
+- The admin can filter the hardwares using the  `Hardware Status` dropdown menu on the right side of the map.
+- The admin can also filter the hardwares on the map by sensor type using the `Sensor Type` dropdown menu. Only hardware modules with selected sensor type attached will be shown on the map. By hovering over the marker, the admin can view the ID of the hardware, the last sensor value and corresponding timestamp recorded from the module. The color of the marker varies depending on the sensor value and the scale on the bottom right corner.  
+- The admin can zoom in, zoom out or reset to default zoom with the `+` `-` or `HOME` buttons on the top left corner correspondingly.
 
 Preview: 
 
-<img src="../../../media/admin_map3.png" width=100%>
+<img src="../media/admin_map3.png" width=100%>
 
 
 ##### 2.3. Charts
@@ -53,19 +53,19 @@ Preview:
     - `Session address`, the unique address of a renting session, which is a 81-character IOTA address that was used to receive payment for that specific renting session
     - `Sensor type`, the type of sensor(s) that is/are attached to a hardware module on the bike
     - and `Time range`, the date time interval within which the admin wishes to view the sensor data 
-- When a single hardware ID is selected, the corresponding sensors and session addresses related to that selected hardware will be updated in the <button style="color: #1DC7EA">Sensors type <i class="fa fa-chevron-down"></i></button> and <button style="color: #1DC7EA">Session address <i class="fa fa-chevron-down"></i></button> dropdown menus.
+- When a single hardware ID is selected, the corresponding sensors and session addresses related to that selected hardware will be updated in the `Sensor Type` and `Session address` dropdown menus.
 - When a single hardware ID and a session address is selected, the `Time range` date time picker will be disabled as each session has its own associated time interval.
-- When a single hardware ID is selected and a time interval is provided/ picked, the <button style="color: #1DC7EA">Session address <i class="fa fa-chevron-down"></i></button> dropdown menu will be disabled.
+- When a single hardware ID is selected and a time interval is provided/ picked, the `Session address` dropdown menu will be disabled.
 - When a single hardware ID is selected but no session address or time interval is provided, a default time interval of the last hour will be used for fetching data.
-- When multiple hardware IDs are selected, the <button style="color: #1DC7EA">Session address <i class="fa fa-chevron-down"></i></button> dropdown menu will be disabled as no 2 hardware modules share the same session address. 
-- The admin can clear the input fields and selections using the <button><i class="fa fa-remove" style="color: red"></i></button> (Clear) icon next to each input field
-- The admin has to click on the <button style="color: #1DC7EA">Update Charts</button> button to apply the selected filters. A warning message will pop up if the admin clicks this button while inputs are missing or when no data is found for selected fiters.
+- When multiple hardware IDs are selected, the `Session address` dropdown menu will be disabled as no 2 hardware modules share the same session address. 
+- The admin can clear the input fields and selections using the `X` (Clear) icon next to each input field
+- The admin has to click on the `Update Charts` button to apply the selected filters. A warning message will pop up if the admin clicks this button while inputs are missing or when no data is found for selected fiters.
 - Sensor data corresponding to the selected filters will be displayed as line chart(s) with proper title, legend and labels. Each chart shows the data for only a single sensor type but for one or more hardwares or session addresses.
 - The data has been aggregated to render smooth curve on the visualization.
 
 Preview: 
 
-<img src="../../../media/admin_charts.PNG" width=1000%>
+<img src="../media/admin_charts.PNG" width=1000%>
 
 ##### 2.4. Hardware Manager
 - On this page the system admin can view a table which shows all details of every hardware module registered in the system. These includes:
@@ -79,14 +79,14 @@ Preview:
     - `Location`, which is the latest city/ state/ region where this hardware module can be found
 - The admin can additionally perform following actions for the table:
     - search within the table using the `Search` input field
-    - toggle fullscreen mode for the table using the <i class="fa fa-arrows-alt" style="color: #1DC7EA"></i> toggle button
-    - select columns to show or hide in the table using the <button style="color: #1DC7EA"><i class="fa fa-th-list"></i> <i class="fa fa-chevron-down"></i></button> dropdown menu
+    - toggle fullscreen mode for the table using the toggle button
+    - select columns to show or hide in the table using the dropdown menu on the top right
     - navigate between pages
-    - select the number of data rows to display per page using the <button style="color: #1DC7EA"> 5 <i class="fa fa-chevron-up"></i></button> dropup menu
+    - select the number of data rows to display per page using the dropup menu on the bottom left
 - The admin can manage each hardware modules in the system using the `Actions` buttons in the corresponding row of the table including:
-    - Edit details of the hardware using the <button><i class="fa fa-edit" style="color: blue"></i></button> (Edit) button. A pop-up window will appear for user to make changes to the hardware.
-    - Remove the hardware completely from the system using the <button><i class="fa fa-remove" style="color: red"></i></button> (Clear) button. A pop-up window will appear for user to confirm this irreversible action.
-- The admin can register new a hardware into the system using the <button style="color: #1DC7EA">+ Add New Hardware</button> button. A pop-up window will appear for user to enter details of the new hardware. 
+    - Edit details of the hardware using the `Edit` button. A pop-up window will appear for user to make changes to the hardware.
+    - Remove the hardware completely from the system using the `X` (Clear) button. A pop-up window will appear for user to confirm this irreversible action.
+- The admin can register new a hardware into the system using the `+ Add New Hardware` button. A pop-up window will appear for user to enter details of the new hardware. 
 - A warning message will pop up in one of the following cases:
     - The admin tries to register a new hardware which has the same `hardware ID` as an existing one.
     - No `hardware ID` is given while editing existing hardware or  adding new hardware
@@ -95,7 +95,7 @@ Preview:
 
 Preview: 
 
-<img src="../../../media/admin_hardware.PNG" width=100%>
+<img src="../media/admin_hardware.PNG" width=100%>
 
 ##### 2.5. User Profile
 - On this page the system admin can activate any of the 3 following sections to make changes to their account data:
@@ -106,8 +106,8 @@ Preview:
 
 Preview: 
 
-<img src="../../../media/admin_user1.PNG" width=100%>
-<img src="../../../media/admin_user2.PNG" width=70%>
+<img src="../media/admin_user1.PNG" width=100%>
+<img src="../media/admin_user2.PNG" width=70%>
 
 
 ##### 2.6. Login/ Register Account
@@ -119,8 +119,8 @@ Preview:
 
 Preview: 
 
-<img src="../../../media/admin_login.PNG" width=100%>
-<img src="../../../media/admin_register.PNG" width=100%>
+<img src="../media/admin_login.PNG" width=100%>
+<img src="../media/admin_register.PNG" width=100%>
 
 -------
 Based on [Flask Dashboard Light](https://appseed.us/admin-dashboards/flask-dashboard-light-bootstrap) provided by **AppSeed**
