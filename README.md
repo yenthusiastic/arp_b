@@ -6,9 +6,9 @@
 ### Problem Statement & Market Research 
 
 Bike renting services are re-gaining popularity in many big cities around the world for short distances. Multiple renting services now allow users to conveniently locate vehicles with apps on their smartphone, initiate the renting and returning of a vehicle from and to anywhere unlike with the traditional renting stations.. 
-However, current popular bike renting apps such as Nextbike[^1], Lyft[^2] or Uber JUMP[^3] require users to register and provide their private payment details. 
+However, current popular bike renting apps such as [Nextbike](https://www.nextbike.de/en/information/), [Lyft](https://www.lyft.com/bikes) or [Uber JUMP](https://www.jump.com/de/de/) require users to register and provide their private payment details. 
 
-This project thus proposes an innovative bike renting service concept based on pseudo-anonymous, registration-free payment using Distributed Ledger Technology, namely IOTA[^4]. IOTA is a permissionless, immutable, scalable ledger system that allows for feeless data transaction with or without monetary values. Hence, all data related to any renting session can be anonymously collected, analyzed and utilized for future improvements of the system.
+This project thus proposes an innovative bike renting service concept based on pseudo-anonymous, registration-free payment using Distributed Ledger Technology, namely [IOTA](https://www.iota.org/get-started/what-is-iota). IOTA is a permissionless, immutable, scalable ledger system that allows for feeless data transaction with or without monetary values. Hence, all data related to any renting session can be anonymously collected, analyzed and utilized for future improvements of the system.
 
 ### Methodology 
 The architecture of the system (see Fig. 1) can be divided into three main elements, which are: the server that manages our service; the hardware that connects the bike to our platform; and the IOTA Node that processes the payments. Every element communicates with each other through HTTP protocol to process the request from the users and bike administrators. The server consists of three sub-elements or sub-servers which handle a particular task of the renting process such as API calls, data storage and the web platforms.
@@ -30,7 +30,7 @@ The frontend again consists of two separate user interfaces: a landing page for 
 #### Hardware
 The hardware module (see Fig. 2) is able to collect and publish geo-referenced data about its environment, which are sent via 2G to the API application at the backend. Each renting session is handled by the device itself, as the device is checking, if there is a positive balance for an IOTA address and displays the corresponding renting time on the E-ink display. In addition, due to the modular design, it is possible to use the device only for renting and tracking; the environmental sensors are optional.
 
-![hardware-prop](media/hardware_prop.PNG)
+![hardware-prop](media/hardware_prop.png)
 
 *Fig. 2: BIKOTA hardware prototype*
 
@@ -49,17 +49,10 @@ The [landing page](http://bikota.xyz) is responsive and can be accessed via comp
 ##### Admin Panel
 The [admin panel](http://admin.bikota.xyz) allows the admin to have an overview of all hardware modules in the system, including their locations, their status and their usage. The admin can also perform CRUD operations to the PostgreSQL database to create, read, update and delete hardware modules (see Fig. 4). Additionally, any sensor data collected by the hardware modules can also be visualized as graphs for environmental data monitoring. The complete description and usage manual of the admin panel can be found [here](documentation/Admin_Panel_Manual.md).
 
-![hardware-mgr](media/admin_hardware.png)
+![hardware-mgr](media/admin_hardware.PNG)
 
 *Fig. 4: Hardware manager section of BIKOTA admin panel*
 
 ### Outlook
-This project proposes a proof-of-concept for a bike renting system based on the IOTA ledger. The geo-referenced data as well as sensor data collected from renting sessions are stored and visualized but can be further analyzed for environmental monitoring purposes. For future work, the data can be sent to the IOTA Tangle using Masked Authenticated Messaging protocol to allow customizable distribution channels depending on the use cases, as well as data trading on the IOTA Data Marketplace[^5]. 
+This project proposes a proof-of-concept for a bike renting system based on the IOTA ledger. The geo-referenced data as well as sensor data collected from renting sessions are stored and visualized but can be further analyzed for environmental monitoring purposes. For future work, the data can be sent to the IOTA Tangle using Masked Authenticated Messaging protocol to allow customizable distribution channels depending on the use cases, as well as data trading on the [IOTA Data Marketplace](https://data.iota.org/). 
 Improvements can also be made to the hardware to automatically make a call or send an SMS once a collision or vandalism is detected to notify the bike owners immediately such that faster actions can be taken.
-
-### References
-[^1]: Nextbike GmbH (n.d.) Renting a bike is that easy!, Available from https://www.nextbike.de/en/information/ [Accessed 13.01.2020]
-[^2]: Lyft Inc. (n.d) Bike shares near you, Available from https://www.lyft.com/bikes [Accessed 13.01.2020]
-[^3]: JUMP von Uber (n.d.) JUMP - E-Bike-Verleih auf Abruf, Available from https://www.jump.com/de/de/  [Accessed 13.01.2020]
-[^4]: IOTA Foundation (n.d.) What is IOTA?, Available from https://www.iota.org/get-started/what-is-iota [Accessed 13.01.2020]
-[^5]: IOTA Foundation (n.d.) The IOTA Data Marketplace, Available from https://data.iota.org/ [Accessed 13.01.2020]
