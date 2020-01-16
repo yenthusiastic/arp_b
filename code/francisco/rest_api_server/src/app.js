@@ -6,7 +6,6 @@ const session_addressRouter = require('./routers/session_address')
 const sensor_dataRouter = require('./routers/sensor_data')
 const hardware_statusRouter = require('./routers/hardware_status')
 
-
 app.use(usersRouter)
 app.use(session_addressRouter)
 app.use(hardware_statusRouter)
