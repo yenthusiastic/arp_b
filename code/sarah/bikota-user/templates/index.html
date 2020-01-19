@@ -1,0 +1,882 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Aria is a business focused free HTML landing page template built with Bootstrap to help you create lead generation websites for companies and their services.">
+    <meta name="author" content="Inovatik">
+
+    <!-- OG Meta Tags to improve the way the post looks when you share the page on LinkedIn, Facebook, Google+ -->
+    <meta property="og:site_name" content="" /> <!-- website name -->
+    <meta property="og:site" content="" /> <!-- website link -->
+    <meta property="og:title" content="" /> <!-- title shown in the actual shared post -->
+    <meta property="og:description" content="" /> <!-- description shown in the actual shared post -->
+    <meta property="og:image" content="" /> <!-- image link, make sure it's jpg -->
+    <meta property="og:url" content="" /> <!-- where do you want your post to link to -->
+    <meta property="og:type" content="article" />
+
+    <!-- Website Title -->
+    <title>BIKOTA - Distributed ledger-based bike renting system</title>
+
+    <!-- Styles -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:500,700&display=swap&subset=latin-ext" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600&display=swap&subset=latin-ext" rel="stylesheet">
+    <link href="static/css/bootstrap.css" rel="stylesheet">
+    <link href="static/css/fontawesome-all.css" rel="stylesheet">
+    <link href="static/css/swiper.css" rel="stylesheet">
+    <link href="static/css/magnific-popup.css" rel="stylesheet">
+    <link href="static/css/styles.css" rel="stylesheet">
+    <link href="static/css/leaflet.css" rel="stylesheet">
+    <link href="static/css/leaflet.zoomhome.css" rel="stylesheet">
+    <style>
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .legend {
+            line-height: 18px;
+            color: #555;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+    </style>
+
+    <!-- Favicon  -->
+    <link rel="icon" href="static/images/favicon.png">
+
+
+    <script type="text/javascript" src="static/js/highmaps.js"></script> <!-- highmaps script -->
+    <script type="text/javascript" src="static/js/data.js"></script> <!-- for highmaps script -->
+    <script type="text/javascript" src="static/js/pro4js.js"></script> <!-- for highmaps script -->
+    <script type="text/javascript" src="static/js/moments-v2.9.0.min.js"></script> <!-- For time --> 
+    <script type="text/javascript" src="static/js/Chart.min.js"></script> <!-- Chartjs script -->    
+    <script type="text/javascript"  src="static/js/leaflet.js"></script> <!-- Custom scripts -->
+    <script type="text/javascript" src="static/js/leaflet.zoomhome.js"></script>
+    <script type="text/javascript" src="static/js/german_states_geojson.js"></script>
+
+</head>
+<body data-spy="scroll" data-target=".fixed-top">
+
+    <!-- Preloader -->
+    <div class="spinner-wrapper">
+        <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+        </div>
+    </div>
+    <!-- end of preloader -->
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark navbar-custom fixed-top">
+        <!-- Text Logo - Use this if you don't have a graphic logo -->
+        <a class="navbar-brand logo-text page-scroll" href="index.html">BIKOTA</a>
+        <!-- Image Logo -->
+        <!-- <a class="navbar-brand logo-image" href="index.html"><img src="static/images/logo.svg" alt="alternative"></a> -->
+        <!-- Mobile Menu Toggle Button -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-awesome fas fa-bars"></span>
+            <span class="navbar-toggler-awesome fas fa-times"></span>
+        </button>
+        <!-- end of mobile menu toggle button -->
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link page-scroll" href="#header">HOME <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link page-scroll" href="#intro">INTRO</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link page-scroll" href="#find_bikes">AVAILABLE BIKES</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link page-scroll" href="#session_data">SESSION DATA</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link page-scroll" href="#team">TEAM</a>
+                </li>
+
+                <!-- Dropdown Menu -->
+                <!-- <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle page-scroll" href="#about" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false">ABOUT</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="terms-conditions.html"><span class="item-text">TERMS CONDITIONS</span></a>
+                        <div class="dropdown-items-divide-hr"></div>
+                        <a class="dropdown-item" href="privacy-policy.html"><span class="item-text">PRIVACY POLICY</span></a>
+                    </div>
+                </li> -->
+                <!-- end of dropdown menu -->
+                <!--<li class="nav-item">
+                        <a class="nav-link page-scroll" href="#contact">CONTACT</a>
+                    </li>
+                </ul>
+                <span class="nav-item social-icons">
+                    <span class="fa-stack">
+                        <a href="#your-link">
+                            <span class="hexagon"></span>
+                            <i class="fab fa-facebook-f fa-stack-1x"></i>
+                        </a>
+                    </span>
+                    <span class="fa-stack">
+                        <a href="#your-link">
+                            <span class="hexagon"></span>
+                            <i class="fab fa-twitter fa-stack-1x"></i>
+                        </a>
+                    </span>
+                </span>-->
+        </div>
+    </nav> <!-- end of navbar -->
+    <!-- end of navbar -->
+    <!-- Header -->
+    <header id="header" class="header">
+        <div class="header-content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="text-container">
+                            <h1>BIKOTA - <span id="js-rotating">BIKE, IOTA, DATA</span></h1>
+                            <p class="p-heading p-large">BIKOTA is a project, which combines distributed ledger-based technology with bike renting and environmental monitoring.</p>
+                            <a class="btn-solid-lg page-scroll" href="#intro">DISCOVER</a>
+                        </div>
+                    </div> <!-- end of col -->
+                </div> <!-- end of row -->
+            </div> <!-- end of container -->
+        </div> <!-- end of header-content -->
+    </header> <!-- end of header -->
+    <!-- end of header -->
+    <!-- Intro -->
+    <div id="intro" class="basic-1">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-5">
+                    <div class="text-container">
+                        <div class="section-title">INTRO</div>
+                        <h2>BIKOTA</h2>
+                        <p>This project proposes an innovative bike renting service concept based on pseudo-anonymous, registration-free payment using Distributed Ledger Technology, namely IOTA. The only prerequisite is a Trinity Wallet.</p>
+                        <p class="testimonial-text">Watch the video to see how the rental process works. If you are looking for available bikes, take a look at the map. And if you want to see the data collected during a rental session, just enter your session address.</p>
+                        <!-- <div class="testimonial-author">Louise Donovan - CEO</div> -->
+                    </div> <!-- end of text-container -->
+                </div> <!-- end of col -->
+                <div class="col-lg-7">
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <video loop controls>
+                            <source src="static/video/bikota_v02_large.mp4" type="video/mp4">
+                            <!--<source src="https://drive.google.com/open?id=1FHp9pYoK13Ce6y1lMG2TddgX8yY8-Fq8" type="video/mp4">-->
+                        </video>
+                        <!--<iframe src="https://drive.google.com/file/d/1ax01tZYwXvwo_ZiWx8EFIjTjkWNauYe4/preview" width="640" height="480" fullscreen" allowfullscreen></iframe>-->                        
+                    </div>
+                    <!-- <div class="image-container">
+                        <img class="img-fluid" src="static/images/intro-office.jpg" alt="alternative">
+                    </div> -->
+                </div> <!-- end of col -->
+            </div> <!-- end of row -->
+        </div> <!-- end of container -->
+    </div> <!-- end of basic-1 -->
+    <!-- end of intro -->
+
+
+
+
+    <div id="find_bikes" class="basic-1">
+        <div class="container">
+            <div class="section-title">FIND AVAILABLE BIKES</div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Bikota Map - Bike Finder</h4>
+                        </div>
+                        <div class="card-body" >
+                            <div id="map" style="height: 750px;">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    var map = L.map('map', {zoomControl: false}).setView([50.955914, 10.344412], 6);
+    var zoomHome = L.Control.zoomHome();
+    zoomHome.addTo(map);
+    var map_base = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/light-v9',
+    accessToken: 'pk.eyJ1IjoieWVudGh1bmd1eWVuIiwiYSI6ImNrNTVzcnpkZTAwMnozZm8xbHUwd2l3bHQifQ.keCI792ppiRlVLieMK84nQ'
+})
+    map_base.addTo(map);
+
+    var states_layer = L.geoJson(german_states, {
+        onEachFeature: function(feature, layer) {
+            var label = L.marker(layer.getBounds().getCenter(), {
+            icon: L.divIcon({
+                className: 'label',
+                html: feature.properties.NAME_1,
+                iconSize: [100, 40]
+                })
+            })
+        }
+    })
+    states_layer.addTo(map);
+
+
+    var point_data = [];
+    {%if geojson_data%}
+    {%for point_data in geojson_data%}
+        point_data.push({{point_data|safe}})
+    {%endfor%}
+    {%endif%}
+
+
+    var info = L.control();
+
+    info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+        this.update();
+        return this._div;
+    };
+
+    // method that we will use to update the control based on feature properties passed
+    info.update = function (props) {
+        this._div.innerHTML = '<b>Hardware Details</b>' +  (props ?
+        '<br>Hardware ID: ' + props.name + '<br>Location: ' + props.place : '<br>Hover over a marker');
+    };
+
+    info.addTo(map);
+
+    var statusColor = "#90ed7d";
+
+    var legend = L.control({position: 'bottomright'});
+    var legendDiv;
+    legend.onAdd = function (map) {
+
+        legendDiv = L.DomUtil.create('div', 'info legend');   
+        legendDiv.innerHTML +='<i style="background:' + statusColor + '"></i> Available bikes <br>';
+        
+        return legendDiv;
+    };
+
+    legend.addTo(map);
+
+    var geojsonMarkerOptions = {
+        radius: 8,
+        weight: 1.5,
+        opacity: 1,
+        fillOpacity: 1,
+        color: "white",
+    };
+
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            click: zoomToFeature
+        });
+    }
+
+    var available_bikes = L.geoJSON(point_data, {
+            style: function(feature) {
+                    geojsonMarkerOptions.fillColor = statusColor;
+                    return geojsonMarkerOptions;
+            },
+            onEachFeature : onEachFeature,
+            pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, geojsonMarkerOptions);
+                }
+        
+    });
+    available_bikes.addTo(map);
+
+    function highlightFeature(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 3,
+            radius: 10,
+        });
+
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        }
+        info.update(layer.feature.properties);
+    }
+
+    function resetHighlight(e) {
+        var layer = e.target;
+        layer.setStyle({
+            weight: 1.5,
+            radius: 8,
+        });
+        info.update();
+    }
+
+    function zoomToFeature(e) {
+        var latLngs = [ e.target.getLatLng() ];
+        var markerBounds = L.latLngBounds(latLngs);
+        map.fitBounds(markerBounds);
+        e.target.bindPopup(e.target.feature.properties.popupContent).openPopup();
+    }
+     
+    </script>            
+
+    <div id="session_data" class="basic-1">
+        <div class="container">
+            <div class="section-title">SESSION DATA</div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Retrieve your session data</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="session_address" id="session_address" placeholder="Please enter session address"> 
+                                </div>
+                                <input type='submit' name='submit' value='Submit' class="btn btn-solid-lg"/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- end of row -->
+            <div class="row">
+                {% if chart_data %}
+                {% for data in chart_data%}
+                <div class="col-md-6">
+                    <div class="card ">
+                        <div class="card-header ">
+                            <h4 class="card-title">{{data.chart_title}}</h4>
+                        </div>
+                        <div class="card-body ">
+                            <canvas id="{{data.chart_id}}"></canvas>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% if gps_track_data %}
+                <div class="col-md-6">
+                    <div class="card ">
+                        <div class="card-header ">
+                            <h4 class="card-title">GPS Track of renting session</h4>
+                        </div>
+                        <div class="card-body ">
+                            <div id="session_map" style="height: 350px;"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div> <!-- end of container -->
+    </div> <!-- end of basic-1 -->
+
+    <script>
+        var chart_data = '{{chart_data}}';
+        {% for ch_dat in chart_data %}
+            // Global parameters:
+            // do not resize the chart canvas when its container does (keep at 600x400px)
+            //Chart.defaults.global.responsive = false;
+
+            // define the chart data
+            var chartData = {
+            labels : [{% for item in ch_dat.labels %}
+                        "{{item}}",
+                        {% endfor %}],
+            datasets : [
+                {
+                    label: "{{ch_dat.legend}}",
+                    fill: true,
+                    lineTension: 0.1,
+                    backgroundColor: "rgba(75,192,192,0.4)",
+                    borderColor: "rgba(75,192,192,1)",
+                    borderCapStyle: 'butt',
+                    borderDash: [],
+                    borderDashOffset: 0.0,
+                    borderJoinStyle: 'miter',
+                    pointBorderColor: "rgba(75,192,192,1)",
+                    pointBackgroundColor: "#fff",
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 1,
+                    pointHitRadius: 10,
+                    data: {% for item in ch_dat.series %}
+                        {{item}}
+                        {% endfor %},
+                    spanGaps: false
+                },
+            ]
+            }
+
+            // get chart canvas
+            var ctx = document.getElementById("{{ch_dat.chart_id}}").getContext("2d");
+
+            // create the chart using the chart canvas
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "Time"
+                                },
+                                type: 'time',
+                                distribution: 'series',
+                                time: {
+                                    unit: "{{time_unit}}",
+                                    displayFormats: {
+                                        'second' : 'HH:mm:ss',
+                                        'minute' : 'HH:mm',
+                                        'hour' : 'HH:mm',
+                                        'day' : 'DD.MM HH:mm',
+                                        'week' : 'DD.MM',
+                                        'month' : "MM.YY",
+                                        'year' : "YYYY"
+                                    }
+                                }
+                            }],
+                            yAxes: [{
+                                type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                                display: true,
+                                position: 'left',
+                                id: 'y-axis-1',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: '{{ch_dat.y_axis|safe}}'
+                                }
+                            }
+                            ],
+                        }
+                    }
+
+            });
+        {%endfor%}
+        {%if gps_track_data%}
+        var gps_track = [];
+        {%if gps_track_data%}
+        {%for point_data in gps_track_data%}
+            gps_track.push({{point_data|safe}})
+        {%endfor%}
+        {%endif%}
+
+        var session_map = L.map('session_map').setView([gps_track[0]["properties"]["lat"],gps_track[0]["properties"]["lon"]], 15);
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 30,
+            id: 'mapbox/light-v9',
+            accessToken: 'pk.eyJ1IjoieWVudGh1bmd1eWVuIiwiYSI6ImNrNTVzcnpkZTAwMnozZm8xbHUwd2l3bHQifQ.keCI792ppiRlVLieMK84nQ'
+        }).addTo(session_map);
+
+        L.geoJson(german_states, {
+            onEachFeature: function(feature, layer) {
+                var label = L.marker(layer.getBounds().getCenter(), {
+                icon: L.divIcon({
+                    className: 'label',
+                    html: feature.properties.NAME_1,
+                    iconSize: [100, 40]
+                    })
+                })
+            }
+        }).addTo(session_map);
+
+        var sessionInfo = L.control();
+
+        sessionInfo.onAdd = function (session_map) {
+            this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+            this.update();
+            return this._div;
+        };
+
+        // method that we will use to update the control based on feature properties passed
+        sessionInfo.update = function (props) {
+            this._div.innerHTML = '<b>Track Details</b>' +  (props ?
+            '<br>Location: ' + props.lat + ', ' + props.lon + '<br>Recorded at ' + props.timestamp : '<br>Hover over a marker');
+        };
+
+        sessionInfo.addTo(session_map);
+
+        function onEachSessionFeature(feature, layer) {
+            layer.on({
+                mouseover: highlightSessionFeature,
+                mouseout: resetSessionHighlight,
+                click: zoomToFeature
+            });
+        }
+
+        var session_gps_track = L.geoJSON(gps_track, {
+                style: {
+                    radius: 8,
+                    weight: 1.5,
+                    opacity: 1,
+                    fillOpacity: 1,
+                    color: "white",
+                    fillColor: "#f7a35c"
+                },
+                onEachFeature : onEachSessionFeature,
+                pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng);
+                    }
+            
+        });
+        session_gps_track.addTo(session_map);
+
+        function connectTheDots(data){
+            var c = [];
+            for(i in data._layers) {
+                var x = data._layers[i]._latlng.lat;
+                var y = data._layers[i]._latlng.lng;
+                c.push([x, y]);
+            }
+            return c;
+        }
+
+        pathCoords = connectTheDots(session_gps_track);
+        var pathLine = L.polyline(pathCoords).addTo(session_map);
+
+        function highlightSessionFeature(e) {
+            var layer = e.target;
+
+            layer.setStyle({
+                weight: 3,
+                radius: 10,
+            });
+
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                layer.bringToFront();
+            }
+            info.update(layer.feature.properties);
+        }
+
+        function resetSessionHighlight(e) {
+            var layer = e.target;
+            layer.setStyle({
+                weight: 1.5,
+                radius: 8,
+            });
+            sessionInfo.update();
+        }
+        {%endif%}
+
+    </script>
+
+    <!-- Video -->
+    <!-- <div id="video" class="basic-1">
+        <div class="container">
+            <div class="section-title">PRODUCT VIDEO</div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Bikota - Video</h4>
+                        </div>
+                        <div class="card-image" >
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <video controls>
+                                    <source src="static/video/bikota_v02_large.mp4" type="video/mp4">
+                                    <source src="https://drive.google.com/open?id=1FHp9pYoK13Ce6y1lMG2TddgX8yY8-Fq8" type="video/mp4">
+                                </video>
+                                <iframe src="https://drive.google.com/file/d/1ax01tZYwXvwo_ZiWx8EFIjTjkWNauYe4/preview" width="640" height="480" fullscreen" allowfullscreen></iframe>
+                                <iframe src="https://player.vimeo.com/video/23875120" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <!-- end of video -->
+
+
+    <!--Description -->
+    <div class="cards-1">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+
+                    <!-- Card -->
+                    <div class="card">
+                        <span class="fa-stack">
+                            <span class="hexagon"></span>
+                            <i class="fas fa-binoculars fa-stack-1x"></i>
+                        </span>
+                        <div class="card-body">
+                            <h3 class="card-title">Search for available bikes</h3>
+                            <p>Look at the <a class="page-scroll" href="#find_bikes">map</a> to find parked bikes nearby.</p>
+                        </div>
+                    </div>
+                    <!-- end of card -->
+                    <!-- Card -->
+                    <div class="card">
+                        <span class="fa-stack">
+                            <span class="hexagon"></span>
+                            <i class="fas fa-credit-card fa-stack-1x"></i>
+                        </span>
+                        <div class="card-body">
+                            <h4 class="card-title">Pay with IOTA</h4>
+                            <p>Go to the bike, scan the displayed QR code with your Trinity Wallet and make a payment for renting the bike.</p>
+                        </div>
+                    </div>
+                    <!-- end of card -->
+                    <!-- Card -->
+                    <div class="card">
+                        <span class="fa-stack">
+                            <span class="hexagon"></span>
+                            <i class="fas fa-bicycle fa-stack-1x"></i>
+                        </span>
+                        <div class="card-body">
+                            <h4 class="card-title">Enjoy your ride</h4>
+                            <p>Now you are ready to go. On the display you see how much time is left. If you need more time, you can always send more IOTA to the session address.</p>
+                        </div>
+                    </div>
+                    <!-- end of card -->
+
+                </div> <!-- end of col -->
+            </div> <!-- end of row -->
+        </div> <!-- end of container -->
+    </div>
+    <!--end of cards - 1 -- >
+    < !--end of description-->
+    
+
+    <!-- Team -->
+    <div id="team" class="basic-2">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2>The team behind BIKOTA</h2>
+                    <p class="p-heading"></p>
+                </div> <!-- end of col -->
+            </div> <!-- end of row -->
+            <div class="row">
+                <div class="col-lg-12">
+
+                    <!-- Team Member -->
+                    <div class="team-member">
+                        <div class="image-wrapper">
+                            <img class="img-fluid" src="static/images/team-01.png" alt="alternative">
+                        </div> <!-- end of image-wrapper -->
+                        <p class="p-large">Thu</p>
+                        <!--<p class="job-title">Project Manager and Web Developer</p>-->
+                        <!--<span class="social-icons">
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-facebook-f fa-stack-1x"></i>
+                                </a>
+                            </span>
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-twitter fa-stack-1x"></i>
+                                </a>
+                            </span>
+                        </span>-->
+                    </div> <!-- end of team-member -->
+                    <!-- end of team member -->
+                    <!-- Team Member -->
+                    <div class="team-member">
+                        <div class="image-wrapper">
+                            <img class="img-fluid" src="static/images/team-02.png" alt="alternative">
+                        </div> <!-- end of image wrapper -->
+                        <p class="p-large">Andy</p>
+                        <!--<p class="job-title">Hardware Guy</p>-->
+                        <!--<span class="social-icons">
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-facebook-f fa-stack-1x"></i>
+                                </a>
+                            </span>
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-twitter fa-stack-1x"></i>
+                                </a>
+                            </span>
+                        </span>-->
+                    </div> <!-- end of team-member -->
+                    <!-- end of team member -->
+                    <!-- Team Member -->
+                    <div class="team-member">
+                        <div class="image-wrapper">
+                            <img class="img-fluid" src="static/images/team-03.png" alt="alternative">
+                        </div> <!-- end of image wrapper -->
+                        <p class="p-large">Francisco</p>
+                        <!--<p class="job-title">Hardware Guy 2.0</p>-->
+                        <!--<span class="social-icons">
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-facebook-f fa-stack-1x"></i>
+                                </a>
+                            </span>
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-twitter fa-stack-1x"></i>
+                                </a>
+                            </span>
+                        </span>-->
+                    </div> <!-- end of team-member -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- end of team member -->
+                    <!-- Team Member -->
+                    <div class="team-member">
+                        <div class="image-wrapper">
+                            <img class="img-fluid" src="static/images/team-04.png" alt="alternative">
+                        </div> <!-- end of image wrapper -->
+                        <p class="p-large">Nader</p>
+                        <!--<p class="job-title">Web Developer</p>-->
+                        <!--<span class="social-icons">
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-facebook-f fa-stack-1x"></i>
+                                </a>
+                            </span>
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-twitter fa-stack-1x"></i>
+                                </a>
+                            </span>
+                        </span>-->
+                    </div> <!-- end of team-member -->
+                                        <!-- Team Member -->
+                    <div class="team-member">
+                        <div class="image-wrapper">
+                            <img class="img-fluid" src="static/images/team-05.png" alt="alternative">
+                        </div> <!-- end of image wrapper -->
+                        <p class="p-large">Sarah</p>
+                        <!--<p class="job-title">Web Developer</p>-->
+                        <!--<span class="social-icons">
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-facebook-f fa-stack-1x"></i>
+                                </a>
+                            </span>
+                            <span class="fa-stack">
+                                <a href="#your-link">
+                                    <span class="hexagon"></span>
+                                    <i class="fab fa-twitter fa-stack-1x"></i>
+                                </a>
+                            </span>
+                        </span>-->
+                    </div> <!-- end of team-member -->
+                    <!-- end of team member -->
+
+                </div> <!-- end of col -->
+            </div> <!-- end of row -->
+        </div> <!-- end of container -->
+    </div> <!-- end of basic-2 -->
+    <!-- end of team -->
+    
+    
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="text-container about">
+                        <h4>Few Words About BIKOTA</h4>
+                        <p class="white">A project by Master students of the "Information Engineering and Computer Science" study programme at Rhine-Waal University of Applied Sciences in the subject "Applied Research Project - B" in the winter semester 2019/20.</p>
+                    </div> <!-- end of text-container -->
+                </div> <!-- end of col -->
+                <div class="col-md-2">
+                    <div class="text-container">
+                        <h4>Links</h4>
+                        <ul class="list-unstyled li-space-lg white">
+                            <li>
+                                <a class="white" href="https://www.iota.org">iota.org</a>
+                            </li>
+                            <li>
+                                <a class="white" href="https://github.com/yenthusiastic/arp_b/">GitHub repository</a>
+                            </li>
+                            <!-- <li>
+                                <a class="white" href="privacy-policy.html">Privacy Policy</a>
+                            </li> -->
+                        </ul>
+                    </div> <!-- end of text-container -->
+                </div> <!-- end of col -->
+                <!-- <div class="col-md-2">
+                    <div class="text-container">
+                        <h4>Tools</h4>
+                        <ul class="list-unstyled li-space-lg">
+                            <li>
+                                <a class="white" href="#your-link">businessgrowth.com</a>
+                            </li>
+                            <li>
+                                <a class="white" href="#your-link">influencers.com</a>
+                            </li>
+                            <li class="media">
+                                <a class="white" href="#your-link">optimizer.net</a>
+                            </li>
+                        </ul>
+                    </div> 
+                </div>  -->
+                <!-- <div class="col-md-2">
+                    <div class="text-container">
+                        <h4>Partners</h4>
+                        <ul class="list-unstyled li-space-lg">
+                            <li>
+                                <a class="white" href="#your-link">unicorns.com</a>
+                            </li>
+                            <li>
+                                <a class="white" href="#your-link">staffmanager.com</a>
+                            </li>
+                            <li>
+                                <a class="white" href="#your-link">association.gov</a>
+                            </li>
+                        </ul>
+                    </div> 
+                </div>  -->
+            </div> <!-- end of row -->
+        </div> <!-- end of container -->
+    </div> <!-- end of footer -->
+    <!-- end of footer -->
+    <!-- Copyright -->
+    <div class="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <p class="p-small white">Copyright © Aria - Business Landing Page Template by <a class="white" href="https://landingrepo.com">Landingrepo</a></p>
+                </div> <!-- end of col -->
+            </div> <!-- enf of row -->
+        </div> <!-- end of container -->
+    </div> <!-- end of copyright -->
+    <!-- end of copyright -->
+    <!-- Scripts -->
+    <script src="static/js/jquery.min.js"></script> <!-- jQuery for Bootstrap's JavaScript plugins -->
+    <script src="static/js/popper.min.js"></script> <!-- Popper tooltip library for Bootstrap -->
+    <script src="static/js/bootstrap.min.js"></script> <!-- Bootstrap framework -->
+    <script src="static/js/jquery.easing.min.js"></script> <!-- jQuery Easing for smooth scrolling between anchors -->
+    <script src="static/js/swiper.min.js"></script> <!-- Swiper for image and text sliders -->
+    <script src="static/js/jquery.magnific-popup.js"></script> <!-- Magnific Popup for lightboxes -->
+    <script src="static/js/morphext.min.js"></script> <!-- Morphtext rotating text in the header -->
+    <script src="static/js/isotope.pkgd.min.js"></script> <!-- Isotope for filter -->
+    <script src="static/js/validator.min.js"></script> <!-- Validator.js - Bootstrap plugin that validates forms -->
+    <script src="static/js/scripts.js"></script> <!-- Custom scripts -->
+</body>
+</html>
