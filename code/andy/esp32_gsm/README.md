@@ -28,20 +28,20 @@
 ## Pin Mapping
 |Pin ESP| Pin AUX|AUX Device|Protocol|Note|
 |---    |---     |---       |---     |--- |
-|3V3 	| | epaper, BME280E, Buzzer| | |
-|5V 	| | MPU6050, [GPS, Co2, SDS011]| | |
+|3V3 	| | epaper, BME280, Buzzer| | |
+|5V 	| | LIS3DH, [GPS, Co2, SDS011]| | |
 |0 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
 |2 |- |Buzzer |GPIO digital | pull-up at startup |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
 |12 | Gate| Mosfet 5V (GPS, Co2, SDS011) |switched off in sleep | pull-down at startup |
 |13 | | | |buildin LED |
-|14 |INT |MPU6050 | | |
+|14 |INT |LIS3DH | | |
 |15 |DIN |epaper| | |
 |18 |PM10 |SDS011 Sensor |GPIO digital |Input: pulse length |
 |19 |PM25 |SDS011 Sensor |GPIO digital |Input: pulse length |
-|21 |SDA |MPU6050, BM260 |I2C | |
-|22 |SCL |MPU6050, BM260 |I2C | |
+|21 |SDA |LIS3DH, BME280 |I2C | |
+|22 |SCL |LIS3DH, BME280 |I2C | |
 |23 |GSM_MODEM_PWR |GSM Module |GPIO digital| |
 |25 |CLK |epaper | | |
 |26 |TX |GSM Module |Serial | |
