@@ -53,6 +53,8 @@ The second way is trought usage of the builtin HTTP stack. The stack supports GE
 
 In conclusion, the MPSR can not be used to interact with an IOTA-Node. Therefore the custom build MicroPython firmware by [loboris](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm) will be used for development of this project. Last commits to the repository were made in summer 2018, which means it might not contain functionalities that are currently implemented in mainline MicroPython.
 
+### Download MicroPython
+
 ## Flash MicroPython
 ```bash
 cd esp32_gsm/micropython_binaries/esp32_psram_all-custom
