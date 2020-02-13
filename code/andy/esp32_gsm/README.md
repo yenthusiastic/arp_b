@@ -1,47 +1,35 @@
 # esp32_gsm
 
 
-### Module
- - **Name:**   LILYGO TTGO T-Call V1.3 ESP32 Wireless Module GPRS Antenna SIM Card SIM800L Board
- - **Link:**   [Product Page](https://www.banggood.com/LILYGO-TTGO-T-Call-V1_3-ESP32-Wireless-Module-GPRS-Antenna-SIM-Card-SIM800L-Board-p-1527048.html)
- - **Price:**   13 €   
+# Hardware
+## Development Board
+[LILYGO TTGO T-Call V1.3 ESP32 Wireless Module GPRS Antenna SIM Card SIM800L Board](https://www.banggood.com/LILYGO-TTGO-T-Call-V1_3-ESP32-Wireless-Module-GPRS-Antenna-SIM-Card-SIM800L-Board-p-1527048.html)
+
  
 ![Pinout](/media/TTGO-T-call-Pinout.jpg)
 
 
-### SIM Card
-- Disable PIN
-- lookup APN name, username and password: [apnchanger.org](https://wiki.apnchanger.org/Germany#Vodafone)
-- Vodafone:
-	- web.vodafone.de, vodafone, vodafone
-
-
-## MircoPython and Example Code
-[LoBo MicroPython for ESP32](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki)
-
-
-[RTC Sync with NTP](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/rtc)
-
-[GSM Library](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm)
+## Components
+> Add BOM table!
 
 
 ## Pin Mapping
 |Pin ESP| Pin AUX|AUX Device|Protocol|Note|
 |---    |---     |---       |---     |--- |
-|3V3 	| | epaper, BME280E, Buzzer| | |
-|5V 	| | MPU6050, [GPS, Co2, SDS011]| | |
+|3V3 	| | epaper, BME280, Buzzer| | |
+|5V 	| | LIS3DH, [GPS, Co2, SDS011]| | |
 |0 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
 |2 |- |Buzzer |GPIO digital | pull-up at startup |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
 |12 | Gate| Mosfet 5V (GPS, Co2, SDS011) |switched off in sleep | pull-down at startup |
 |13 | | | |buildin LED |
-|14 |INT |MPU6050 | | |
+|14 |INT |LIS3DH | | |
 |15 |DIN |epaper| | |
 |18 |PM10 |SDS011 Sensor |GPIO digital |Input: pulse length |
 |19 |PM25 |SDS011 Sensor |GPIO digital |Input: pulse length |
-|21 |SDA |MPU6050, BM260 |I2C | |
-|22 |SCL |MPU6050, BM260 |I2C | |
+|21 |SDA |LIS3DH, BME280 |I2C | |
+|22 |SCL |LIS3DH, BME280 |I2C | |
 |23 |GSM_MODEM_PWR |GSM Module |GPIO digital| |
 |25 |CLK |epaper | | |
 |26 |TX |GSM Module |Serial | |
@@ -52,6 +40,58 @@
 |35 |TX |GPS |Serial |input only, no pulls |
 |36/SVP |A0 |Co2 Sensor |GPIO analog|input only, no pulls |
 |39/SVN |BAT | Battery Voltage |GPIO analog |input only, no pulls |
+
+
+# Software
+## Which MicroPython?
+### GSM Module Support
+Currently (Q3 2019) MicroPython stable release (MPSR) supports PPP (GSM) in its network stack, but it is not implemented yet. Using the MPSR, the GSM module can only be used with *AT-commands* over the UART connection
+. Because of that, the requests library can not be used to issue HTTP requests.
+
+The GSM module (SIM800L) supports two ways of issuing requests. One is trough a direct TCP connection, but this mode doesn't support SSL encryption. Hence it can not be used to issue an IOTA-API call to an IOTA-Node.
+The second way is trought usage of the builtin HTTP stack. The stack supports GET and PUT requests, but doesn't allow the HEADER and BODY of an request to be customized. Therefore it can not be used to to issue an IOTA-API call to an IOTA-Node.
+
+In conclusion, the MPSR can not be used to interact with an IOTA-Node. Therefore the custom build MicroPython firmware by [loboris](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm) will be used for development of this project. Last commits to the repository were made in summer 2018, which means it might not contain functionalities that are currently implemented in mainline MicroPython.
+
+### Download MicroPython
+
+## Flash MicroPython
+```bash
+cd esp32_gsm/micropython_binaries/esp32_psram_all-custom
+esptool.py --port /dev/ttyUSB4 erase_flash
+esptool --chip esp32 --port /dev/ttyUSB4 --before default_reset --after no_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader/bootloader.bin 0xf000 phy_init_data.bin 0x10000 MicroPython.bin 0x8000 partitions_mpy.bin
+```
+## Libraries
+[QR-Code Generation](https://github.com/JASchilz/uQR) 
+
+[MPU6050](https://github.com/adamjezek98/MPU6050-ESP8266-MicroPython) (modified)
+
+[BME280](https://github.com/robert-hh/BME280)
+
+[E-Paper](https://github.com/mcauser/micropython-waveshare-epaper/blob/master/epaper2in9.py)
+
+## SIM Card Instructions
+- Disable PIN
+- lookup APN name, username and password: [apnchanger.org](https://wiki.apnchanger.org/Germany#Vodafone)
+- Vodafone:
+	- web.vodafone.de, vodafone, vodafone
+
+
+# References
+## GSM Code
+[Python Example SIM800](http://www.python-exemplary.com/index_en.php?inhalt_links=navigation_en.inc.php&inhalt_mitte=raspi/en/gsm.inc.php)
+
+
+
+
+
+## MircoPython and Example Code
+[LoBo MicroPython for ESP32](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki)
+
+
+[RTC Sync with NTP](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/rtc)
+
+[GSM Library](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm)
 
 
 ## Low power operation
@@ -103,34 +143,7 @@ The following recommendations can be made:
 |    |       | 0 mA	     | 0 mA	    | |
 
 
-## Flash MicroPython
-```bash
-cd esp32_gsm/micropython_binaries/esp32_psram_all-custom
-esptool.py --port /dev/ttyUSB4 erase_flash
-esptool --chip esp32 --port /dev/ttyUSB4 --before default_reset --after no_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader/bootloader.bin 0xf000 phy_init_data.bin 0x10000 MicroPython.bin 0x8000 partitions_mpy.bin
-```
 
-## GSM Module Support
-Currently (Q3 2019) MicroPython stable release (MPSR) supports PPP (GSM) in its network stack, but it is not implemented yet. Using the MPSR, the GSM module can only be used with *AT-commands* over the UART connection
-. Because of that, the requests library can not be used to issue HTTP requests.
-
-The GSM module (SIM800L) supports two ways of issuing requests. One is trough a direct TCP connection, but this mode doesn't support SSL encryption. Hence it can not be used to issue an IOTA-API call to an IOTA-Node.
-The second way is trought usage of the builtin HTTP stack. The stack supports GET and PUT requests, but doesn't allow the HEADER and BODY of an request to be customized. Therefore it can not be used to to issue an IOTA-API call to an IOTA-Node.
-
-In conclusion, the MPSR can not be used to interact with an IOTA-Node. Therefore the custom build MicroPython firmware by [loboris](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm) will be used for development of this project. Last commits to the repository were made in summer 2018. Because of this, it doesn't contain relevant functionalities with are implemented in the stable releases. These functionalities are:
- - deepsleep with wake-up source 
- - DHT22 library
-Therefore the to be developed prototype might not be able to suport any low-power modes to enhace battery operation time. Additionaly a custom solution to interact with the DHT22 module has to be developed. 
-
-## GSM Code
-[Python Example SIM800](http://www.python-exemplary.com/index_en.php?inhalt_links=navigation_en.inc.php&inhalt_mitte=raspi/en/gsm.inc.php)
-
-
-## Libraries Used
-[QR-Code Generation](https://github.com/JASchilz/uQR)
-[MPU6050](https://github.com/adamjezek98/MPU6050-ESP8266-MicroPython) (modified)
-[BME280](https://github.com/robert-hh/BME280)
-[E-Paper](https://github.com/mcauser/micropython-waveshare-epaper/blob/master/epaper2in9.py)
 
 
 ## Comiling Modules
