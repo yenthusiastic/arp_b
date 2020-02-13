@@ -9,6 +9,15 @@ Ensure that you have met the following requirements:
 * You have a `<Windows/Mac/Linux>` machine.
 * You have Node.js installed in your machine. Otherwise, click [here](https://nodejs.org/en/) to download it.
 
+## Dependencies
+
+- Crypto
+- Express
+- Pg
+- Router
+- Iota-api
+- Iota/checksum
+
 ## Installation
 
 To install the REST API, follow these steps:
