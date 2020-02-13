@@ -10,9 +10,11 @@
 - [X] Integrate GPS.
 - [X] Integrate BME280E (humidity/temperature/pressure).
 - [X] Integrate SDS011 (particulate matter). 
-- [X] Integrate MPU6050 (accelerometer). 
+- [X] Integrate MPU6050 (accelerometer).
+- [X] Integrate LIS3DH (accelerometer).
 - [X] Integrate MH-Z14A CO2 sensor. 
-- [ ] Implement vibration measurement from accelerometer to detect if bike was parked and is not moving.
+- [X] Implement accelerometer interrupt signal for deep sleep wake up.
+- [ ] Implement vibration measurement from accelerometer to detect if bike is parked and is not moving.
 
 
 
@@ -34,7 +36,7 @@
 - [X] Save QR code and IOTA address to RTC memory for deepsleep.
 - [X] Read QR code and IOTA address from RTC memory after wakeup
 - [X] Implement session management from wakeup to sleep.
-- [ ] Request IOTA address from server.
+- [X] Request IOTA address from server.
 
 
 
