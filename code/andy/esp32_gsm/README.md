@@ -61,31 +61,36 @@
 
 # Software
 ## Which MicroPython?
-### GSM Module Support
 Currently (Q3 2019) MicroPython stable release (MPSR) supports PPP (GSM) in its network stack, but it is not implemented yet. Using the MPSR, the GSM module can only be used with *AT-commands* over the UART connection
-. Because of that, the requests library can not be used to issue HTTP requests.
+. Because of that, the requests library can not be used to issue HTTP requests as it requires an network interface.
 
 The GSM module (SIM800L) supports two ways of issuing requests. One is trough a direct TCP connection, but this mode doesn't support SSL encryption. Hence it can not be used to issue an IOTA-API call to an IOTA-Node.
 The second way is trought usage of the builtin HTTP stack. The stack supports GET and PUT requests, but doesn't allow the HEADER and BODY of an request to be customized. Therefore it can not be used to to issue an IOTA-API call to an IOTA-Node.
 
-In conclusion, the MPSR can not be used to interact with an IOTA-Node. Therefore the custom build MicroPython firmware by [loboris](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm) will be used for development of this project. Last commits to the repository were made in summer 2018, which means it might not contain functionalities that are currently implemented in mainline MicroPython.
+In conclusion, the MPSR currently can not be used to interact with an IOTA-Node. Therefore the custom build MicroPython firmware by [loboris](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm) will be used for development of this project. Last commits to the repository were made in summer 2018, which means it might not contain functionalities that are currently implemented in mainline MicroPython.
 
 ### Download MicroPython
+[Loboris MicroPython Port Generic ESP32](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/firmwares)
+[Loboris Micropython Port for LILYGO TTGO T-Call](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/raw/master/MicroPython_BUILD/firmware/MicroPython_LoBo_esp32_psram_all.zip)
 
 ## Flash MicroPython
+[Instructions](https://docs.micropython.org/en/latest/esp8266/tutorial/intro.html#deploying-the-firmware)
 ```bash
 cd esp32_gsm/micropython_binaries/esp32_psram_all-custom
 esptool.py --port /dev/ttyUSB4 erase_flash
 esptool --chip esp32 --port /dev/ttyUSB4 --before default_reset --after no_reset write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader/bootloader.bin 0xf000 phy_init_data.bin 0x10000 MicroPython.bin 0x8000 partitions_mpy.bin
 ```
 ## Libraries
-[QR-Code Generation](https://github.com/JASchilz/uQR) 
 
-[MPU6050](https://github.com/adamjezek98/MPU6050-ESP8266-MicroPython) (modified)
+[LIS3DH](https://github.com/hdsjulian/micropov/blob/master/lis3dh.py) (modified)
+
+[E-Paper](https://github.com/mcauser/micropython-waveshare-epaper/blob/master/epaper2in9.py)
+
+[QR-Code Generation](https://github.com/JASchilz/uQR) 
 
 [BME280](https://github.com/robert-hh/BME280)
 
-[E-Paper](https://github.com/mcauser/micropython-waveshare-epaper/blob/master/epaper2in9.py)
+
 
 ## SIM Card Instructions
 - Disable PIN
