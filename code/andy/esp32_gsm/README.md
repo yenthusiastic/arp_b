@@ -10,35 +10,52 @@
 
 
 ## Components
-> Add BOM table!
+### Minimum Required Hardware for Renting Operation						
+|Component	| Details|
+|---	|---	|
+|Microcontroller & SIM Modem |LILYGO TTGO T-Call V1.3 ESP32 Wireless Module GPRS Antenna SIM Card SIM800L Board|
+|GPS Module	| Beitian Dual BN-220 GPS GLONASS Antenna Module TTL Level RC Drone Airplane|
+|Accelerometer	|LIS3DH Acceleration Sensor
+|Display	|Waveshare 2.9 Inch E-Paper
+|Voltage Converter	|Pololu 5V Step-Up Voltage Regulator U1V10F5
+|Battery Charger & Protector	|TP4056 Micro USB 5V 1A Lithium Battery Charging Module
+|Battery 	|Samsung - INR18650-35E - 3,6 Volt 3450mAh Li-Ion [LiNiCoAlO2]
+|Batter Holder	|Battery Holder Plastic Case 4x 18650 Lithium Battery
+
+### Additional Environmental Sensors																
+|Component	| Details|
+|---	|---	|
+|Particulate Matter Sensor	|PM Sensor SDS011 High Precision Laser PM2.5 Air Quality Detection Sensor
+|Temperature, Humidity & Pressure Sensor	|BME280 Digital Sensor Temperature Humidity Atmospheric Pressure
+|CO2 Sensor	|NDIR CO2 Sensor MH-Z14A 0-5000PPM
 
 
 ## Pin Mapping
 |Pin ESP| Pin AUX|AUX Device|Protocol|Note|
 |---    |---     |---       |---     |--- |
-|3V3 	| | epaper, BME280, Buzzer| | |
+|3V3 	| | ePaper, BME280, Buzzer| | |
 |5V 	| | LIS3DH, [GPS, Co2, SDS011]| | |
 |0 |BTN1 |Button1|GPIO digital |wake0 for deepsleep |
 |2 |- |Buzzer |GPIO digital | pull-up at startup |
 |4 |GSM_PWR |GSM Module |GPIO digital| |
 |5 |GSM_RST |GSM Module |GPIO digital| |
-|12 | Gate| Mosfet 5V (GPS, Co2, SDS011) |switched off in sleep | pull-down at startup |
+|12 | Gate| Mosfet 5V (GPS, CO2, SDS011) |switched off in sleep | pull-down at startup |
 |13 | | | |buildin LED |
 |14 |INT |LIS3DH | | |
-|15 |DIN |epaper| | |
-|18 |PM10 |SDS011 Sensor |GPIO digital |Input: pulse length |
-|19 |PM25 |SDS011 Sensor |GPIO digital |Input: pulse length |
+|15 |DIN |ePaper| | |
+|18 |PM10 |SDS011 |GPIO digital |Input: pulse length |
+|19 |PM25 |SDS011 |GPIO digital |Input: pulse length |
 |21 |SDA |LIS3DH, BME280 |I2C | |
 |22 |SCL |LIS3DH, BME280 |I2C | |
 |23 |GSM_MODEM_PWR |GSM Module |GPIO digital| |
-|25 |CLK |epaper | | |
+|25 |CLK |ePaper | | |
 |26 |TX |GSM Module |Serial | |
 |27 |RX |GSM Module |Serial | |
-|32 |DC |epaper | | |
-|33 |CS |epaper | | |
-|34 |BUSY |epaper | |input only, no pulls|
+|32 |DC |ePaper | | |
+|33 |CS |ePaper | | |
+|34 |BUSY |ePaper | |input only, no pulls|
 |35 |TX |GPS |Serial |input only, no pulls |
-|36/SVP |A0 |Co2 Sensor |GPIO analog|input only, no pulls |
+|36/SVP |A0 |CO2 Sensor |GPIO analog|input only, no pulls |
 |39/SVN |BAT | Battery Voltage |GPIO analog |input only, no pulls |
 
 
