@@ -140,4 +140,4 @@ Key | Value | Description
 
 ## Contact
 
-If you want to contact me you can reach me at franciscosusana2292@gmail.com.
+For more information regarding this project you can reach me at franciscosusana2292@gmail.com.
