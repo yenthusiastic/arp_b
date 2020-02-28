@@ -137,7 +137,3 @@ Key | Value | Description
 ```
 
 **Note**: Do not use json.dumps() in the POST and PUT request, otherwise the request will be received as a string instead of an object.
-
-## Contact
-
-For more information regarding this project you can reach me at franciscosusana2292@gmail.com.
