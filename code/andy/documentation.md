@@ -70,7 +70,8 @@ The second way is trought usage of the builtin HTTP stack. The stack supports GE
 In conclusion, the MPSR currently can not be used to interact with an IOTA-Node. Therefore the custom build MicroPython firmware by [loboris](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/gsm) will be used for development of this project. Last commits to the repository were made in summer 2018, which means it might not contain functionalities that are currently implemented in mainline MicroPython.
 
 ### Download MicroPython
-[Loboris MicroPython Port Generic ESP32](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/firmwares)
+[Loboris MicroPython Port Generic ESP32](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/firmwares) 
+
 [Loboris Micropython Port for LILYGO TTGO T-Call](https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/raw/master/MicroPython_BUILD/firmware/MicroPython_LoBo_esp32_psram_all.zip)
 
 ## Flash MicroPython
@@ -97,5 +98,3 @@ esptool --chip esp32 --port /dev/ttyUSB4 --before default_reset --after no_reset
 - lookup APN name, username and password: [apnchanger.org](https://wiki.apnchanger.org/Germany#Vodafone)
 - Vodafone:
 	- web.vodafone.de, vodafone, vodafone
-
-

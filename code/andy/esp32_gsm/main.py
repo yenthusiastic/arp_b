@@ -26,7 +26,7 @@ GSM_USER = 'vodafone'
 GSM_PASS = 'vodafone'
 
 # Module Settings
-HARDWARE_ID = const(55)
+HARDWARE_ID = const(58)
 API_KEY = "2ed617ed018c0b13f209fc0bbe75ab8ab1a1d303"
 PHONE_NUMBER = '+491745851814'
 SERVER_URL = "https://req.dev.iota.pw/"
@@ -36,7 +36,7 @@ NODE_URL = "https://nodes.thetangle.org/"
 
 UPDATE_INV = const(1000)
 
-RENT_TIME_FACTOR = 0.15
+RENT_TIME_FACTOR = 1
 
 # Accelerometer Config
 ACC_ADDRESS = const(0x18)
@@ -280,6 +280,7 @@ def draw_qr(m=None, address=None, xs=23, ys=211, scale=1): #scale3: xs=2, ys=170
                 fb.pixel(xs+x, ys+y, 0xFF)
             else:
                 fb.pixel(xs+x, ys+y, 0x00)
+        stdout.write('.')
 #========== /DISPLAY =================
 
 
@@ -320,7 +321,7 @@ def acc_set_interrupt():
 def get_bat_voltage():
     volt = (bat.read() / 4095) * 3.99  # raw Voltage
     #return volt * 1.99                 # voltage divider
-    return float("{0:.2f}".format(volt * 1.99))
+    return float("{0:.2f}".format(volt * 2.05))
     
 
 """
@@ -393,15 +394,36 @@ def gps_location():
     if gps.getdata()[0][0] != 1900:
         return (data[1], data[2])
     else:
-        return False
+        return (0.0,0.0)#False
 
 def send_sensor_data():
     # TODO: collect and send the sensor data to backend server
     # TODO: send GPS
-    if SENSOR_MODE:
-        # TODO: send environmental sensor data
-        pass
-    pass
+    try:
+        _data = {"hardwareID": str(HARDWARE_ID)} 
+        #try: "latitude":"61.123","longitude":"7.933","temperature":"5.0","humidity":"30.5", "timestamp":timestamp
+        #_data["lon"], _data["lat"] = gps_location()
+        gps_loc = gps_location()
+        if gps_loc is not False:
+            _data["latitude"] = str(gps_loc[0])
+            _data["longitude"] = str(gps_loc[1])
+        _data["temperature"] = "0.0"
+        _data["humidity"] = "0.0"
+        _data["address"] = session_address #"Postman_test" 
+        if SENSOR_MODE:
+            # TODO: send environmental sensor data
+            #_data["temperature"], _data["humidity"], _data["pressure"] = get_bme()
+            pass
+        _data["timestamp"] = strftime("%Y-%m-%d %H:%M:%S")
+        #
+        #return _data#json.dumps(_data)
+        #
+        r = http_request(url=BACKEND_URL+"/data", method="POST", json=_data)
+        #r.close()
+        return r
+    except Exception as e:
+        print("Exception at send_sensor_data: ", e)
+        return False
 #========== /SENSORS =================
 
 
@@ -701,10 +723,10 @@ print("HardwareID: ", HARDWARE_ID)
 print("Battery Voltage: ",get_bat_voltage())
 
 session_balance = 0
-timestamp = strftime("%Y-%m-%d %H:%M:%S")
 
 
-jsn= {"hardwareID":"1","address":"Postman_test","latitude":"61.123","longitude":"7.933","temperature":"5.0","humidity":"30.5", "timestamp":timestamp}
+
+#jsn= {"hardwareID":"1","address":"Postman_test","latitude":"61.123","longitude":"7.933","temperature":"5.0","humidity":"30.5", "timestamp":timestamp}
 #r2=http_request(method="POST", url="https://be.dev.iota.pw/data", json=jsn)
 
 
@@ -750,6 +772,7 @@ else:
         new_ticks = ticks_ms()
         update_old_ticks = 0
         balance_old_ticks = new_ticks
+        sensor_old_ticks = new_ticks
         parking_old_ticks = new_ticks
         
         e.set_lut(e.LUT_PARTIAL_UPDATE)
@@ -758,6 +781,7 @@ else:
             new_ticks = ticks_ms()
             update_diff = ticks_diff(new_ticks, update_old_ticks)
             balance_diff = ticks_diff(new_ticks, balance_old_ticks)
+            sensor_diff = ticks_diff(new_ticks, sensor_old_ticks)
             parking_diff = ticks_diff(new_ticks, parking_old_ticks)
             
             if update_diff >= UPDATE_INV or update_diff < 0:
@@ -787,8 +811,9 @@ else:
                 #session_balance = counter
                 if DEMO:
                     if btn1.value() == 0:
-                        demo_balance = 1
+                        demo_balance = 5
                         session_balance = demo_balance
+                        RENT_TIME_FACTOR = 1 #0.15
                         if DEBUG: print("DEMO MODE ACTIVATED\nsession_balance = 1\nRelease button...")
                         sound(2, 100, 3)
                         sleep(2)
@@ -798,6 +823,10 @@ else:
             #SESSION RUNNING
             # TODO: ensure balance update happens only x seconds into the running session
             elif status == 3:
+                if sensor_diff > 15000:
+                    sensor_old_ticks = new_ticks
+                    sd = send_sensor_data()
+                    if DEBUG: print("send_sensor_data: ", sd)
                 if balance_diff > 80000: # check balance every 80 seconds
                     balance_old_ticks = new_ticks
                     session_balance = get_balance(url=NODE_URL2, address=session_address[:81])
@@ -806,7 +835,7 @@ else:
                             session_balance = demo_balance
             # SESSION OVER
             if status == 4:
-                if parking_diff > 10:
+                if parking_diff > 1000: # in ms
                     # TODO: check for no vibration = bike is parked
                     if True:
                         hibernate()
